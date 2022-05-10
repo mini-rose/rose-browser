@@ -33,38 +33,43 @@ static void read_clipboard(GObject *object,
 	);
 }
 
-static gboolean key_press_callback(WebKitWebView *webview,
+static gboolean key_press_callback(RoseWindow *window,
                                    guint keyval,
 																	 guint keycode,
                                    GdkModifierType state)
 {
-	if (state & GDK_CONTROL_MASK) {
 		for (int i = 0; i < LENGTH(keys); i++) {
-			if (keys[i].modkey == GDK_CONTROL_MASK
+			if (keys[i].modkey == state
 					&& keys[i].keycod == keyval) {
 				switch (keys[i].funcid) {
 					case goback:
-						webkit_web_view_go_back(webview);
+						webkit_web_view_go_back(window->webview);
 						break;
 					case goforward:
-						webkit_web_view_go_forward(webview);
+						webkit_web_view_go_forward(window->webview);
 						break;
 					case copy_url: {
 						GdkDisplay *dpy = gdk_display_get_default();
 						gdk_clipboard_set_text(
 								gdk_display_get_clipboard(dpy),
-								webkit_web_view_get_uri(webview)
+								webkit_web_view_get_uri(window->webview)
 						);
 					} break;
 					case paste_url: {
 						GdkDisplay *dpy = gdk_display_get_default();
 						GdkClipboard *clipboard = gdk_display_get_clipboard(dpy);
-						gdk_clipboard_read_text_async(clipboard, NULL, read_clipboard, webview);
+						gdk_clipboard_read_text_async(clipboard, NULL, read_clipboard, window->webview);
 					} break;
+					case fullscreen:
+						if (gtk_window_is_fullscreen(window->window))
+							gtk_window_unfullscreen(GTK_WINDOW(window->window));
+						else
+							gtk_window_fullscreen(GTK_WINDOW(window->window));
+						break;
 				}
 			}
 		}
-	}
+
 	return GDK_EVENT_PROPAGATE;
 }
 
@@ -91,12 +96,13 @@ static void rose_window_init(RoseWindow *window)
 void rose_window_show(RoseWindow *window)
 {
 	GtkWidget *w = gtk_window_new();
+	window->window = GTK_WINDOW(w);
 	gtk_window_set_child(GTK_WINDOW(w), GTK_WIDGET(window->webview));
 
 	/* Keyboard shortcuts */
 	GtkEventController *controller;
 	controller = gtk_event_controller_key_new();
-	g_signal_connect_swapped(controller, "key-pressed", G_CALLBACK(key_press_callback), window->webview);
+	g_signal_connect_swapped(controller, "key-pressed", G_CALLBACK(key_press_callback), window);
 	gtk_widget_add_controller(GTK_WIDGET(w), controller);
 
 	gtk_widget_show(w);

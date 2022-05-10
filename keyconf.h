@@ -3,6 +3,8 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 
+#define NONE 4
+
 typedef struct {
 	unsigned modkey;
 	unsigned keycod;
@@ -13,5 +15,6 @@ enum {
 	goback,
 	goforward,
 	copy_url,
-	paste_url
+	paste_url,
+	fullscreen
 };

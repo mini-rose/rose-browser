@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 		argv++; argc--;
 	}
 
-	GtkApplication *app = gtk_application_new("org.gtk.rose", G_APPLICATION_FLAGS_NONE);
+	GtkApplication *app = gtk_application_new("org.gtk.rose", G_APPLICATION_NON_UNIQUE);
 	g_signal_connect(app, "activate", G_CALLBACK(run), NULL);
 	g_application_run(G_APPLICATION(app), argc, argv);
 }
