@@ -3,6 +3,8 @@
 #include "config.h"
 #include "webview.h"
 
+#define LENGTH(x) (sizeof(x) / sizeof(x[0]))
+
 struct _RoseWindow {
 	GtkApplicationWindow parent_instance;
 
@@ -19,26 +21,50 @@ enum {
 
 G_DEFINE_TYPE(RoseWindow, rose_window, GTK_TYPE_APPLICATION_WINDOW)
 
+static void read_clipboard(GObject *object,
+                            GAsyncResult *res,
+													  gpointer webview)
+{
+	GdkDisplay *dpy = gdk_display_get_default();
+	GdkClipboard *clipboard = gdk_display_get_clipboard(dpy);
+	webkit_web_view_load_uri(
+		WEBKIT_WEB_VIEW(webview),
+		gdk_clipboard_read_text_finish(clipboard, res, NULL)
+	);
+}
+
 static gboolean key_press_callback(WebKitWebView *webview,
                                    guint keyval,
 																	 guint keycode,
                                    GdkModifierType state)
 {
-
 	if (state & GDK_CONTROL_MASK) {
-			switch (keycode) {
-				case 43: {
-					webkit_web_view_go_back(webview);
-				} break;
-				case 46: {
-					webkit_web_view_go_forward(webview);
-				} break;
-				case 26: {
-						rose_webview_load_url(webview, homepage);
-				} break;
+		for (int i = 0; i < LENGTH(keys); i++) {
+			if (keys[i].modkey == GDK_CONTROL_MASK
+					&& keys[i].keycod == keyval) {
+				switch (keys[i].funcid) {
+					case goback:
+						webkit_web_view_go_back(webview);
+						break;
+					case goforward:
+						webkit_web_view_go_forward(webview);
+						break;
+					case copy_url: {
+						GdkDisplay *dpy = gdk_display_get_default();
+						gdk_clipboard_set_text(
+								gdk_display_get_clipboard(dpy),
+								webkit_web_view_get_uri(webview)
+						);
+					} break;
+					case paste_url: {
+						GdkDisplay *dpy = gdk_display_get_default();
+						GdkClipboard *clipboard = gdk_display_get_clipboard(dpy);
+						gdk_clipboard_read_text_async(clipboard, NULL, read_clipboard, webview);
+					} break;
+				}
 			}
 		}
-
+	}
 	return GDK_EVENT_PROPAGATE;
 }
 
