@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gtk/gtk.h>
+#include <gdk/x11/gdkx.h>
 #include "webview.h"
 
 G_BEGIN_DECLS
@@ -10,7 +11,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE(RoseWindow, rose_window, ROSE, WINDOW, GtkApplicationWindow)
 
 RoseWindow* rose_window_new();
-void rose_window_show(RoseWindow *window);
+guint rose_window_show(GtkApplication *app, RoseWindow *window);
 gboolean rose_window_close(RoseWindow *window);
 
 void rose_window_set_webview(RoseWindow *window, GtkWidget *webview);

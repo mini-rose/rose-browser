@@ -1,4 +1,5 @@
 #include "window.h"
+#include "rose.h"
 /* #include "gestures.h" */
 #include "config.h"
 #include "webview.h"
@@ -8,6 +9,7 @@
 struct _RoseWindow {
 	GtkApplicationWindow parent_instance;
 
+	guint xid;
 	GtkWindow *window;
 	WebKitWebView *webview;
 	GHashTable *action_groups;
@@ -66,6 +68,26 @@ static gboolean key_press_callback(RoseWindow *window,
 						else
 							gtk_window_fullscreen(GTK_WINDOW(window->window));
 						break;
+					case inspector:
+						puts("wqf");
+						break;
+					case search: {
+						int id = fork();
+						if (id == 0) {
+							if (dpy)
+								close(ConnectionNumber(dpy));
+							close(spair[0]);
+							close(spair[1]);
+							setsid();
+							char* argument_list[] = {"/bin/sh", "-c", "surf-open", NULL};
+							execvp("/bin/sh", argument_list);
+							perror(" failed");
+							exit(1);
+						} else {
+							wait(&id);
+							webkit_web_view_load_uri(window->webview, getatom(AtomGo));
+						}
+					}
 				}
 			}
 		}
@@ -93,11 +115,17 @@ static void rose_window_init(RoseWindow *window)
 	window->window = GTK_WINDOW(gtk_window_new());
 }
 
-void rose_window_show(RoseWindow *window)
+guint rose_window_show(GtkApplication *app, RoseWindow *window)
 {
-	GtkWidget *w = gtk_window_new();
+	GtkWidget *w = gtk_application_window_new(app);
 	window->window = GTK_WINDOW(w);
-	gtk_window_set_child(GTK_WINDOW(w), GTK_WIDGET(window->webview));
+	GtkWidget *webview = rose_webview_new();
+	window->webview = WEBKIT_WEB_VIEW(webview);
+
+	if (homepage)
+		rose_webview_load_url(WEBKIT_WEB_VIEW(webview), homepage);
+
+	gtk_window_set_child(GTK_WINDOW(w), GTK_WIDGET(webview));
 
 	/* Keyboard shortcuts */
 	GtkEventController *controller;
@@ -106,6 +134,8 @@ void rose_window_show(RoseWindow *window)
 	gtk_widget_add_controller(GTK_WIDGET(w), controller);
 
 	gtk_widget_show(w);
+
+	return gdk_x11_surface_get_xid(gtk_native_get_surface(GTK_NATIVE(w)));
 }
 
 void rose_window_set_webview(RoseWindow *window, GtkWidget *webview)

@@ -3,7 +3,7 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 
-#define NONE 4
+#define SHIFT GDK_SHIFT_MASK
 
 typedef struct {
 	unsigned modkey;
@@ -16,5 +16,7 @@ enum {
 	goforward,
 	copy_url,
 	paste_url,
-	fullscreen
+	fullscreen,
+	inspector,
+	search
 };
