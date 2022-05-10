@@ -20,3 +20,11 @@ Run following command to build and install
 (if necessary as root):
 
   make clean install
+
+usage
+-----
+
+To set default homepage change config.h
+
+Opening new window with specific website:
+  rose https://duckduckgo.com
