@@ -8,8 +8,6 @@ all:
 
 install: all
 	cp -uf ./rose /usr/local/bin/rose
-	mkdir -p /usr/local/share/rose
-	cp -uf ./youtube.js /usr/local/share/rose/youtube.js
 
 clean:
 	rm -f rose compile_flags.txt
