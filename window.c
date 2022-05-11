@@ -14,7 +14,6 @@ struct _RoseWindow {
 	WebKitWebView *webview;
 	GHashTable *action_groups;
 	GHashTable *action_labels;
-	/* RoseGestureController *mouse_gesture_controller; */
 };
 
 enum {
@@ -40,6 +39,7 @@ static gboolean key_press_callback(RoseWindow *window,
 																	 guint keycode,
                                    GdkModifierType state)
 {
+
 		for (int i = 0; i < LENGTH(keys); i++) {
 			if (keys[i].modkey == state
 					&& keys[i].keycod == keyval) {
@@ -63,13 +63,10 @@ static gboolean key_press_callback(RoseWindow *window,
 						gdk_clipboard_read_text_async(clipboard, NULL, read_clipboard, window->webview);
 					} break;
 					case fullscreen:
-						if (gtk_window_is_fullscreen(window->window))
-							gtk_window_unfullscreen(GTK_WINDOW(window->window));
+						if (gtk_window_is_fullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview)))))
+							gtk_window_unfullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview))));
 						else
-							gtk_window_fullscreen(GTK_WINDOW(window->window));
-						break;
-					case inspector:
-						puts("wqf");
+							gtk_window_fullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview))));
 						break;
 					case search: {
 						int id = fork();
@@ -79,7 +76,7 @@ static gboolean key_press_callback(RoseWindow *window,
 							close(spair[0]);
 							close(spair[1]);
 							setsid();
-							char* argument_list[] = {"/bin/sh", "-c", "surf-open", NULL};
+							char* argument_list[] = { "/bin/sh", "-c", "surf-open", NULL};
 							execvp("/bin/sh", argument_list);
 							perror(" failed");
 							exit(1);
@@ -108,7 +105,6 @@ static void rose_window_init(RoseWindow *window)
 guint rose_window_show(GtkApplication *app, RoseWindow *window)
 {
 	GtkWidget *w = gtk_application_window_new(app);
-	window->window = GTK_WINDOW(w);
 	GtkWidget *webview = rose_webview_new();
 	window->webview = WEBKIT_WEB_VIEW(webview);
 
