@@ -97,17 +97,7 @@ static gboolean key_press_callback(RoseWindow *window,
 
 static void rose_window_constructed(GObject *object)
 {
-	RoseWindow *window;
-	GAction *action;
-	GActionGroup *action_group;
-	GSimpleActionGroup *simple_action_group;
-	guint i;
-	GApplication *app;
-	GtkEventController *controller;
-
 	G_OBJECT_CLASS(rose_window_parent_class)->constructed(object);
-
-	window = ROSE_WINDOW(window);
 }
 
 static void rose_window_init(RoseWindow *window)
@@ -146,13 +136,8 @@ void rose_window_set_webview(RoseWindow *window, GtkWidget *webview)
 static void rose_window_class_init(RoseWindowClass *class)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(class);
-	GtkApplicationWindowClass *window_class = GTK_APPLICATION_WINDOW_CLASS(class);
 
 	object_class->constructed = rose_window_constructed;
-
-	/* g_object_class_override_property(object_class, */
-                                   /* PROP_ACTIVE_CHILD, */
-                                   /* "active-child"); */
 }
 
 RoseWindow* rose_window_new(GtkApplication *app)

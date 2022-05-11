@@ -62,7 +62,6 @@ static void rose_webview_constructed(GObject *object)
 static void rose_webview_dispose(GObject *object)
 {
 	RoseWebView *webview = ROSE_WEBVIEW(object);
-	WebKitUserContentManager *ucm = webkit_web_view_get_user_content_manager(WEBKIT_WEB_VIEW(webview));
 
 	if (webview->cancellable) {
 		g_cancellable_cancel(webview->cancellable);
@@ -84,7 +83,6 @@ static void rose_webview_finalize(GObject *object)
 static void rose_webview_class_init(RoseWebViewClass *class)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(class);
-	WebKitWebViewClass *webkit_webview_class = WEBKIT_WEB_VIEW_CLASS(class);
 
 	object_class->dispose = rose_webview_dispose;
 	object_class->finalize = rose_webview_finalize;
@@ -111,7 +109,6 @@ void rose_webview_load_url(WebKitWebView *webview, const char *url)
 GtkWidget* rose_webview_new()
 {
 	char cookiefile[64];
-	WebKitWebView *webview;
 	WebKitCookieManager *cookiemanager;
 	WebKitUserContentManager *contentmanager;
 
