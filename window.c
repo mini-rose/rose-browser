@@ -102,14 +102,14 @@ static void rose_window_init(RoseWindow *window)
 	window->window = GTK_WINDOW(gtk_window_new());
 }
 
-guint rose_window_show(GtkApplication *app, RoseWindow *window)
+guint rose_window_show(GtkApplication *app, RoseWindow *window, const char *url)
 {
 	GtkWidget *w = gtk_application_window_new(app);
 	GtkWidget *webview = rose_webview_new();
 	window->webview = WEBKIT_WEB_VIEW(webview);
 
-	if (homepage)
-		rose_webview_load_url(WEBKIT_WEB_VIEW(webview), homepage);
+	if (url)
+		rose_webview_load_url(WEBKIT_WEB_VIEW(webview), url);
 
 	gtk_window_set_child(GTK_WINDOW(w), GTK_WIDGET(webview));
 

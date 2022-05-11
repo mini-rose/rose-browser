@@ -109,7 +109,7 @@ static void run(GtkApplication *app)
 		g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", true, NULL);
 	}
 
-	xid = rose_window_show(app, window);
+	xid = rose_window_show(app, window, homepage);
 	setatom(AtomUri, homepage);
 }
 
