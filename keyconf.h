@@ -20,5 +20,7 @@ enum {
 	inspector,
 	search,
 	zoomin,
-	zoomout
+	zoomout,
+	down,
+	up
 };

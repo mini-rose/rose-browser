@@ -15,5 +15,8 @@ static Key keys[] = {
 	{ MODKEY,         GDK_KEY_e,     search     },
 	{ MODKEY,         GDK_KEY_equal, zoomin     },
 	{ MODKEY,         GDK_KEY_minus, zoomout    },
-	{ 0,              GDK_KEY_F11,   fullscreen },
+	{ MODKEY,         GDK_KEY_i,     inspector  },
+	{ MODKEY,         GDK_KEY_j,     down       },
+	{ MODKEY,         GDK_KEY_k,     up         },
+	{ 0,              GDK_KEY_F11,   fullscreen }
 };

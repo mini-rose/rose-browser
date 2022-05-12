@@ -1,10 +1,9 @@
 #include "window.h"
 #include "rose.h"
-/* #include "gestures.h" */
 #include "config.h"
 #include "webview.h"
 
-#define LENGTH(x) (sizeof(x) / sizeof(x[0]))
+#define LENGTH(x) ((int) (sizeof(x) / sizeof(x[0])))
 
 struct _RoseWindow {
 	GtkApplicationWindow parent_instance;
@@ -12,6 +11,7 @@ struct _RoseWindow {
 	guint xid;
 	GtkWindow *window;
 	WebKitWebView *webview;
+	WebKitWebInspector *inspector;
 	GHashTable *action_groups;
 	GHashTable *action_labels;
 };
@@ -28,8 +28,7 @@ static void read_clipboard(GObject *object,
                             GAsyncResult *res,
 													  gpointer webview)
 {
-	GdkDisplay *dpy = gdk_display_get_default();
-	GdkClipboard *clipboard = gdk_display_get_clipboard(dpy);
+	GdkClipboard *clipboard = GDK_CLIPBOARD(object);
 	webkit_web_view_load_uri(
 		WEBKIT_WEB_VIEW(webview),
 		gdk_clipboard_read_text_finish(clipboard, res, NULL)
@@ -41,66 +40,80 @@ static gboolean key_press_callback(RoseWindow *window,
 																	 guint keycode,
                                    GdkModifierType state)
 {
+	if (!state)
+		return GDK_EVENT_PROPAGATE;
 
-		for (int i = 0; i < LENGTH(keys); i++) {
-			if (keys[i].modkey == state
-					&& keys[i].keycod == keyval) {
-				switch (keys[i].funcid) {
-					case goback:
-						webkit_web_view_go_back(window->webview);
-						break;
-					case goforward:
-						webkit_web_view_go_forward(window->webview);
-						break;
-					case copy_url: {
-						GdkDisplay *dpy = gdk_display_get_default();
-						gdk_clipboard_set_text(
-								gdk_display_get_clipboard(dpy),
-								webkit_web_view_get_uri(window->webview)
-						);
-					} break;
-					case paste_url: {
-						GdkDisplay *dpy = gdk_display_get_default();
-						GdkClipboard *clipboard = gdk_display_get_clipboard(dpy);
-						gdk_clipboard_read_text_async(clipboard, NULL, read_clipboard, window->webview);
-					} break;
-					case fullscreen:
-						if (gtk_window_is_fullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview)))))
-							gtk_window_unfullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview))));
-						else
-							gtk_window_fullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview))));
-						break;
-					case search: {
-						int id = fork();
-						if (id == 0) {
-							if (dpy)
-								close(ConnectionNumber(dpy));
-							close(spair[0]);
-							close(spair[1]);
-							setsid();
-							char* argument_list[] = { "/bin/sh", "-c", "surf-open", NULL};
-							execvp("/bin/sh", argument_list);
-							perror(" failed");
-							exit(1);
-						} else {
-							wait(&id);
-							webkit_web_view_load_uri(window->webview, getatom(AtomGo));
-						}
+	for (int i = 0; i < LENGTH(keys); i++) {
+		if (keys[i].modkey == state
+				&& keys[i].keycod == keyval) {
+			switch (keys[i].funcid) {
+				case goback:
+					webkit_web_view_go_back(window->webview);
+					break;
+				case goforward:
+					webkit_web_view_go_forward(window->webview);
+					break;
+				case copy_url: {
+					GdkDisplay *dpy = gdk_display_get_default();
+					gdk_clipboard_set_text(
+							gdk_display_get_clipboard(dpy),
+							webkit_web_view_get_uri(window->webview)
+					);
+				} break;
+				case paste_url: {
+					GdkDisplay *dpy = gdk_display_get_default();
+					GdkClipboard *clipboard = gdk_display_get_clipboard(dpy);
+					gdk_clipboard_read_text_async(clipboard, NULL, read_clipboard, window->webview);
+				} break;
+				case fullscreen:
+					if (gtk_window_is_fullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview)))))
+						gtk_window_unfullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview))));
+					else
+						gtk_window_fullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview))));
+					break;
+				case search: {
+					int id = fork();
+					if (id == 0) {
+						if (dpy)
+							close(ConnectionNumber(dpy));
+						close(spair[0]);
+						close(spair[1]);
+						setsid();
+						char* argument_list[] = { "/bin/sh", "-c", "surf-open", NULL};
+						execvp("/bin/sh", argument_list);
+						perror(" failed");
+						exit(1);
+					} else {
+						wait(&id);
+						webkit_web_view_load_uri(window->webview, getatom(AtomGo));
 					}
-					case zoomin:
-						zoom += 0.1;
-						webkit_web_view_set_zoom_level(window->webview, zoom);
-						break;
-					case zoomout:
-						zoom -= 0.1;
-						webkit_web_view_set_zoom_level(window->webview, zoom);
-						break;
 				}
+				case zoomin:
+					zoom += 0.1;
+					webkit_web_view_set_zoom_level(window->webview, zoom);
+					break;
+				case zoomout:
+					zoom -= 0.1;
+					webkit_web_view_set_zoom_level(window->webview, zoom);
+					break;
+				case inspector:
+					window->inspector = webkit_web_view_get_inspector(window->webview);
+					if (webkit_web_inspector_is_attached(window->inspector))
+						webkit_web_inspector_close(window->inspector);
+					else
+						webkit_web_inspector_show(window->inspector);
+					return GDK_EVENT_STOP;
+					break;
+				case up:
+					webkit_web_view_run_javascript(window->webview, "window.scrollBy(0,-100);", NULL, NULL, NULL);
+					break;
+				case down:
+					webkit_web_view_run_javascript(window->webview, "window.scrollBy(0,100);", NULL, NULL, NULL);
+					break;
 			}
 		}
+	}
 
-	printf("%i\n", keyval);
-	puts("");
 	return GDK_EVENT_PROPAGATE;
 }
 
@@ -114,6 +127,11 @@ static void rose_window_init(RoseWindow *window)
 	window->window = GTK_WINDOW(gtk_window_new());
 }
 
+static void destroy(RoseWindow *window)
+{
+	exit(0);
+}
+
 guint rose_window_show(GtkApplication *app, RoseWindow *window, const char *url)
 {
 	GtkWidget *w = gtk_application_window_new(app);
@@ -124,6 +142,11 @@ guint rose_window_show(GtkApplication *app, RoseWindow *window, const char *url)
 	gtk_widget_has_default(webview);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(w), TRUE);
 	window->webview = WEBKIT_WEB_VIEW(webview);
+
+	g_signal_connect(G_OBJECT(w), "destroy",
+	                 G_CALLBACK(destroy), window);
+	g_signal_connect(G_OBJECT(window->webview), "web-process-terminated",
+			 G_CALLBACK(destroy), window);
 
 	if (url)
 		rose_webview_load_url(WEBKIT_WEB_VIEW(webview), url);

@@ -1,7 +1,7 @@
 CC       = clang
 CFLAGS   = `pkg-config --cflags gtk4 webkit2gtk-5.0 x11 `
 LIBS     = `pkg-config --libs gtk4 webkit2gtk-5.0 x11`
-GTKFLAGS = -Dgtk_doc=false -Dintrospection=false \
+OPTIONS  = -Dgtk_doc=false -Dintrospection=false \
 					 -DG_DISABLE_CAST_CHECKS \
 					 -Dcloudproviders=false \
 					 -DGTK_DISABLE_DEPRECATED \
@@ -18,7 +18,7 @@ GTKFLAGS = -Dgtk_doc=false -Dintrospection=false \
 
 
 all:
-	${CC} -fPIC -Os -o rose *.c $(CFLAGS) $(LIBS) $(GTKFLAGS)
+	${CC} -fPIC -O3 -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS)
 	strip ./rose
 
 install: all
