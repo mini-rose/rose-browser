@@ -18,5 +18,7 @@ enum {
 	paste_url,
 	fullscreen,
 	inspector,
-	search
+	search,
+	zoomin,
+	zoomout
 };

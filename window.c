@@ -20,6 +20,8 @@ enum {
 	PROP_ACTIVE_CHILD
 };
 
+static float zoom = 1.0;
+
 G_DEFINE_TYPE(RoseWindow, rose_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static void read_clipboard(GObject *object,
@@ -85,10 +87,20 @@ static gboolean key_press_callback(RoseWindow *window,
 							webkit_web_view_load_uri(window->webview, getatom(AtomGo));
 						}
 					}
+					case zoomin:
+						zoom += 0.1;
+						webkit_web_view_set_zoom_level(window->webview, zoom);
+						break;
+					case zoomout:
+						zoom -= 0.1;
+						webkit_web_view_set_zoom_level(window->webview, zoom);
+						break;
 				}
 			}
 		}
 
+	printf("%i\n", keyval);
+	puts("");
 	return GDK_EVENT_PROPAGATE;
 }
 
@@ -105,7 +117,12 @@ static void rose_window_init(RoseWindow *window)
 guint rose_window_show(GtkApplication *app, RoseWindow *window, const char *url)
 {
 	GtkWidget *w = gtk_application_window_new(app);
+
+	gtk_application_set_menubar(app, FALSE);
 	GtkWidget *webview = rose_webview_new();
+	gtk_widget_set_has_tooltip(webview, FALSE);
+	gtk_widget_has_default(webview);
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(w), TRUE);
 	window->webview = WEBKIT_WEB_VIEW(webview);
 
 	if (url)

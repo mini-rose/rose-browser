@@ -113,12 +113,16 @@ GtkWidget* rose_webview_new()
 	WebKitUserContentManager *contentmanager;
 
 	WebKitSettings *settings = webkit_settings_new_with_settings(
-		"auto-load-images", true,
-		"enable-back-forward-navigation-gestures", true,
-		"enable-developer-extras", true,
-		"enable-media-stream", true,
+		"auto-load-images", TRUE,
+		"enable-back-forward-navigation-gestures", TRUE,
+		"enable-developer-extras", TRUE,
+		"enable-media-stream", TRUE,
+		"enable-plugins", FALSE,
+		"enable-dns-prefetching", TRUE,
+		"enable-smooth-scrolling", TRUE,
+		"media-content-types-requiring-hardware-support", "video:/mp4;codecs=\"H.264-encoded\"",
 		"hardware-acceleration-policy", WEBKIT_HARDWARE_ACCELERATION_POLICY_ALWAYS,
-		"javascript-can-access-clipboard", true, NULL);
+		"javascript-can-access-clipboard", TRUE, NULL);
 
 	WebKitWebContext *context = webkit_web_context_new_with_website_data_manager(
 		webkit_website_data_manager_new(
@@ -129,7 +133,6 @@ GtkWidget* rose_webview_new()
 	webkit_settings_set_user_agent_with_application_details(
 		settings, "Mini", "0.1");
 
-	webkit_web_context_set_process_model(context, WEBKIT_PROCESS_MODEL_MULTIPLE_SECONDARY_PROCESSES);
 	webkit_web_context_set_cache_model(context, WEBKIT_CACHE_MODEL_WEB_BROWSER);
 	contentmanager = webkit_user_content_manager_new();
 	cookiemanager = webkit_web_context_get_cookie_manager(context);
