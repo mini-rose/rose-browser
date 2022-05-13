@@ -12,6 +12,7 @@ In order to use the functionalities:
   - video support: gst-libav, gst-plugins-good
   - url bar and find: dmenu
   - tabs: tabbed
+  - download: aria2c
 
 installation
 ------------
