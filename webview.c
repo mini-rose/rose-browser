@@ -104,6 +104,7 @@ static void rose_webview_init(RoseWebView *webview)
 void rose_webview_load_url(WebKitWebView *webview, const char *url)
 {
 	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(webview), url);
+	setatom(AtomUri, url);
 }
 
 GtkWidget* rose_webview_new()

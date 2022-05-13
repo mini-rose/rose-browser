@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rose.h"
+
 #include <webkit2/webkit2.h>
 #include <gdk/gdk.h>
 

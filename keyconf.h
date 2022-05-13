@@ -3,7 +3,7 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 
-#define SHIFT GDK_SHIFT_MASK
+#define MODSHIFT 5
 
 typedef struct {
 	unsigned modkey;
@@ -19,6 +19,9 @@ enum {
 	fullscreen,
 	inspector,
 	search,
+	find,
+	findnext,
+	findprev,
 	zoomin,
 	zoomout,
 	down,

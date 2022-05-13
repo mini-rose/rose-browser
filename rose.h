@@ -19,4 +19,5 @@ enum { AtomFind, AtomGo, AtomUri, AtomUTF8, AtomLast };
 static Atom atoms[AtomLast];
 static Display *dpy;
 const char* getatom(int a);
+void setatom(int a, const char *v);
 static int spair[2];

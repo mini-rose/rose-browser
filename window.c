@@ -12,6 +12,7 @@ struct _RoseWindow {
 	GtkWindow *window;
 	WebKitWebView *webview;
 	WebKitWebInspector *inspector;
+	WebKitFindOptions *findopts;
 	GHashTable *action_groups;
 	GHashTable *action_labels;
 };
@@ -40,9 +41,6 @@ static gboolean key_press_callback(RoseWindow *window,
 																	 guint keycode,
                                    GdkModifierType state)
 {
-	if (!state)
-		return GDK_EVENT_PROPAGATE;
-
 	for (int i = 0; i < LENGTH(keys); i++) {
 		if (keys[i].modkey == state
 				&& keys[i].keycod == keyval) {
@@ -50,9 +48,11 @@ static gboolean key_press_callback(RoseWindow *window,
 				case goback:
 					webkit_web_view_go_back(window->webview);
 					break;
+
 				case goforward:
 					webkit_web_view_go_forward(window->webview);
 					break;
+
 				case copy_url: {
 					GdkDisplay *dpy = gdk_display_get_default();
 					gdk_clipboard_set_text(
@@ -60,17 +60,20 @@ static gboolean key_press_callback(RoseWindow *window,
 							webkit_web_view_get_uri(window->webview)
 					);
 				} break;
+
 				case paste_url: {
 					GdkDisplay *dpy = gdk_display_get_default();
 					GdkClipboard *clipboard = gdk_display_get_clipboard(dpy);
 					gdk_clipboard_read_text_async(clipboard, NULL, read_clipboard, window->webview);
 				} break;
+
 				case fullscreen:
 					if (gtk_window_is_fullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview)))))
 						gtk_window_unfullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview))));
 					else
 						gtk_window_fullscreen(GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(window->webview))));
 					break;
+
 				case search: {
 					int id = fork();
 					if (id == 0) {
@@ -79,23 +82,59 @@ static gboolean key_press_callback(RoseWindow *window,
 						close(spair[0]);
 						close(spair[1]);
 						setsid();
-						char* argument_list[] = { "/bin/sh", "-c", "surf-open", NULL};
+						char* argument_list[] = { "/bin/sh", "-c", "dmenu_rose", NULL};
 						execvp("/bin/sh", argument_list);
 						perror(" failed");
 						exit(1);
 					} else {
 						wait(&id);
-						webkit_web_view_load_uri(window->webview, getatom(AtomGo));
+						rose_webview_load_url(window->webview, getatom(AtomGo));
 					}
-				}
+				} break;
+				case find: {
+
+					int id = fork();
+					if (id == 0) {
+						if (dpy)
+							close(ConnectionNumber(dpy));
+						close(spair[0]);
+						close(spair[1]);
+						setsid();
+						char* argument_list[] = { "/bin/sh", "-c", "dmenu_rose\tfind", NULL};
+						execvp("/bin/sh", argument_list);
+						perror(" failed");
+						exit(1);
+					} else {
+						wait(&id);
+						WebKitFindController *finder = webkit_web_view_get_find_controller(window->webview);
+						webkit_find_controller_search(
+							finder,
+							getatom(AtomFind),
+							WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE |
+							WEBKIT_FIND_OPTIONS_WRAP_AROUND, G_MAXUINT);
+					}
+				} break;
+
+				case findnext: {
+					WebKitFindController *finder = webkit_web_view_get_find_controller(window->webview);
+					webkit_find_controller_search_next(finder);
+				} break;
+
+				case findprev: {
+					WebKitFindController *finder = webkit_web_view_get_find_controller(window->webview);
+					webkit_find_controller_search_previous(finder);
+				} break;
+
 				case zoomin:
 					zoom += 0.1;
 					webkit_web_view_set_zoom_level(window->webview, zoom);
 					break;
+
 				case zoomout:
 					zoom -= 0.1;
 					webkit_web_view_set_zoom_level(window->webview, zoom);
 					break;
+
 				case inspector:
 					window->inspector = webkit_web_view_get_inspector(window->webview);
 					if (webkit_web_inspector_is_attached(window->inspector))
@@ -104,15 +143,18 @@ static gboolean key_press_callback(RoseWindow *window,
 						webkit_web_inspector_show(window->inspector);
 					return GDK_EVENT_STOP;
 					break;
+
 				case up:
 					webkit_web_view_run_javascript(window->webview, "window.scrollBy(0,-100);", NULL, NULL, NULL);
 					break;
+
 				case down:
 					webkit_web_view_run_javascript(window->webview, "window.scrollBy(0,100);", NULL, NULL, NULL);
 					break;
 			}
 		}
 	}
+
 
 	return GDK_EVENT_PROPAGATE;
 }

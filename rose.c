@@ -5,8 +5,7 @@
 
 guint xid;
 
-void
-setatom(int a, const char *v)
+void setatom(int a, const char *v)
 {
 	XChangeProperty(dpy, xid,
 									atoms[a], atoms[AtomUTF8], 8, PropModeReplace,
@@ -14,8 +13,7 @@ setatom(int a, const char *v)
 	XSync(dpy, False);
 }
 
-const char *
-getatom(int a)
+const char* getatom(int a)
 {
 	static char buf[BUFSIZ];
 	Atom adummy;

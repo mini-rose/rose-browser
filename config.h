@@ -18,5 +18,8 @@ static Key keys[] = {
 	{ MODKEY,         GDK_KEY_i,     inspector  },
 	{ MODKEY,         GDK_KEY_j,     down       },
 	{ MODKEY,         GDK_KEY_k,     up         },
+	{ MODKEY,         GDK_KEY_f,     find       },
+	{ MODKEY,         GDK_KEY_n,     findnext   },
+	{ MODSHIFT,       GDK_KEY_N,     findprev   },
 	{ 0,              GDK_KEY_F11,   fullscreen }
 };
