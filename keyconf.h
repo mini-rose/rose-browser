@@ -11,7 +11,7 @@
 #define CACHE      0
 #define HOMEPAGE   1
 
-#define DEFAULT    NULL
+#define DEFAULT    0
 
 #define HEIGHT     0
 #define WIDTH      1
@@ -46,5 +46,5 @@ enum {
 	up,
 	reload,
 	reloadforce,
-	LAST_FUNC
+	history
 };

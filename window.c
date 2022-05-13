@@ -162,6 +162,25 @@ static gboolean key_press_callback(RoseWindow *window,
 				case reloadforce:
 					webkit_web_view_reload_bypass_cache(window->webview);
 					break;
+
+				case history: {
+					int id = fork();
+					if (id == 0) {
+						close(spair[0]);
+						close(spair[1]);
+						setsid();
+						char* argument_list[] = { "/bin/sh", "-c", "dmenu_rose\thistory", NULL};
+						execvp("/bin/sh", argument_list);
+						perror(" failed");
+						exit(1);
+					} else {
+						wait(&id);
+						char *uri;
+						if (strcmp((uri = (char*)getatom(AtomGo)), ""))
+							rose_webview_load_url(window->webview, uri);
+					}
+				} break;
+
 			}
 		}
 	}
@@ -202,8 +221,17 @@ guint rose_window_show(GtkApplication *app, RoseWindow *window, const char *url)
 	g_signal_connect(G_OBJECT(window->webview), "web-process-terminated",
 			 G_CALLBACK(destroy), window);
 
+	g_signal_connect(G_OBJECT(window->webview), "load-changed",
+			 G_CALLBACK(rose_load_changed_callback), window);
+
 	if (url) {
 		rose_webview_load_url(WEBKIT_WEB_VIEW(webview), url);
+		setatom(AtomUri, url);
+	}
+
+	if (!(appearance[WIDTH] && appearance[HEIGHT])) {
+		appearance[WIDTH]  = 1280;
+		appearance[HEIGHT] = 720;
 	}
 
 	gtk_window_set_default_size(GTK_WINDOW(w), appearance[WIDTH], appearance[HEIGHT]);

@@ -21,7 +21,7 @@ search()
 
 	[ -z "$SEARCH" ] && exit
 
-	ROSE_GO=$(xprop -id "$CURRENT_ID" | grep _ROSE_URI)
+	ROSE_GO=$(xprop -id "$CURRENT_ID" | grep rose)
 
 	[ -z "$1" ] || ROSE_GO=''
 
@@ -31,7 +31,7 @@ search()
 				exit
 		} || {
 			FULL_URL=$(printf "$BOOKMARKS" | grep -w "$SEARCH" | sed 's/ /\./g')
-			xprop -id "$CURRENT_ID" -f "_ROSE_GO" 8u -set "_ROSE_GO" $FULL_URL
+			xprop -id "$CURRENT_ID" -f "_ROSE_GO" 8u -set "_ROSE_GO" https://$FULL_URL
 			exit
 		}
 	}
@@ -48,9 +48,19 @@ find()
 {
 	FIND=$(printf "" | dmenu -p Find:)
 	CURRENT_ID=$(xdotool getactivewindow)
-	ROSE_FIND=$(xprop -id "$CURRENT_ID" | grep _ROSE_URI)
+	ROSE_FIND=$(xprop -id "$CURRENT_ID" | grep rose)
 
 	[ -z "$ROSE_FIND" ] || xprop -id "$CURRENT_ID" -f "_ROSE_FIND" 8u -set "_ROSE_FIND" "$FIND"
+}
+
+history()
+{
+	CHOOSE=$(tac ~/.cache/rose/history | dmenu -p History:);
+
+	CURRENT_ID=$(xdotool getactivewindow)
+	ROSE_GO=$(xprop -id "$CURRENT_ID" | grep rose)
+
+	[ -z "$ROSE_GO" ] || xprop -id "$CURRENT_ID" -f "_ROSE_GO" 8u -set "_ROSE_GO" "$CHOOSE"
 }
 
 [ -z "$1" ] && search || {
@@ -61,5 +71,6 @@ find()
 		add_bookmark) echo "$2" >> $BOOKMARKS_PATH;;
 		new_window) search new;;
 		find) find;;
+		history) history;
 	esac
 }

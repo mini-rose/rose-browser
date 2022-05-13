@@ -1,14 +1,14 @@
 #include "keyconf.h"
 
 OPTIONS {
-	[CACHE]       = DEFAULT,
-	[HOMEPAGE]    = DEFAULT,
+	[CACHE]    = DEFAULT,
+	[HOMEPAGE] = DEFAULT,
 };
 
 APPERANCE {
-	[HEIGHT]      = 600,
-	[WIDTH]       = 800,
-	[DARKMODE]    = true
+	[HEIGHT]   = DEFAULT,
+	[WIDTH]    = DEFAULT,
+	[DARKMODE] = TRUE
 };
 
 KEYBINDS {
@@ -28,5 +28,6 @@ KEYBINDS {
 	{ MODSFT, GDK_KEY_N,   findprev    },
 	{ MODKEY, GDK_KEY_r,   reload      },
 	{ MODSFT, GDK_KEY_R,   reloadforce },
-	{ NOMODK, GDK_KEY_F11, fullscreen  }
+	{ NOMODK, GDK_KEY_F11, fullscreen  },
+	{ MODSFT, GDK_KEY_H,   history     }
 };

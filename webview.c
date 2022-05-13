@@ -106,6 +106,30 @@ void rose_webview_load_url(WebKitWebView *webview, const char *url)
 	setatom(AtomUri, url);
 }
 
+void rose_load_changed_callback(WebKitWebView *webview,
+																WebKitLoadEvent event)
+{
+	if (event == WEBKIT_LOAD_FINISHED) {
+			const char *uri = webkit_web_view_get_uri(webview);
+			char *cookiefile = calloc(1, sizeof(char) * (strlen(options[CACHE]) + 32) + 1);
+			sprintf(cookiefile, "%s/history", options[CACHE]);
+			FILE *f = fopen(cookiefile, "r");
+
+			if (!f) {
+				fclose(f);
+				FILE *f = fopen(cookiefile, "w");
+				fclose(f);
+			} else {
+				fclose(f);
+			}
+
+			FILE *cookie = fopen(cookiefile, "a");
+			fprintf(f, "%s\n", uri);
+			fclose(cookie);
+			free(cookiefile);
+		}
+}
+
 static void rose_download(const char* uri)
 {
 	char *cmd = calloc(1, sizeof(char) * strlen(uri) + 1);

@@ -25,4 +25,7 @@ RoseWebViewNavigationFlags rose_webview_get_navigation_flags(RoseWebView *webvie
 void rose_webview_go_back(RoseWebView *window);
 void rose_webview_go_forward(RoseWebView *window);
 
+void rose_load_changed_callback(WebKitWebView *webview,
+                                WebKitLoadEvent event);
+
 const char* rose_webview_get_address(RoseWebView *webview);
