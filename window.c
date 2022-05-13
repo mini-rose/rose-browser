@@ -88,11 +88,12 @@ static gboolean key_press_callback(RoseWindow *window,
 						exit(1);
 					} else {
 						wait(&id);
-						rose_webview_load_url(window->webview, getatom(AtomGo));
+						char *uri;
+						if (strcmp((uri = (char*)getatom(AtomGo)), ""))
+							rose_webview_load_url(window->webview, uri);
 					}
 				} break;
 				case find: {
-
 					int id = fork();
 					if (id == 0) {
 						if (dpy)
