@@ -107,9 +107,44 @@ void rose_webview_load_url(WebKitWebView *webview, const char *url)
 	setatom(AtomUri, url);
 }
 
+static void rose_download(const char* uri)
+{
+	char *cmd = calloc(1, sizeof(char) * strlen(uri) + 1);
+	char *url = calloc(1, sizeof(char) * strlen(uri) + 1);
+
+	strcpy(url, uri);
+
+	int id = fork();
+	if (id == 0) {
+		close(spair[0]);
+		close(spair[1]);
+		setsid();
+		char *argv[] = { "/bin/sh", "-c", "st -e /bin/sh -c", "\"aria2c \\", cmd, "\"", NULL };
+		execvp("/bin/sh", argv);
+		perror(" failed");
+		exit(1);
+	}
+}
+
+static void rose_response_reciver(WebKitDownload *download,
+                                  GParamSpec *pspec)
+{
+	const char *uri = webkit_uri_response_get_uri(webkit_download_get_response(download));
+
+	rose_download(uri);
+}
+
+static void rose_download_callback(WebKitWebContext *context,
+                                   WebKitDownload *download)
+{
+		g_signal_connect(G_OBJECT(download), "notify::response",
+	                 G_CALLBACK(rose_response_reciver), NULL);
+}
+
 GtkWidget* rose_webview_new()
 {
 	char cookiefile[64];
+	WebKitWebView *webview;
 	WebKitCookieManager *cookiemanager;
 	WebKitUserContentManager *contentmanager;
 
@@ -146,9 +181,14 @@ GtkWidget* rose_webview_new()
 
 	webkit_cookie_manager_set_accept_policy(cookiemanager, WEBKIT_COOKIE_POLICY_ACCEPT_ALWAYS);
 
-	return g_object_new(
+
+	g_signal_connect(G_OBJECT(context), "download-started",
+		                 G_CALLBACK(rose_download_callback), NULL);
+
+	return 	g_object_new(
 			WEBKIT_TYPE_WEB_VIEW,
 			"settings", settings,
 			"user-content-manager", contentmanager,
 			"web-context", context, NULL);
+
 }
