@@ -1,8 +1,9 @@
 #pragma once
 
+#include "rose.h"
+
 #include <gtk/gtk.h>
 #include <gdk/x11/gdkx.h>
-#include "webview.h"
 
 G_BEGIN_DECLS
 

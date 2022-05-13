@@ -44,28 +44,27 @@ static void setup()
 	atoms[AtomFind] = XInternAtom(dpy, "_ROSE_FIND", False);
 	atoms[AtomGo] = XInternAtom(dpy, "_ROSE_GO", False);
 	atoms[AtomUri] = XInternAtom(dpy, "_ROSE_URI", False);
-	atoms[AtomUTF8] = XInternAtom(dpy, "UTF8_STRING", False);
 }
 
 static void run(GtkApplication *app)
 {
 	RoseWindow *window = rose_window_new(app);
 
-	if (dark_mode) {
+	if (appearance[DARKMODE])
 		g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", true, NULL);
-	}
 
-	xid = rose_window_show(app, window, homepage);
-	setatom(AtomUri, homepage);
+	if (!options[HOMEPAGE])
+		options[HOMEPAGE] = "https://duckduckgo.com";
+
+	xid = rose_window_show(app, window, options[HOMEPAGE]);
 }
 
 int main(int argc, char **argv)
 {
 	if (argc == 2) {
-		homepage = argv[1];
+		options[HOMEPAGE] = argv[1];
 		argv++; argc--;
 	}
-
 	setup();
 	GtkApplication *app = gtk_application_new("org.gtk.rose", G_APPLICATION_NON_UNIQUE);
 	g_signal_connect(app, "activate", G_CALLBACK(run), NULL);

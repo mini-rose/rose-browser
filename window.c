@@ -1,7 +1,4 @@
 #include "window.h"
-#include "rose.h"
-#include "config.h"
-#include "webview.h"
 
 #define LENGTH(x) ((int) (sizeof(x) / sizeof(x[0])))
 
@@ -205,8 +202,11 @@ guint rose_window_show(GtkApplication *app, RoseWindow *window, const char *url)
 	g_signal_connect(G_OBJECT(window->webview), "web-process-terminated",
 			 G_CALLBACK(destroy), window);
 
-	if (url)
+	if (url) {
 		rose_webview_load_url(WEBKIT_WEB_VIEW(webview), url);
+	}
+
+	gtk_window_set_default_size(GTK_WINDOW(w), appearance[WIDTH], appearance[HEIGHT]);
 
 	gtk_window_set_child(GTK_WINDOW(w), GTK_WIDGET(webview));
 

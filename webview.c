@@ -1,5 +1,4 @@
 #include "webview.h"
-#include "config.h"
 
 struct _RoseWebView {
 	WebKitWebView parent_instance;
@@ -143,7 +142,7 @@ static void rose_download_callback(WebKitWebContext *context,
 
 GtkWidget* rose_webview_new()
 {
-	char cookiefile[64];
+	char cookiefile[128];
 	WebKitWebView *webview;
 	WebKitCookieManager *cookiemanager;
 	WebKitUserContentManager *contentmanager;
@@ -160,10 +159,17 @@ GtkWidget* rose_webview_new()
 		"hardware-acceleration-policy", WEBKIT_HARDWARE_ACCELERATION_POLICY_ALWAYS,
 		"javascript-can-access-clipboard", TRUE, NULL);
 
+	if (!options[CACHE]) {
+		const char *HOME = getenv("HOME");
+		char *buf = calloc(1, sizeof(char) * (strlen(HOME) + 32) + 1);
+		sprintf(buf, "%s/.cache/rose/", HOME);
+		options[CACHE] = buf;
+	}
+
 	WebKitWebContext *context = webkit_web_context_new_with_website_data_manager(
 		webkit_website_data_manager_new(
-		"base-cache-directory", cachedir,
-		"base-data-directory", cachedir,
+		"base-cache-directory", options[CACHE],
+		"base-data-directory", options[CACHE],
 		NULL));
 
 	webkit_settings_set_user_agent_with_application_details(
@@ -173,14 +179,13 @@ GtkWidget* rose_webview_new()
 	contentmanager = webkit_user_content_manager_new();
 	cookiemanager = webkit_web_context_get_cookie_manager(context);
 
-	strcpy(cookiefile, cachedir);
+	strcpy(cookiefile, options[CACHE]);
 	strcat(cookiefile, "cookies");
 
 	webkit_cookie_manager_set_persistent_storage(cookiemanager,
 		cookiefile, WEBKIT_COOKIE_PERSISTENT_STORAGE_SQLITE);
 
 	webkit_cookie_manager_set_accept_policy(cookiemanager, WEBKIT_COOKIE_POLICY_ACCEPT_ALWAYS);
-
 
 	g_signal_connect(G_OBJECT(context), "download-started",
 		                 G_CALLBACK(rose_download_callback), NULL);
@@ -190,5 +195,4 @@ GtkWidget* rose_webview_new()
 			"settings", settings,
 			"user-content-manager", contentmanager,
 			"web-context", context, NULL);
-
 }
