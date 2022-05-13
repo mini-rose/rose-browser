@@ -135,6 +135,11 @@ static gboolean key_press_callback(RoseWindow *window,
 					webkit_web_view_set_zoom_level(window->webview, zoom);
 					break;
 
+				case zoomreset:
+					zoom = 1;
+					webkit_web_view_set_zoom_level(window->webview, zoom);
+					break;
+
 				case inspector:
 					window->inspector = webkit_web_view_get_inspector(window->webview);
 					if (webkit_web_inspector_is_attached(window->inspector))
@@ -150,6 +155,14 @@ static gboolean key_press_callback(RoseWindow *window,
 
 				case down:
 					webkit_web_view_run_javascript(window->webview, "window.scrollBy(0,100);", NULL, NULL, NULL);
+					break;
+
+				case reload:
+					webkit_web_view_reload(window->webview);
+					break;
+
+				case reloadforce:
+					webkit_web_view_reload_bypass_cache(window->webview);
 					break;
 			}
 		}
@@ -187,6 +200,7 @@ guint rose_window_show(GtkApplication *app, RoseWindow *window, const char *url)
 
 	g_signal_connect(G_OBJECT(w), "destroy",
 	                 G_CALLBACK(destroy), window);
+
 	g_signal_connect(G_OBJECT(window->webview), "web-process-terminated",
 			 G_CALLBACK(destroy), window);
 

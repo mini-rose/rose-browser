@@ -1,6 +1,6 @@
 CC       = clang
-CFLAGS   = `pkg-config --cflags gtk4 webkit2gtk-5.0 x11 gstreamer-gl-1.0`
-LIBS     = `pkg-config --libs gtk4 webkit2gtk-5.0 x11 gstreamer-gl-1.0`
+CFLAGS   = `pkg-config --cflags gtk4 webkit2gtk-5.0 x11`
+LIBS     = `pkg-config --libs gtk4 webkit2gtk-5.0 x11`
 OPTIONS  = -Dgtk_doc=false -Dintrospection=false \
 					 -DG_DISABLE_CAST_CHECKS \
 					 -Dcloudproviders=false \

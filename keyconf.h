@@ -24,6 +24,9 @@ enum {
 	findprev,
 	zoomin,
 	zoomout,
+	zoomreset,
 	down,
-	up
+	up,
+	reload,
+	reloadforce
 };
