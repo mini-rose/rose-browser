@@ -10,7 +10,7 @@ In order to build surf you need gtk4 and webkit2gtk-5.0.
 
 In order to use the functionalities:
   - video support: gst-libav, gst-plugins-good
-  - url bar: dmenu
+  - url bar and find: dmenu
   - tabs: tabbed
 
 installation
