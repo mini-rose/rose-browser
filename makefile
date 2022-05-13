@@ -22,7 +22,8 @@ all:
 	strip ./rose
 
 install: all
-	su -c "cp -uf ./rose /usr/local/bin/rose"
+	su -c "cp -f ./rose /usr/local/bin/rose && \
+	       cp -f ./scripts/rose-open.sh /usr/local/bin/dmenu_rose"
 
 clean:
 	rm -f rose compile_flags.txt
