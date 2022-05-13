@@ -23,7 +23,7 @@ all:
 
 install: all
 	su -c "cp -f ./rose /usr/local/bin/rose && \
-	       cp -f ./scripts/rose-open.sh /usr/local/bin/dmenu_rose"
+	       cp -f ./scripts/dmenu_rose.sh /usr/local/bin/dmenu_rose"
 
 clean:
 	rm -f rose compile_flags.txt
@@ -31,4 +31,4 @@ clean:
 flags:
 	echo $(CFLAGS) | sed 's/ /\n/g' > compile_flags.txt
 
-.SILENT: all clean flags
+.SILENT: all clean install flags

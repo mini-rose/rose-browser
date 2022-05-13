@@ -27,11 +27,11 @@ search()
 
 	[ -z "$ROSE_GO" ] || {
 		[ -z "$(printf "$BOOKMARKS" | grep -w "$SEARCH")" ] && {
-				xprop -id "$CURRENT_ID" -f "_ROSE_GO" 8u -set "_ROSE_GO" $SEARCH
+				xprop -id "$CURRENT_ID" -f "_ROSE_GO" 8u -set "_ROSE_GO" https://duckduckgo.com/?q="$SEARCH"
 				exit
 		} || {
 			FULL_URL=$(printf "$BOOKMARKS" | grep -w "$SEARCH" | sed 's/ /\./g')
-			xprop -id "$CURRENT_ID" -f "_ROSE_GO" 8u -set "_ROSE_GO" https://"$FULL_URL"
+			xprop -id "$CURRENT_ID" -f "_ROSE_GO" 8u -set "_ROSE_GO" $FULL_URL
 			exit
 		}
 	}
