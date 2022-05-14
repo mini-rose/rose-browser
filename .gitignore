@@ -1,3 +1,4 @@
 compile_commands.json
 rose
 .cache/
+/config.h
