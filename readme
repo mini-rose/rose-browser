@@ -6,7 +6,11 @@ Simple webkitgtk browser.
 requirements
 ------------
 
-In order to build surf you need gtk4 and webkit2gtk-5.0.
+In order to build rose you need gtk4 and webkit2gtk-5.0.
+
+Binary file: 28k
+Webkit: 80MB
+Gtk: 50MB
 
 In order to use the functionalities:
   - video support: gst-libav, gst-plugins-good
