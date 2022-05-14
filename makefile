@@ -6,8 +6,8 @@ OPTIONS  = -Dgtk_doc=false -Dintrospection=false \
 					 -DG_DISABLE_CAST_CHECKS \
 					 -Dcloudproviders=false \
 					 -DGTK_DISABLE_DEPRECATED \
-					 -GDK_PIXBUF_DISABLE_DEPRECATED \
-					 -G_DISABLE_DEPRECATED -DENABLE_GLES2=ON \
+					 -DGDK_PIXBUF_DISABLE_DEPRECATED \
+					 -DG_DISABLE_DEPRECATED -DENABLE_GLES2=ON \
 					 -DENABLE_GEOLOCATION=OFF -DENABLE_PLUGIN_PROCESS_GTK2=OFF \
 					 -DPORT=GTK \
 					 -Dforce_posix_threads=true \
