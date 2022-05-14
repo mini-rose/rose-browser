@@ -1,4 +1,4 @@
-CC       = clang
+CC       = cc
 CFLAGS   = `pkg-config --cflags gtk4 webkit2gtk-5.0 x11`
 LIBS     = `pkg-config --libs gtk4 webkit2gtk-5.0 x11`
 OPTIONS  = -Dgtk_doc=false -Dintrospection=false \
@@ -16,14 +16,18 @@ OPTIONS  = -Dgtk_doc=false -Dintrospection=false \
 					 -Db_coverage=false \
 					 -Ddebug=false
 
+PREFIX=/usr/local
 
 all:
-	${CC} -fPIC -O3 -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS)
+	$(CC) -fPIC -O3 -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS)
 	strip ./rose
 
 install: all
-	su -c "cp -f ./rose /usr/local/bin/rose && \
-	       cp -f ./scripts/dmenu_rose.sh /usr/local/bin/dmenu_rose"
+	cp -f ./rose $(PREFIX)/bin/rose
+	cp -f ./scripts/dmenu_rose.sh $(PREFIX)/bin/dmenu_rose
+
+uninstall:
+	rm -f $(PREFIX)/bin/rose $(PREFIX)/bin/dmenu_rose
 
 clean:
 	rm -f rose compile_flags.txt
@@ -31,4 +35,5 @@ clean:
 flags:
 	echo $(CFLAGS) | sed 's/ /\n/g' > compile_flags.txt
 
-.SILENT: all clean install flags
+.PHONY: all clean install uninstall flags
+.SILENT: all clean install uninstall flags
