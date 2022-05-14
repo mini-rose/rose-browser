@@ -113,18 +113,10 @@ void rose_load_changed_callback(WebKitWebView *webview,
 			const char *uri = webkit_web_view_get_uri(webview);
 			char *cookiefile = calloc(1, sizeof(char) * (strlen(options[CACHE]) + 32) + 1);
 			sprintf(cookiefile, "%s/history", options[CACHE]);
-			FILE *f = fopen(cookiefile, "r");
-
-			if (!f) {
-				fclose(f);
-				FILE *f = fopen(cookiefile, "w");
-				fclose(f);
-			} else {
-				fclose(f);
-			}
 
 			FILE *cookie = fopen(cookiefile, "a");
-			fprintf(f, "%s\n", uri);
+
+			fprintf(cookie, "%s\n", uri);
 			fclose(cookie);
 			free(cookiefile);
 		}
