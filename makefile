@@ -1,5 +1,5 @@
 # -*- indent-tabs-mode: t -*-
-CC       = cc
+CC       ?= cc
 CFLAGS   = `pkg-config --cflags gtk4 webkit2gtk-5.0 x11`
 LIBS     = `pkg-config --libs gtk4 webkit2gtk-5.0 x11`
 OPTIONS  = -Dgtk_doc=false -Dintrospection=false \
@@ -17,7 +17,7 @@ OPTIONS  = -Dgtk_doc=false -Dintrospection=false \
 					 -Db_coverage=false \
 					 -Ddebug=false
 
-PREFIX=/usr/local
+PREFIX   ?= /usr/local
 
 all: config.h rose
 
