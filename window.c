@@ -181,6 +181,16 @@ static gboolean key_press_callback(RoseWindow *window,
 					}
 				} break;
 
+				case gotop: {
+					webkit_web_view_run_javascript(window->webview, "window.scrollTo(0,0);", NULL, NULL, NULL);
+				} break;
+
+				case gobottom: {
+					webkit_web_view_run_javascript(
+						window->webview,
+						"window.scrollTo(0, document.body.scrollHeight);",
+						NULL, NULL, NULL);
+				} break;
 			}
 		}
 	}

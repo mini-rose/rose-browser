@@ -46,5 +46,7 @@ enum {
 	up,
 	reload,
 	reloadforce,
-	history
+	history,
+	gotop,
+	gobottom
 };

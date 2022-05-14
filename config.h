@@ -29,5 +29,7 @@ KEYBINDS {
 	{ MODKEY, GDK_KEY_r,   reload      },
 	{ MODSFT, GDK_KEY_R,   reloadforce },
 	{ NOMODK, GDK_KEY_F11, fullscreen  },
-	{ MODSFT, GDK_KEY_H,   history     }
+	{ MODSFT, GDK_KEY_H,   history     },
+	{ MODKEY, GDK_KEY_g,   gotop       },
+	{ MODSFT, GDK_KEY_G,   gobottom    }
 };

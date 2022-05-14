@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# FIXME: Sometimes when new bookmark added cant open it
+
 BOOKMARKS_PATH=~/.cache/rose/bookmarks
 
 search()
