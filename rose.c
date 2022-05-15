@@ -8,8 +8,8 @@ guint xid;
 void setatom(int a, const char *v)
 {
 	XChangeProperty(dpy, xid,
-									atoms[a], atoms[AtomUTF8], 8, PropModeReplace,
-									(unsigned char *)v, strlen(v) + 1);
+		atoms[a], atoms[AtomUTF8], 8, PropModeReplace,
+		(unsigned char *)v, strlen(v) + 1);
 	XSync(dpy, False);
 }
 
