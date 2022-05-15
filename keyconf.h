@@ -18,9 +18,9 @@
 #define DARKMODE   2
 #define SCROLLBARS 3
 
-#define KEYBINDS   static Key keys[] =
-#define APPERANCE  static int appearance[] =
-#define OPTIONS    static char *options[] =
+#define KEYBINDS   static inline Key keys[]
+#define APPERANCE  static inline int appearance[]
+#define OPTIONS    static inline char *options[]
 
 typedef struct {
 	unsigned modkey;

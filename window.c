@@ -23,8 +23,8 @@ static float zoom = 1.0;
 G_DEFINE_TYPE(RoseWindow, rose_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static void read_clipboard(GObject *object,
-                            GAsyncResult *res,
-													  gpointer webview)
+                           GAsyncResult *res,
+                           gpointer webview)
 {
 	GdkClipboard *clipboard = GDK_CLIPBOARD(object);
 	webkit_web_view_load_uri(
@@ -35,7 +35,7 @@ static void read_clipboard(GObject *object,
 
 static gboolean key_press_callback(RoseWindow *window,
                                    guint keyval,
-																	 guint keycode,
+                                   guint keycode,
                                    GdkModifierType state)
 {
 	for (int i = 0; i < LENGTH(keys); i++) {
@@ -76,8 +76,6 @@ static gboolean key_press_callback(RoseWindow *window,
 					if (id == 0) {
 						if (dpy)
 							close(ConnectionNumber(dpy));
-						close(spair[0]);
-						close(spair[1]);
 						setsid();
 						char* argument_list[] = { "/bin/sh", "-c", "dmenu_rose", NULL};
 						execvp("/bin/sh", argument_list);
@@ -95,8 +93,6 @@ static gboolean key_press_callback(RoseWindow *window,
 					if (id == 0) {
 						if (dpy)
 							close(ConnectionNumber(dpy));
-						close(spair[0]);
-						close(spair[1]);
 						setsid();
 						char* argument_list[] = { "/bin/sh", "-c", "dmenu_rose\tfind", NULL};
 						execvp("/bin/sh", argument_list);
@@ -166,8 +162,6 @@ static gboolean key_press_callback(RoseWindow *window,
 				case history: {
 					int id = fork();
 					if (id == 0) {
-						close(spair[0]);
-						close(spair[1]);
 						setsid();
 						char* argument_list[] = { "/bin/sh", "-c", "dmenu_rose\thistory", NULL};
 						execvp("/bin/sh", argument_list);

@@ -25,6 +25,9 @@ rose:
 	$(CC) -fPIC -O3 -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS)
 	strip ./rose
 
+debug:
+	$(CC) -fPIC -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS) -Wall -Wextra
+
 config.h:
 	[ -f "$@" ] || cp config.def.h $@
 

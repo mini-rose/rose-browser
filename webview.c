@@ -131,8 +131,6 @@ static void rose_download(const char* uri)
 
 	int id = fork();
 	if (id == 0) {
-		close(spair[0]);
-		close(spair[1]);
 		setsid();
 		char *argv[] = { "/bin/sh", "-c", "st -e /bin/sh -c", "\"aria2c \\", cmd, "\"", NULL };
 		execvp("/bin/sh", argv);
@@ -141,16 +139,14 @@ static void rose_download(const char* uri)
 	}
 }
 
-static void rose_response_reciver(WebKitDownload *download,
-                                  GParamSpec *pspec)
+static void rose_response_reciver(WebKitDownload *download)
 {
 	const char *uri = webkit_uri_response_get_uri(webkit_download_get_response(download));
 
 	rose_download(uri);
 }
 
-static void rose_download_callback(WebKitWebContext *context,
-                                   WebKitDownload *download)
+static void rose_download_callback(WebKitDownload *download)
 {
 		g_signal_connect(G_OBJECT(download), "notify::response",
 	                 G_CALLBACK(rose_response_reciver), NULL);
@@ -159,7 +155,6 @@ static void rose_download_callback(WebKitWebContext *context,
 GtkWidget* rose_webview_new()
 {
 	char cookiefile[128];
-	WebKitWebView *webview;
 	WebKitCookieManager *cookiemanager;
 	WebKitUserContentManager *contentmanager;
 
