@@ -26,12 +26,7 @@ rose:
 	strip ./rose
 
 debug:
-<<<<<<< HEAD
 	$(CC) -fPIC -o rose *.c $(CFLAGS) $(LIBS) -Wall -Wextra
-=======
-	$(CC) -fPIC -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS) -Wall -Wextra \
-		-Wno-unused-variable
->>>>>>> 1d622de7971b8439866dfb2873d0b33004437431
 
 config.h:
 	[ -f "$@" ] || cp config.def.h $@
