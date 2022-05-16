@@ -4,6 +4,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <stdbool.h>
 
+#define CTRLKEY
 #define MODKEY GDK_CONTROL_MASK
 #define MODSFT   5
 #define NOMODK   0
@@ -17,13 +18,6 @@
 #define WIDTH      1
 #define DARKMODE   2
 #define SCROLLBARS 3
-
-<<<<<<< HEAD
-#define KEYBINDS   static Key keys[]
-#define APPERANCE  static int appearance[]
-#define OPTIONS    static char *options[]
-=======
->>>>>>> 1d622de7971b8439866dfb2873d0b33004437431
 
 typedef struct {
 	unsigned modkey;

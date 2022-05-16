@@ -4,7 +4,6 @@
 
 struct _RoseWindow {
 	GtkApplicationWindow parent_instance;
-
 	guint xid;
 	GtkWindow *window;
 	WebKitWebView *webview;
@@ -208,7 +207,6 @@ static void rose_window_init(RoseWindow *window)
 
 static void destroy()
 {
-	(void) window;
 	exit(0);
 }
 
