@@ -1,5 +1,5 @@
 # -*- indent-tabs-mode: t -*-
-CC       ?= cc
+CC       ?= clang
 CFLAGS   = `pkg-config --cflags gtk4 webkit2gtk-5.0 x11`
 LIBS     = `pkg-config --libs gtk4 webkit2gtk-5.0 x11`
 OPTIONS  = -Dgtk_doc=false -Dintrospection=false \
@@ -26,7 +26,8 @@ rose:
 	strip ./rose
 
 debug:
-	$(CC) -fPIC -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS) -Wall -Wextra
+	$(CC) -fPIC -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS) -Wall -Wextra \
+		-Wno-unused-variable
 
 config.h:
 	[ -f "$@" ] || cp config.def.h $@
@@ -47,5 +48,5 @@ clean-all: clean
 flags:
 	echo $(CFLAGS) | sed 's/ /\n/g' > compile_flags.txt
 
-.PHONY: all clean clean-all install uninstall flags config.h
-.SILENT: all clean clean-all install uninstall flags config.h
+.PHONY: all rose clean clean-all install uninstall flags config.h
+.SILENT: all rose clean clean-all install uninstall flags config.h
