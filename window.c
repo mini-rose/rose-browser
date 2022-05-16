@@ -88,6 +88,7 @@ static gboolean key_press_callback(RoseWindow *window,
 							rose_webview_load_url(window->webview, uri);
 					}
 				} break;
+
 				case find: {
 					int id = fork();
 					if (id == 0) {
@@ -203,7 +204,7 @@ static void rose_window_init(RoseWindow *window)
 	window->window = GTK_WINDOW(gtk_window_new());
 }
 
-static void destroy(RoseWindow *window)
+static void destroy()
 {
 	exit(0);
 }
@@ -220,10 +221,10 @@ guint rose_window_show(GtkApplication *app, RoseWindow *window, const char *url)
 	window->webview = WEBKIT_WEB_VIEW(webview);
 
 	g_signal_connect(G_OBJECT(w), "destroy",
-	                 G_CALLBACK(destroy), window);
+	                 G_CALLBACK(destroy), NULL);
 
 	g_signal_connect(G_OBJECT(window->webview), "web-process-terminated",
-			 G_CALLBACK(destroy), window);
+			 G_CALLBACK(destroy), NULL);
 
 	g_signal_connect(G_OBJECT(window->webview), "load-changed",
 			 G_CALLBACK(rose_load_changed_callback), window);
