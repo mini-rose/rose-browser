@@ -3,13 +3,16 @@
 #define MSGBUFSZ 8
 #define LENGTH(x) (sizeof(x) / sizeof(x[0]))
 
-static Display *glob_dpy;
+Display *glob_dpy;  /* defined in rose.h */
+
 static guint glob_xid;
+static Atom glob_atoms[AtomLast];
+
 
 void setatom(int a, const char *v)
 {
 	XChangeProperty(glob_dpy, glob_xid,
-		atoms[a], atoms[AtomUTF8], 8, PropModeReplace,
+		glob_atoms[a], glob_atoms[AtomUTF8], 8, PropModeReplace,
 		(unsigned char *)v, strlen(v) + 1);
 	XSync(glob_dpy, False);
 }
@@ -24,7 +27,7 @@ const char* getatom(int a)
 
 	XSync(glob_dpy, False);
 	XGetWindowProperty(glob_dpy, glob_xid,
-	                   atoms[a], 0L, BUFSIZ, False, atoms[AtomUTF8],
+	                   glob_atoms[a], 0L, BUFSIZ, False, glob_atoms[AtomUTF8],
 	                   &adummy, &idummy, &ldummy, &ldummy, &p);
 	if (p)
 		strncpy(buf, (char *)p, LENGTH(buf) - 1);
@@ -42,9 +45,9 @@ static void setup()
 		exit(1);
 	}
 
-	atoms[AtomFind] = XInternAtom(glob_dpy, "_ROSE_FIND", False);
-	atoms[AtomGo] = XInternAtom(glob_dpy, "_ROSE_GO", False);
-	atoms[AtomUri] = XInternAtom(glob_dpy, "_ROSE_URI", False);
+	glob_atoms[AtomFind] = XInternAtom(glob_dpy, "_ROSE_FIND", False);
+	glob_atoms[AtomGo] = XInternAtom(glob_dpy, "_ROSE_GO", False);
+	glob_atoms[AtomUri] = XInternAtom(glob_dpy, "_ROSE_URI", False);
 }
 
 static void run(GtkApplication *app)

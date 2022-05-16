@@ -1,17 +1,17 @@
 #include "keyconf.h"
 
-OPTIONS {
-	[CACHE]    = DEFAULT,
-	[HOMEPAGE] = DEFAULT,
+static const char *options[] = {
+	[CACHE]    = DEFAULT,   /* DEFAULT = "~/.cache/rose" */
+	[HOMEPAGE] = DEFAULT,   /* DEFAULT = "https://duckduckgo.com" */
 };
 
-APPERANCE {
-	[HEIGHT]   = DEFAULT,
-	[WIDTH]    = DEFAULT,
+static int appearance[] = {
+	[HEIGHT]   = DEFAULT,   /* DEFAULT = 720 */
+	[WIDTH]    = DEFAULT,   /* DEFAULT = 1280 */
 	[DARKMODE] = TRUE
 };
 
-KEYBINDS {
+static const Key keys[] = {
 	{ MODKEY, GDK_KEY_h,   goback      },
 	{ MODKEY, GDK_KEY_l,   goforward   },
 	{ MODKEY, GDK_KEY_y,   copy_url    },
