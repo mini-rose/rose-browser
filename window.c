@@ -38,6 +38,8 @@ static gboolean key_press_callback(RoseWindow *window,
                                    guint keycode,
                                    GdkModifierType state)
 {
+	(void) keycode;
+
 	for (int i = 0; i < LENGTH(keys); i++) {
 		if (keys[i].modkey == state
 				&& keys[i].keycod == keyval) {
@@ -74,8 +76,8 @@ static gboolean key_press_callback(RoseWindow *window,
 				case search: {
 					int id = fork();
 					if (id == 0) {
-						if (dpy)
-							close(ConnectionNumber(dpy));
+						if (glob_dpy)
+							close(ConnectionNumber(glob_dpy));
 						setsid();
 						char* argument_list[] = { "/bin/sh", "-c", "dmenu_rose", NULL};
 						execvp("/bin/sh", argument_list);
@@ -92,8 +94,8 @@ static gboolean key_press_callback(RoseWindow *window,
 				case find: {
 					int id = fork();
 					if (id == 0) {
-						if (dpy)
-							close(ConnectionNumber(dpy));
+						if (glob_dpy)
+							close(ConnectionNumber(glob_dpy));
 						setsid();
 						char* argument_list[] = { "/bin/sh", "-c", "dmenu_rose\tfind", NULL};
 						execvp("/bin/sh", argument_list);
@@ -206,6 +208,7 @@ static void rose_window_init(RoseWindow *window)
 
 static void destroy()
 {
+	(void) window;
 	exit(0);
 }
 

@@ -3,14 +3,18 @@
 #define MSGBUFSZ 8
 #define LENGTH(x) (sizeof(x) / sizeof(x[0]))
 
-guint xid;
+Display *glob_dpy;  /* defined in rose.h */
+
+static guint glob_xid;
+static Atom glob_atoms[AtomLast];
+
 
 void setatom(int a, const char *v)
 {
-	XChangeProperty(dpy, xid,
-		atoms[a], atoms[AtomUTF8], 8, PropModeReplace,
+	XChangeProperty(glob_dpy, glob_xid,
+		glob_atoms[a], glob_atoms[AtomUTF8], 8, PropModeReplace,
 		(unsigned char *)v, strlen(v) + 1);
-	XSync(dpy, False);
+	XSync(glob_dpy, False);
 }
 
 const char* getatom(int a)
@@ -21,9 +25,9 @@ const char* getatom(int a)
 	unsigned long ldummy;
 	unsigned char *p = NULL;
 
-	XSync(dpy, False);
-	XGetWindowProperty(dpy, xid,
-	                   atoms[a], 0L, BUFSIZ, False, atoms[AtomUTF8],
+	XSync(glob_dpy, False);
+	XGetWindowProperty(glob_dpy, glob_xid,
+	                   glob_atoms[a], 0L, BUFSIZ, False, glob_atoms[AtomUTF8],
 	                   &adummy, &idummy, &ldummy, &ldummy, &p);
 	if (p)
 		strncpy(buf, (char *)p, LENGTH(buf) - 1);
@@ -36,14 +40,14 @@ const char* getatom(int a)
 
 static void setup()
 {
-	if (!(dpy = XOpenDisplay(NULL))) {
+	if (!(glob_dpy = XOpenDisplay(NULL))) {
 		puts("Can't open default display");
 		exit(1);
 	}
 
-	atoms[AtomFind] = XInternAtom(dpy, "_ROSE_FIND", False);
-	atoms[AtomGo] = XInternAtom(dpy, "_ROSE_GO", False);
-	atoms[AtomUri] = XInternAtom(dpy, "_ROSE_URI", False);
+	glob_atoms[AtomFind] = XInternAtom(glob_dpy, "_ROSE_FIND", False);
+	glob_atoms[AtomGo] = XInternAtom(glob_dpy, "_ROSE_GO", False);
+	glob_atoms[AtomUri] = XInternAtom(glob_dpy, "_ROSE_URI", False);
 }
 
 static void run(GtkApplication *app)
@@ -56,7 +60,7 @@ static void run(GtkApplication *app)
 	if (!options[HOMEPAGE])
 		options[HOMEPAGE] = "https://duckduckgo.com";
 
-	xid = rose_window_show(app, window, options[HOMEPAGE]);
+	glob_xid = rose_window_show(app, window, options[HOMEPAGE]);
 }
 
 int main(int argc, char **argv)

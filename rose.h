@@ -5,18 +5,23 @@
 #include "config.h"
 
 #include <gtk/gtk.h>
+#include <gdk/x11/gdkx.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-#include <signal.h>
 #include <X11/Xatom.h>
-#include <gdk/x11/gdkx.h>
-#include <webkit2/webkit2.h>
 #include <stdlib.h>
+#include <webkit2/webkit2.h>
+#include <sys/wait.h>
 
-enum { AtomFind, AtomGo, AtomUri, AtomUTF8, AtomLast };
-static Atom atoms[AtomLast];
-static Display *dpy;
+enum {
+	AtomFind,
+	AtomGo,
+	AtomUri,
+	AtomUTF8,
+	AtomLast
+};
+
+extern Display *glob_dpy;  /* declared in rose.c */
+
 const char* getatom(int a);
 void setatom(int a, const char *v);

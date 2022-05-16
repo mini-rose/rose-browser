@@ -26,7 +26,12 @@ rose:
 	strip ./rose
 
 debug:
+<<<<<<< HEAD
 	$(CC) -fPIC -o rose *.c $(CFLAGS) $(LIBS) -Wall -Wextra
+=======
+	$(CC) -fPIC -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS) -Wall -Wextra \
+		-Wno-unused-variable
+>>>>>>> 1d622de7971b8439866dfb2873d0b33004437431
 
 config.h:
 	[ -f "$@" ] || cp config.def.h $@
@@ -47,5 +52,5 @@ clean-all: clean
 flags:
 	echo $(CFLAGS) | sed 's/ /\n/g' > compile_flags.txt
 
-.PHONY: all clean clean-all install uninstall flags config.h
-.SILENT: all clean clean-all install uninstall flags config.h
+.PHONY: all rose clean clean-all install uninstall flags config.h
+.SILENT: all rose clean clean-all install uninstall flags config.h

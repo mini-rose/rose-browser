@@ -18,9 +18,12 @@
 #define DARKMODE   2
 #define SCROLLBARS 3
 
+<<<<<<< HEAD
 #define KEYBINDS   static Key keys[]
 #define APPERANCE  static int appearance[]
 #define OPTIONS    static char *options[]
+=======
+>>>>>>> 1d622de7971b8439866dfb2873d0b33004437431
 
 typedef struct {
 	unsigned modkey;
