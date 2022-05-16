@@ -5,8 +5,6 @@
 #include <webkit2/webkit2.h>
 #include <gdk/gdk.h>
 
-G_BEGIN_DECLS
-
 #define ROSE_TYPE_WEBVIEW rose_webview_get_type()
 
 G_DECLARE_FINAL_TYPE(RoseWebView, rose_webview, ROSE, WEBVIEW, WebKitWebView)
