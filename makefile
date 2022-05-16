@@ -1,5 +1,5 @@
 # -*- indent-tabs-mode: t -*-
-CC       ?= cc
+CC       ?= clang
 CFLAGS   = `pkg-config --cflags gtk4 webkit2gtk-5.0 x11`
 LIBS     = `pkg-config --libs gtk4 webkit2gtk-5.0 x11`
 OPTIONS  = -Dgtk_doc=false -Dintrospection=false \
@@ -26,7 +26,7 @@ rose:
 	strip ./rose
 
 debug:
-	$(CC) -fPIC -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS) -Wall -Wextra
+	$(CC) -fPIC -o rose *.c $(CFLAGS) $(LIBS) -Wall -Wextra
 
 config.h:
 	[ -f "$@" ] || cp config.def.h $@
