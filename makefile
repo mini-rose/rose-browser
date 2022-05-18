@@ -23,11 +23,11 @@ all: config.h rose
 
 rose:
 	$(CC) -fPIC -O3 -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS)
-	strip ./rose
+	# strip ./rose
 
 debug:
-	$(CC) -fPIC -o rose *.c $(CFLAGS) $(LIBS) -Wall -Wextra \
-		-Wno-unused-variable
+	$(CC) -g -o rose *.c $(CFLAGS) $(LIBS) -Wall -Wextra \
+		-fsanitize=address
 
 config.h:
 	[ -f "$@" ] || cp config.def.h $@

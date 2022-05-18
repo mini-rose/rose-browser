@@ -1,27 +1,20 @@
 #pragma once
 
-#include "window.h"
-#include "webview.h"
-#include "config.h"
-
-#include <gtk/gtk.h>
-#include <gdk/x11/gdkx.h>
 #include <X11/X.h>
-#include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <X11/Xlib.h>
+#include <gdk/x11/gdkx.h>
+#include <gtk/gtk.h>
 #include <stdlib.h>
-#include <webkit2/webkit2.h>
 #include <sys/wait.h>
+#include <webkit2/webkit2.h>
 
-enum {
-	AtomFind,
-	AtomGo,
-	AtomUri,
-	AtomUTF8,
-	AtomLast
-};
+#include "config.h"
+#include "window.h"
 
-extern Display *glob_dpy;  /* declared in rose.c */
+enum { AtomFind, AtomGo, AtomUri, AtomUTF8, AtomLast };
 
-const char* getatom(int a);
+extern Display *glob_dpy; /* declared in rose.c */
+
+const char *getatom(int a);
 void setatom(int a, const char *v);
