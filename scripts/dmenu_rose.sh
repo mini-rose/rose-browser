@@ -11,14 +11,15 @@ search()
 	CURRENT_ID=$(xdotool getactivewindow)
 	SEARCH=$(printf "Add\nRemove\n$(printf "$BOOKMARKS" | cut -f1 -d" ")" | dmenu -p SEARCH:)
 
+
 	[ "$SEARCH" = Add ] && {
 		printf "" | dmenu -p Url: | sed 's/\./ /g' >> $BOOKMARKS_PATH
-		$0 & exit
+		$0 && exit
 	}
 
 	[ "$SEARCH" = Remove ] && {
 		printf "$(grep -v "$(printf "$BOOKMARKS" | dmenu -p Select:)" $BOOKMARKS_PATH)" > $BOOKMARKS_PATH
-		$0 & exit
+		$0 && exit
 	}
 
 	[ -z "$SEARCH" ] && exit

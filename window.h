@@ -21,5 +21,5 @@ typedef struct {
 
 RoseWindow *rose_window_new(GtkApplication *application);
 
-void rose_window_show(RoseWindow *window, const char *url);
+int rose_window_show(RoseWindow *window, const char *url);
 void rose_window_close(RoseWindow *window);

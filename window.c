@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include "rose.h"
+
 #define LENGTH(x) ((int)(sizeof(x) / sizeof(x[0])))
 
 enum { PROP_ACTIVE_CHILD };
@@ -68,18 +70,23 @@ static gboolean key_press_callback(RoseWindow *window, guint keyval,
 		    if (id == 0) {
 			if (glob_dpy) close(ConnectionNumber(glob_dpy));
 			setsid();
+			char xid[16];
+
+			snprintf(xid, 16, "%i", window->xid);
 			char *argument_list[] = {"/bin/sh", "-c", "dmenu_rose",
-						 NULL};
+						 xid, NULL};
 			execvp("/bin/sh", argument_list);
 			perror(" failed");
 			exit(1);
 		    } else {
 			wait(&id);
-			char *uri;
-			if (strcmp((uri = (char *)getatom(AtomGo)), ""))
-			    webkit_web_view_load_uri(
-				window->webviews[tab]->webview, uri);
+			char *uri = (char *)getatom(AtomGo);
+			puts(uri);
+			webkit_web_view_load_uri(window->webviews[tab]->webview,
+						 uri);
+			return GDK_EVENT_STOP;
 		    }
+
 		} break;
 
 		case find: {
@@ -330,7 +337,7 @@ RoseWebview *rose_webview_new() {
     return self;
 }
 
-void rose_window_show(RoseWindow *window, const char *url) {
+int rose_window_show(RoseWindow *window, const char *url) {
     if (url) {
 	webkit_web_view_load_uri(
 	    WEBKIT_WEB_VIEW(window->webviews[window->tab]->webview), url);
@@ -347,8 +354,8 @@ void rose_window_show(RoseWindow *window, const char *url) {
 
     gtk_widget_show(window->window);
 
-    window->xid = gdk_x11_surface_get_xid(
-	gtk_native_get_surface(GTK_NATIVE(window->window)));
+    return window->xid = gdk_x11_surface_get_xid(
+	       gtk_native_get_surface(GTK_NATIVE(window->window)));
 }
 
 RoseWindow *rose_window_new(GtkApplication *app) {
