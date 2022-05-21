@@ -46,10 +46,12 @@ static bool handle_key(RoseWindow *window, int key)
 	switch (key) {
 		case goback:
 		    webkit_web_view_go_back(window->webviews[tab]->webview);
+			return GDK_EVENT_STOP;
 		    break;
 
 		case goforward:
 		    webkit_web_view_go_forward(window->webviews[tab]->webview);
+			return GDK_EVENT_STOP;
 		    break;
 
 		case copy_url: {
@@ -57,6 +59,7 @@ static bool handle_key(RoseWindow *window, int key)
 		    gdk_clipboard_set_text(gdk_display_get_clipboard(dpy),
 					   webkit_web_view_get_uri(
 					       window->webviews[tab]->webview));
+			return GDK_EVENT_STOP;
 		} break;
 
 		case paste_url: {
@@ -65,6 +68,7 @@ static bool handle_key(RoseWindow *window, int key)
 		    gdk_clipboard_read_text_async(
 			clipboard, NULL, read_clipboard,
 			window->webviews[tab]->webview);
+			return GDK_EVENT_STOP;
 		} break;
 
 		case fullscreen:
@@ -75,6 +79,7 @@ static bool handle_key(RoseWindow *window, int key)
 		    else
 			gtk_window_fullscreen(GTK_WINDOW(gtk_widget_get_root(
 			    GTK_WIDGET(window->webviews[tab]->webview))));
+			return GDK_EVENT_STOP;
 		    break;
 
 		case search: {
@@ -93,7 +98,6 @@ static bool handle_key(RoseWindow *window, int key)
 		    } else {
 			wait(&id);
 			char *uri = (char *)getatom(AtomGo);
-			puts(uri);
 			webkit_web_view_load_uri(window->webviews[tab]->webview,
 						 uri);
 			return GDK_EVENT_STOP;
@@ -122,6 +126,7 @@ static bool handle_key(RoseWindow *window, int key)
 				WEBKIT_FIND_OPTIONS_WRAP_AROUND,
 			    G_MAXUINT);
 		    }
+			return GDK_EVENT_STOP;
 		} break;
 
 		case findnext: {
@@ -129,6 +134,7 @@ static bool handle_key(RoseWindow *window, int key)
 			webkit_web_view_get_find_controller(
 			    window->webviews[tab]->webview);
 		    webkit_find_controller_search_next(finder);
+			return GDK_EVENT_STOP;
 		} break;
 
 		case findprev: {
@@ -136,6 +142,7 @@ static bool handle_key(RoseWindow *window, int key)
 			webkit_web_view_get_find_controller(
 			    window->webviews[tab]->webview);
 		    webkit_find_controller_search_previous(finder);
+			return GDK_EVENT_STOP;
 		} break;
 
 		case zoomin:
@@ -143,6 +150,7 @@ static bool handle_key(RoseWindow *window, int key)
 		    webkit_web_view_set_zoom_level(
 			window->webviews[tab]->webview,
 			window->webviews[tab]->zoom);
+			return GDK_EVENT_STOP;
 		    break;
 
 		case zoomout:
@@ -150,6 +158,7 @@ static bool handle_key(RoseWindow *window, int key)
 		    webkit_web_view_set_zoom_level(
 			window->webviews[tab]->webview,
 			window->webviews[tab]->zoom);
+			return GDK_EVENT_STOP;
 		    break;
 
 		case zoomreset:
@@ -157,6 +166,7 @@ static bool handle_key(RoseWindow *window, int key)
 		    webkit_web_view_set_zoom_level(
 			window->webviews[tab]->webview,
 			window->webviews[tab]->zoom);
+			return GDK_EVENT_STOP;
 		    break;
 
 		case inspector:
@@ -177,21 +187,25 @@ static bool handle_key(RoseWindow *window, int key)
 		    webkit_web_view_run_javascript(
 			window->webviews[tab]->webview,
 			"window.scrollBy(0,-200);", NULL, NULL, NULL);
+			return GDK_EVENT_STOP;
 		    break;
 
 		case down:
 		    webkit_web_view_run_javascript(
 			window->webviews[tab]->webview,
 			"window.scrollBy(0,200);", NULL, NULL, NULL);
+			return GDK_EVENT_STOP;
 		    break;
 
 		case reload:
 		    webkit_web_view_reload(window->webviews[tab]->webview);
+			return GDK_EVENT_STOP;
 		    break;
 
 		case reloadforce:
 		    webkit_web_view_reload_bypass_cache(
 			window->webviews[tab]->webview);
+			return GDK_EVENT_STOP;
 		    break;
 
 		case history: {
@@ -210,12 +224,14 @@ static bool handle_key(RoseWindow *window, int key)
 			    webkit_web_view_load_uri(
 				window->webviews[tab]->webview, uri);
 		    }
+			return GDK_EVENT_STOP;
 		} break;
 
 		case gotop: {
 		    webkit_web_view_run_javascript(
 			window->webviews[tab]->webview, "window.scrollTo(0,0);",
 			NULL, NULL, NULL);
+			return GDK_EVENT_STOP;
 		} break;
 
 		case gobottom: {
@@ -223,6 +239,7 @@ static bool handle_key(RoseWindow *window, int key)
 			window->webviews[tab]->webview,
 			"window.scrollTo(0, document.body.scrollHeight);", NULL,
 			NULL, NULL);
+			return GDK_EVENT_STOP;
 		} break;
 
 		case tabnext:
@@ -234,6 +251,13 @@ static bool handle_key(RoseWindow *window, int key)
 			gtk_notebook_prev_page(GTK_NOTEBOOK(window->pages));
 			return GDK_EVENT_STOP;
 			break;
+
+		case tabbar:
+			if (gtk_notebook_get_show_tabs(GTK_NOTEBOOK(window->pages)))
+				gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->pages), false);
+			else
+				gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->pages), true);
+			return GDK_EVENT_STOP;
 	}
 
 	return GDK_EVENT_PROPAGATE;
@@ -265,9 +289,14 @@ static void download_callback(WebKitDownload *download)
 		     G_CALLBACK(response_reciver), NULL);
 }
 
-void load_changed_callback(WebKitWebView *webview, WebKitLoadEvent event)
+void load_changed_callback(WebKitWebView *webview, WebKitLoadEvent event, RoseWindow *window)
 {
 	if (event == WEBKIT_LOAD_FINISHED) {
+		gtk_notebook_set_tab_label_text(
+			GTK_NOTEBOOK(window->pages),
+			GTK_WIDGET(webview),
+			webkit_web_view_get_title(webview));
+
 		const char *uri = webkit_web_view_get_uri(webview);
 		char *cookiefile = calloc(
 				1, sizeof(char) * (strlen(options[CACHE]) + 32) + 1
@@ -339,16 +368,19 @@ RoseWebview *rose_webview_new()
 	strcat(cookiefile, "cookies");
 
 	webkit_cookie_manager_set_persistent_storage(
-	cookiemanager, cookiefile, WEBKIT_COOKIE_PERSISTENT_STORAGE_SQLITE);
+	cookiemanager, cookiefile, WEBKIT_COOKIE_PERSISTENT_STORAGE_TEXT);
 
 	webkit_cookie_manager_set_accept_policy(cookiemanager,
 		WEBKIT_COOKIE_POLICY_ACCEPT_ALWAYS);
+
+	webkit_settings_set_user_agent_with_application_details(
+		settings, "Rose", "0.1");
+
 
 	self->webview = g_object_new(WEBKIT_TYPE_WEB_VIEW, "settings", settings,
 			"user-content-manager", contentmanager,
 			"web-context", context, NULL);
 
-	printf("created webview with %p\n", self->webview);
 
 	self->inspector = webkit_web_view_get_inspector(self->webview);
 
@@ -394,7 +426,7 @@ RoseWindow *rose_window_new(GtkApplication *app)
 	window->pages = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->pages), FALSE);
 
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 1; i++) {
 		load_tab(window, i);
 		gtk_notebook_append_page(GTK_NOTEBOOK(window->pages),
 				GTK_WIDGET(window->webviews[i]->webview), NULL);
@@ -412,28 +444,24 @@ static void load_tab(RoseWindow *w, int tab_)
 	/* Create or show the tab at `tab`. */
 	tab = w->webviews[tab_];
 	if (!w->webviews[tab_]) {
-		printf(">>> NEW TAB\n");
 		w->webviews[tab_] = rose_webview_new();
 		tab = w->webviews[tab_];
 
 		tab->controller = gtk_event_controller_key_new();
 		g_signal_connect_swapped(tab->controller, "key-pressed",
-				G_CALLBACK(key_press_callback), w);
+			G_CALLBACK(key_press_callback), w);
 
-		printf("before set conroller 1\n");
+		g_signal_connect(
+			tab->webview, "load-changed",
+			G_CALLBACK(load_changed_callback), w);
+
+		g_signal_connect(
+			tab->webview, "web-process-crashed",
+			G_CALLBACK(web_process_terminated_callback), w);
 
 		gtk_widget_add_controller(GTK_WIDGET(tab->webview), tab->controller);
-	} else {
-		printf(">>> LOADING TAB\n");
-	}
-
-	printf("tab[%d]=%p\n", tab_, tab);
-
-	for (int i = 0; i < TABS; i++) {
-		printf("[%d] %p\n", i, w->webviews[i]);
 	}
 
 	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
 			"https://duckduckgo.com");
-	printf("loaded URI\n");
 }

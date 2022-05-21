@@ -48,5 +48,6 @@ enum {
 	gotop,
 	gobottom,
 	tabnext,
-	tabprev
+	tabprev,
+	tabbar
 };
