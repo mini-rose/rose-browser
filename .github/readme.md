@@ -12,7 +12,6 @@ In order to build rose you need gtk4 and webkit2gtk-5.0.
 In order to use the functionalities:
   - video support: gst-libav, gst-plugins-good
   - searchbar/find/history: dmenu
-  - tabs: tabbed
   - download: aria2c
 
 ## Installation
