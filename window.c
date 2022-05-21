@@ -4,7 +4,8 @@
 
 #include "rose.h"
 
-#define LENGTH(x) ((int)(sizeof(x) / sizeof(x[0])))
+#define LENGTH(x)   ((int)(sizeof(x) / sizeof(x[0])))
+#define TABS        9
 
 static void load_tab(RoseWindow *w, int tab);
 static bool handle_key(RoseWindow *w, int key);
