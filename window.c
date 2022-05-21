@@ -243,20 +243,29 @@ static bool handle_key(RoseWindow *window, int key)
 		} break;
 
 		case tabnext:
-			gtk_notebook_next_page(GTK_NOTEBOOK(window->pages));
+			if (window->tab < 9) {
+				if (!window->webviews[window->tab + 1])
+					load_tab(window, ++window->tab);
+				gtk_notebook_next_page(GTK_NOTEBOOK(window->pages));
+			}
 			return GDK_EVENT_STOP;
 			break;
 
 		case tabprev:
-			gtk_notebook_prev_page(GTK_NOTEBOOK(window->pages));
+			if (window->tab > 0) {
+				gtk_notebook_prev_page(GTK_NOTEBOOK(window->pages));
+			}
 			return GDK_EVENT_STOP;
 			break;
 
 		case tabbar:
-			if (gtk_notebook_get_show_tabs(GTK_NOTEBOOK(window->pages)))
-				gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->pages), false);
+			if (gtk_notebook_get_show_tabs(
+					GTK_NOTEBOOK(window->pages)))
+				gtk_notebook_set_show_tabs(
+					GTK_NOTEBOOK(window->pages), false);
 			else
-				gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->pages), true);
+				gtk_notebook_set_show_tabs(
+					GTK_NOTEBOOK(window->pages), true);
 			return GDK_EVENT_STOP;
 	}
 
@@ -426,11 +435,7 @@ RoseWindow *rose_window_new(GtkApplication *app)
 	window->pages = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->pages), FALSE);
 
-	for (int i = 0; i < 1; i++) {
-		load_tab(window, i);
-		gtk_notebook_append_page(GTK_NOTEBOOK(window->pages),
-				GTK_WIDGET(window->webviews[i]->webview), NULL);
-	}
+	load_tab(window, 0);
 
 	gtk_window_set_child(GTK_WINDOW(window->window), window->pages);
 
@@ -460,6 +465,10 @@ static void load_tab(RoseWindow *w, int tab_)
 			G_CALLBACK(web_process_terminated_callback), w);
 
 		gtk_widget_add_controller(GTK_WIDGET(tab->webview), tab->controller);
+
+		gtk_notebook_append_page(GTK_NOTEBOOK(w->pages),
+			GTK_WIDGET(w->webviews[w->tab]->webview), NULL);
+
 	}
 
 	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
