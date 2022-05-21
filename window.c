@@ -6,32 +6,43 @@
 
 #define LENGTH(x) ((int)(sizeof(x) / sizeof(x[0])))
 
-enum { PROP_ACTIVE_CHILD };
+static void load_tab(RoseWindow *w, int tab);
+static bool handle_key(RoseWindow *w, int key);
 
-static void die(char *msg, int exit_code) {
-    puts(msg);
-    exit(exit_code);
+static void die(char *msg, int exit_code)
+{
+	puts(msg);
+	exit(exit_code);
 }
 
 static void read_clipboard(GObject *object, GAsyncResult *res,
-			   gpointer webview) {
-    GdkClipboard *clipboard = GDK_CLIPBOARD(object);
-    webkit_web_view_load_uri(
+		gpointer webview)
+{
+	GdkClipboard *clipboard = GDK_CLIPBOARD(object);
+	webkit_web_view_load_uri(
 	WEBKIT_WEB_VIEW(webview),
 	gdk_clipboard_read_text_finish(clipboard, res, NULL));
 }
 
 static gboolean key_press_callback(RoseWindow *window, guint keyval,
-				   guint keycode, GdkModifierType state) {
-    (void)keycode;
+		guint keycode, GdkModifierType state)
+{
+	(void) keycode;
 
-    unsigned tab = window->tab;
+	unsigned tab = window->tab;
+	for (int i = 0; i < LENGTH(keys); i++) {
+		if (keys[i].modkey == state && keys[i].keycod == keyval)
+			return handle_key(window, keys[i].funcid);
+	}
 
-    if (!state && keycode != GDK_KEY_F11) return GDK_EVENT_PROPAGATE;
+	return GDK_EVENT_PROPAGATE;
+}
 
-    for (int i = 0; i < LENGTH(keys); i++) {
-	if (keys[i].modkey == state && keys[i].keycod == keyval) {
-	    switch (keys[i].funcid) {
+static bool handle_key(RoseWindow *window, int key)
+{
+	int tab = window->tab;
+
+	switch (key) {
 		case goback:
 		    webkit_web_view_go_back(window->webviews[tab]->webview);
 		    break;
@@ -212,129 +223,141 @@ static gboolean key_press_callback(RoseWindow *window, guint keyval,
 			"window.scrollTo(0, document.body.scrollHeight);", NULL,
 			NULL, NULL);
 		} break;
-	    }
+
+		case tabnext:
+			gtk_notebook_next_page(GTK_NOTEBOOK(window->pages));
+			return GDK_EVENT_STOP;
+			break;
+
+		case tabprev:
+			gtk_notebook_prev_page(GTK_NOTEBOOK(window->pages));
+			return GDK_EVENT_STOP;
+			break;
 	}
-    }
 
-    return GDK_EVENT_PROPAGATE;
+	return GDK_EVENT_PROPAGATE;
 }
 
-static void destroy(RoseWindow *window) {
-    free(window->webviews);
-    window->webviews = NULL;
-    window = NULL;
-    exit(0);
+static void rose_download(char *uri)
+{
+	int id = fork();
+	if (id == 0) {
+		setsid();
+		char *argv[] = {"/bin/sh", "-c", "\"aria2c \\", uri, "\"", NULL};
+		execvp("/bin/sh", argv);
+		perror(" failed");
+		exit(1);
+	}
 }
 
-static void rose_download(char *uri) {
-    int id = fork();
-    if (id == 0) {
-	setsid();
-	char *argv[] = {"/bin/sh", "-c", "\"aria2c \\", uri, "\"", NULL};
-	execvp("/bin/sh", argv);
-	perror(" failed");
-	exit(1);
-    }
-}
-
-static void response_reciver(WebKitDownload *download) {
-    char *uri = (char *)webkit_uri_response_get_uri(
+static void response_reciver(WebKitDownload *download)
+{
+	char *uri = (char *) webkit_uri_response_get_uri(
 	webkit_download_get_response(download));
 
-    rose_download(uri);
+	rose_download(uri);
 }
 
-static void download_callback(WebKitDownload *download) {
-    g_signal_connect(G_OBJECT(download), "notify::response",
+static void download_callback(WebKitDownload *download)
+{
+	g_signal_connect(G_OBJECT(download), "notify::response",
 		     G_CALLBACK(response_reciver), NULL);
 }
 
-void load_changed_callback(WebKitWebView *webview, WebKitLoadEvent event) {
-    if (event == WEBKIT_LOAD_FINISHED) {
-	const char *uri = webkit_web_view_get_uri(webview);
-	char *cookiefile =
-	    calloc(1, sizeof(char) * (strlen(options[CACHE]) + 32) + 1);
-	sprintf(cookiefile, "%s/history", options[CACHE]);
+void load_changed_callback(WebKitWebView *webview, WebKitLoadEvent event)
+{
+	if (event == WEBKIT_LOAD_FINISHED) {
+		const char *uri = webkit_web_view_get_uri(webview);
+		char *cookiefile = calloc(
+				1, sizeof(char) * (strlen(options[CACHE]) + 32) + 1
+		);
 
-	FILE *cookie = fopen(cookiefile, "a");
+		sprintf(cookiefile, "%s/history", options[CACHE]);
 
-	fprintf(cookie, "%s\n", uri);
-	fclose(cookie);
-	free(cookiefile);
-    }
+		FILE *cookie = fopen(cookiefile, "a");
+		fprintf(cookie, "%s\n", uri);
+		fclose(cookie);
+		free(cookiefile);
+	}
 }
 
-static void web_process_terminated_callback(
-    WebKitWebView *webview, WebKitWebProcessTerminationReason reason) {
-    (void)webview;
+static void web_process_terminated_callback(WebKitWebView *webview,
+		WebKitWebProcessTerminationReason reason)
+{
+	(void) webview;
 
-    if (reason == WEBKIT_WEB_PROCESS_CRASHED)
-	die("Webkit web process crached.", WEBKIT_WEB_PROCESS_CRASHED);
+	if (reason == WEBKIT_WEB_PROCESS_CRASHED)
+		die("Webkit web process crashed.", WEBKIT_WEB_PROCESS_CRASHED);
 
-    if (reason == WEBKIT_WEB_PROCESS_EXCEEDED_MEMORY_LIMIT)
-	die("Webkit web exceeded memory limit.",
-	    WEBKIT_WEB_PROCESS_EXCEEDED_MEMORY_LIMIT);
+	if (reason == WEBKIT_WEB_PROCESS_EXCEEDED_MEMORY_LIMIT)
+		die("Webkit web exceeded memory limit.",
+			WEBKIT_WEB_PROCESS_EXCEEDED_MEMORY_LIMIT);
 
-    if (reason == WEBKIT_WEB_PROCESS_TERMINATED_BY_API)
-	die("Webkit web process terminated by api.",
-	    WEBKIT_WEB_PROCESS_TERMINATED_BY_API);
+	if (reason == WEBKIT_WEB_PROCESS_TERMINATED_BY_API)
+		die("Webkit web process terminated by api.",
+			WEBKIT_WEB_PROCESS_TERMINATED_BY_API);
 }
 
-RoseWebview *rose_webview_new() {
-    RoseWebview *self = malloc(sizeof(RoseWebview));
+RoseWebview *rose_webview_new()
+{
+	RoseWebview *self = malloc(sizeof(RoseWebview));
+	memset(self, 0, sizeof(*self));
 
-    self->zoom = 1;
+	self->zoom = 1;
 
-    WebKitSettings *settings = webkit_settings_new_with_settings(
-	"auto-load-images", TRUE, "enable-developer-extras", TRUE,
-	"enable-media-stream", TRUE, "enable-plugins", FALSE,
-	"enable-dns-prefetching", TRUE, "javascript-can-access-clipboard", TRUE,
-	NULL);
+	WebKitSettings *settings = webkit_settings_new_with_settings(
+		"auto-load-images", TRUE, "enable-developer-extras", TRUE,
+		"enable-media-stream", TRUE, "enable-plugins", FALSE,
+		"enable-dns-prefetching", TRUE, "javascript-can-access-clipboard", TRUE,
+		"enable-smooth-scrolling", FALSE, NULL);
 
-    if (!options[CACHE]) {
-	const char *HOME = getenv("HOME");
-	char *buf = calloc(1, sizeof(char) * (strlen(HOME) + 32) + 1);
-	sprintf(buf, "%s/.cache/rose/", HOME);
-	options[CACHE] = buf;
-    }
+	if (!options[CACHE]) {
+		const char *HOME = getenv("HOME");
+		char *buf = calloc(1, sizeof(char) * (strlen(HOME) + 32) + 1);
+		sprintf(buf, "%s/.cache/rose/", HOME);
+		options[CACHE] = buf;
+	}
 
-    WebKitWebContext *context =
+	WebKitWebContext *context =
 	webkit_web_context_new_with_website_data_manager(
-	    webkit_website_data_manager_new(
-		"base-cache-directory", options[CACHE], "base-data-directory",
-		options[CACHE], NULL));
+		webkit_website_data_manager_new(
+			"base-cache-directory", options[CACHE], "base-data-directory",
+			options[CACHE], NULL));
 
-    webkit_web_context_set_cache_model(context, WEBKIT_CACHE_MODEL_WEB_BROWSER);
+	webkit_web_context_set_cache_model(context, WEBKIT_CACHE_MODEL_WEB_BROWSER);
 
-    WebKitUserContentManager *contentmanager =
+	WebKitUserContentManager *contentmanager =
 	webkit_user_content_manager_new();
 
-    WebKitCookieManager *cookiemanager =
+	WebKitCookieManager *cookiemanager =
 	webkit_web_context_get_cookie_manager(context);
 
-    char cookiefile[128];
+	char cookiefile[128];
 
-    strcpy(cookiefile, options[CACHE]);
-    strcat(cookiefile, "cookies");
+	strcpy(cookiefile, options[CACHE]);
+	strcat(cookiefile, "cookies");
 
-    webkit_cookie_manager_set_persistent_storage(
+	webkit_cookie_manager_set_persistent_storage(
 	cookiemanager, cookiefile, WEBKIT_COOKIE_PERSISTENT_STORAGE_SQLITE);
 
-    webkit_cookie_manager_set_accept_policy(cookiemanager,
-					    WEBKIT_COOKIE_POLICY_ACCEPT_ALWAYS);
+	webkit_cookie_manager_set_accept_policy(cookiemanager,
+		WEBKIT_COOKIE_POLICY_ACCEPT_ALWAYS);
 
-    self->webview = g_object_new(WEBKIT_TYPE_WEB_VIEW, "settings", settings,
-				 "user-content-manager", contentmanager,
-				 "web-context", context, NULL);
+	self->webview = g_object_new(WEBKIT_TYPE_WEB_VIEW, "settings", settings,
+			"user-content-manager", contentmanager,
+			"web-context", context, NULL);
 
-    self->inspector = webkit_web_view_get_inspector(self->webview);
+	printf("created webview with %p\n", self->webview);
 
-    g_signal_connect(G_OBJECT(self->webview), "web-process-terminated",
+	self->inspector = webkit_web_view_get_inspector(self->webview);
+
+	g_signal_connect(G_OBJECT(self->webview), "web-process-terminated",
 		     G_CALLBACK(web_process_terminated_callback), NULL);
 
-    g_signal_connect(G_OBJECT(context), "download-started",
+	g_signal_connect(G_OBJECT(context), "download-started",
 		     G_CALLBACK(download_callback), NULL);
-    return self;
+
+	return self;
 }
 
 int rose_window_show(RoseWindow *window, const char *url) {
@@ -344,44 +367,72 @@ int rose_window_show(RoseWindow *window, const char *url) {
 	setatom(AtomUri, url);
     }
 
-    if (!(appearance[WIDTH] && appearance[HEIGHT])) {
-	appearance[WIDTH] = 1280;
-	appearance[HEIGHT] = 720;
-    }
+	if (!(appearance[WIDTH] && appearance[HEIGHT])) {
+		appearance[WIDTH] = 1280;
+		appearance[HEIGHT] = 720;
+	}
 
-    gtk_window_set_default_size(GTK_WINDOW(window->window), appearance[WIDTH],
-				appearance[HEIGHT]);
+	gtk_window_set_default_size(GTK_WINDOW(window->window), appearance[WIDTH],
+			appearance[HEIGHT]);
 
-    gtk_widget_show(window->window);
+	gtk_widget_show(window->window);
 
-    return window->xid = gdk_x11_surface_get_xid(
+  return window->xid = gdk_x11_surface_get_xid(
 	       gtk_native_get_surface(GTK_NATIVE(window->window)));
 }
 
-RoseWindow *rose_window_new(GtkApplication *app) {
-    RoseWindow *window = malloc(sizeof(RoseWindow));
-    window->tab = 0;
-    window->window = gtk_application_window_new(app);
-    window->webviews = malloc(9 * sizeof(RoseWebview));
-    window->webviews[window->tab] = rose_webview_new();
-    gtk_widget_set_has_tooltip(window->window, FALSE);
-    gtk_application_set_menubar(app, FALSE);
+RoseWindow *rose_window_new(GtkApplication *app)
+{
+	RoseWindow *window = malloc(sizeof(RoseWindow));
+	window->tab = 0;
+	window->window = gtk_application_window_new(app);
+	window->webviews = calloc(TABS, sizeof(RoseWebview *));
+	gtk_widget_set_has_tooltip(window->window, FALSE);
+	gtk_application_set_menubar(app, FALSE);
 
-    /* Keyboard shortcuts */
-    GtkEventController *controller;
-    controller = gtk_event_controller_key_new();
+	window->pages = gtk_notebook_new();
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->pages), FALSE);
 
-    g_signal_connect_swapped(controller, "key-pressed",
-			     G_CALLBACK(key_press_callback), window);
+	for (int i = 0; i < 9; i++) {
+		load_tab(window, i);
+		gtk_notebook_append_page(GTK_NOTEBOOK(window->pages),
+				GTK_WIDGET(window->webviews[i]->webview), NULL);
+	}
 
-    gtk_widget_add_controller(
-	GTK_WIDGET(window->webviews[window->tab]->webview), controller);
+	gtk_window_set_child(GTK_WINDOW(window->window), window->pages);
 
-    gtk_window_set_child(GTK_WINDOW(window->window),
-			 GTK_WIDGET(window->webviews[window->tab]->webview));
+	return window;
+}
 
-    g_signal_connect(G_OBJECT(window->window), "destroy", G_CALLBACK(destroy),
-		     NULL);
+static void load_tab(RoseWindow *w, int tab_)
+{
+	RoseWebview *tab;
 
-    return window;
+	/* Create or show the tab at `tab`. */
+	tab = w->webviews[tab_];
+	if (!w->webviews[tab_]) {
+		printf(">>> NEW TAB\n");
+		w->webviews[tab_] = rose_webview_new();
+		tab = w->webviews[tab_];
+
+		tab->controller = gtk_event_controller_key_new();
+		g_signal_connect_swapped(tab->controller, "key-pressed",
+				G_CALLBACK(key_press_callback), w);
+
+		printf("before set conroller 1\n");
+
+		gtk_widget_add_controller(GTK_WIDGET(tab->webview), tab->controller);
+	} else {
+		printf(">>> LOADING TAB\n");
+	}
+
+	printf("tab[%d]=%p\n", tab_, tab);
+
+	for (int i = 0; i < TABS; i++) {
+		printf("[%d] %p\n", i, w->webviews[i]);
+	}
+
+	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
+			"https://duckduckgo.com");
+	printf("loaded URI\n");
 }
