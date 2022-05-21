@@ -2,6 +2,8 @@
 
 #include <gdk/gdk.h>
 
+#include "window.h"
+
 #define MSGBUFSZ 8
 #define LENGTH(x) (sizeof(x) / sizeof(x[0]))
 
@@ -59,7 +61,7 @@ static void run(GtkApplication *app) {
 
   if (!options[HOMEPAGE]) options[HOMEPAGE] = "https://duckduckgo.com";
 
-  rose_window_show(window, options[HOMEPAGE]);
+  glob_xid = rose_window_show(window, options[HOMEPAGE]);
 }
 
 int main(int argc, char **argv) {
