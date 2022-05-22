@@ -9,7 +9,8 @@ static int appearance[] = {
 	[HEIGHT]       = DEFAULT,
 	[WIDTH]        = DEFAULT,
 	[DARKMODE]     = TRUE,
-	[SMOOTHSCROLL] = TRUE
+	[SMOOTHSCROLL] = FALSE,
+	[ANIMATIONS]   = TRUE
 };
 
 static const Key keys[] = {

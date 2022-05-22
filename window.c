@@ -353,15 +353,15 @@ RoseWebview *rose_webview_new()
 		glob_options[CACHE] = buf;
 	}
 
-	/* context = webkit_web_context_new_with_website_data_manager( */
-		/* webkit_website_data_manager_new( */
-			/* "base-cache-directory", glob_options[CACHE], */
-			/* "base-data-directory", glob_options[CACHE], */
-			/* "hsts-cache-directory", glob_options[CACHE], */
-			/* "offline-application-cache-directory", glob_options[CACHE], NULL) */
-	/* ); */
+	context = webkit_web_context_new_with_website_data_manager(
+		webkit_website_data_manager_new(
+			"base-cache-directory", glob_options[CACHE],
+			"base-data-directory", glob_options[CACHE],
+			"hsts-cache-directory", glob_options[CACHE],
+			"offline-application-cache-directory", glob_options[CACHE], NULL)
+	);
 
-	/* webkit_web_context_set_cache_model(context, WEBKIT_CACHE_MODEL); */
+	webkit_web_context_set_cache_model(context, WEBKIT_CACHE_MODEL_WEB_BROWSER);
 
 	/* Configure cookies. */
 
@@ -548,8 +548,10 @@ static void load_tab(RoseWindow *w, int tab_)
 
 		GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(tab->webview));
 
-		gtk_stack_set_transition_duration(GTK_STACK(parent), 300);
-		gtk_stack_set_transition_type(GTK_STACK(parent), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
+		if (appearance[ANIMATIONS]) {
+			gtk_stack_set_transition_duration(GTK_STACK(parent), 200);
+			gtk_stack_set_transition_type(GTK_STACK(parent), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
+		}
 
 		webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
 			glob_options[HOMEPAGE]);
