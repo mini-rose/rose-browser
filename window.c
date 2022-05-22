@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "keyconf.h"
 #include "window.h"
 #include "rose.h"
@@ -248,24 +249,49 @@ static bool handle_key(RoseWindow *window, int key, int keyval)
 			return GDK_EVENT_STOP;
 		}
 
-		case tabnext:
-			move_tab(window, TAB_NEXT);
+		case tabnext: {
+			GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(
+					window->webviews[window->tab]->webview));
+			if (!gtk_stack_get_transition_running(GTK_STACK(parent)))
+				move_tab(window, TAB_NEXT);
 			return GDK_EVENT_STOP;
+		}
 
-		case tabprev:
-			move_tab(window, TAB_PREV);
+		case tabprev: {
+			GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(
+					window->webviews[window->tab]->webview));
+			if (!gtk_stack_get_transition_running(GTK_STACK(parent)))
+				move_tab(window, TAB_PREV);
 			return GDK_EVENT_STOP;
+		}
 
 		case tabsel: {
 			int npage = keyval - 0x31;
 			gtk_notebook_get_n_pages(GTK_NOTEBOOK(window->tabs));
 			gtk_notebook_set_current_page(GTK_NOTEBOOK(window->tabs), npage);
+			window->tab = npage;
 			return GDK_EVENT_STOP;
 		 }
 
 		case tabclose:
 			gtk_notebook_remove_page(GTK_NOTEBOOK(window->tabs), window->tab);
-			window->webviews[window->tab--] = NULL;
+			if (!gtk_notebook_get_n_pages(GTK_NOTEBOOK(window->tabs)))
+				exit(0);
+
+			int start = window->tab;
+			window->webviews[window->tab] = NULL;
+
+			window->tab = gtk_notebook_get_current_page(
+					GTK_NOTEBOOK(window->tabs));
+
+			for (int i = start; i < TABS - 1; i++) {
+				if (!window->webviews[i + 1])
+					break;
+				window->webviews[i] = window->webviews[i + 1];
+				window->webviews[i + 1] = NULL;
+			}
+
+			return GDK_EVENT_STOP;
 	}
 
 	return GDK_EVENT_PROPAGATE;
@@ -454,7 +480,7 @@ RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
 
 	window->tabs = gtk_notebook_new();
 
-	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->tabs), TRUE);
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->tabs), FALSE);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(window->window), TRUE);
 	gtk_window_set_child(GTK_WINDOW(window->window), window->tabs);
 	gtk_widget_set_focus_child(window->window, window->tabs);
@@ -514,7 +540,7 @@ static void load_uri(RoseWebview *view, const char *uri)
 	 || g_str_has_prefix(uri, "about:")) {
 		webkit_web_view_load_uri(view->webview, uri);
 	} else {
-		file = calloc(1, sizeof(char*));
+		file = calloc(256, sizeof(char));
 		pwd = getenv("PWD");
 		sprintf(file, "file://%s/%s", pwd, uri);
 		realpath(file, NULL);
@@ -557,7 +583,8 @@ static void load_tab(RoseWindow *w, int tab_)
 
 		if (appearance[ANIMATIONS]) {
 			gtk_stack_set_transition_duration(GTK_STACK(parent), 200);
-			gtk_stack_set_transition_type(GTK_STACK(parent), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
+			gtk_stack_set_transition_type(GTK_STACK(parent),
+					GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 		}
 
 		webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
@@ -570,8 +597,8 @@ static void move_tab(RoseWindow *w, int move)
 	/* If move is TAB_NEXT, try to move to the next tab. Otherwise, move should
 	   be TAB_PREV and we try to move to the previous tab. */
 
-	if ((move == TAB_PREV && w->tab <= 0)
-		|| (move == TAB_NEXT && w->tab >= TABS - 1))
+	if ((move == TAB_PREV && w->tab == 0)
+		|| (move == TAB_NEXT && w->tab == TABS - 1))
 		return;
 
 	w->tab += move;
