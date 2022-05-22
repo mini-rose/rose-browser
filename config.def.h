@@ -37,6 +37,7 @@ static const Key keys[] = {
 	{ MODKEY, GDK_KEY_b,   tabshow     },
 	{ ALTKEY, GDK_KEY_h,   tabprev     },
 	{ ALTKEY, GDK_KEY_l,   tabnext     },
+	{ ALTKEY, GDK_KEY_w,   tabclose    },
 	{ ALTKEY, GDK_KEY_1,   tabsel      },
 	{ ALTKEY, GDK_KEY_2,   tabsel      },
 	{ ALTKEY, GDK_KEY_3,   tabsel      },
