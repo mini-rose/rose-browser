@@ -30,6 +30,6 @@ Opening new window with specific website:
 ```$ rose https://duckduckgo.com```
 
 ## TODO
-- [x] Add tabs option in config
+- [ ] Replace suckless tools with gtk widgets
 - [ ] Improve mass weight image loading time
 - [ ] Add support for xdg-open and opening files
