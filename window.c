@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "window.h"
 #include "rose.h"
 
@@ -12,6 +13,7 @@
 static void load_tab(RoseWindow *w, int tab);
 static bool handle_key(RoseWindow *w, int key, int keyval);
 static void move_tab(RoseWindow *w, int move);
+static void load_uri(RoseWebview *view, const char *uri);
 
 static const char **glob_options;
 
@@ -386,8 +388,8 @@ RoseWebview *rose_webview_new()
 
 int rose_window_show(RoseWindow *window, const char *url) {
 	if (url) {
-		webkit_web_view_load_uri(
-			WEBKIT_WEB_VIEW(window->webviews[window->tab]->webview), url);
+		load_uri(
+			window->webviews[window->tab], url);
 		setatom(AtomUri, url);
 	}
 
@@ -422,6 +424,39 @@ RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
 	load_tab(window, 0);
 
 	return window;
+}
+
+char *
+untildepath(const char *path)
+{
+       char *apath, *name, *p;
+       const char *homedir;
+
+       if (path[1] == '/' || path[1] == '\0') {
+               p = (char *)&path[1];
+               homedir = getenv("HOME");
+       }
+
+       apath = g_build_filename(homedir, p, NULL);
+       return apath;
+}
+
+static void load_uri(RoseWebview *view, const char *uri)
+{
+	char *apath, *file, *pwd;
+
+	if (g_str_has_prefix(uri, "http://")
+	 || g_str_has_prefix(uri, "https://")
+	 || g_str_has_prefix(uri, "file://")
+	 || g_str_has_prefix(uri, "about:")) {
+		webkit_web_view_load_uri(view->webview, uri);
+	} else {
+		file = calloc(1, sizeof(char*));
+		pwd = getenv("PWD");
+		sprintf(file, "file://%s/%s", pwd, uri);
+		realpath(file, NULL);
+		webkit_web_view_load_uri(view->webview, file);
+	}
 }
 
 static void load_tab(RoseWindow *w, int tab_)
