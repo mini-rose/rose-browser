@@ -355,8 +355,10 @@ RoseWebview *rose_webview_new()
 
 	context = webkit_web_context_new_with_website_data_manager(
 		webkit_website_data_manager_new(
-			"base-cache-directory", glob_options[CACHE], "base-data-directory",
-			glob_options[CACHE], NULL)
+			"base-cache-directory", glob_options[CACHE],
+			"base-data-directory", glob_options[CACHE],
+			"hsts-cache-directory", glob_options[CACHE],
+			"offline-application-cache-directory", glob_options[CACHE], NULL)
 	);
 
 	webkit_web_context_set_cache_model(context, WEBKIT_CACHE_MODEL_WEB_BROWSER);
@@ -379,6 +381,7 @@ RoseWebview *rose_webview_new()
 	settings = webkit_settings_new_with_settings(
 			"auto-load-images", TRUE,
 			"enable-developer-extras", TRUE,
+			"enable-write-console-messages-to-stdout", TRUE,
 			"enable-media-stream", TRUE,
 			"enable-plugins", FALSE,
 			"enable-dns-prefetching", TRUE,
@@ -450,6 +453,28 @@ RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
 	return window;
 }
 
+gboolean decide_policy(WebKitWebView *v,
+                       WebKitPolicyDecision *decision,
+                       WebKitPolicyDecisionType type)
+{
+	WebKitResponsePolicyDecision *r;
+
+	switch (type)
+	{
+		case WEBKIT_POLICY_DECISION_TYPE_RESPONSE:
+			r = WEBKIT_RESPONSE_POLICY_DECISION(decision);
+			if (!webkit_response_policy_decision_is_mime_type_supported(r))
+				webkit_policy_decision_download(decision);
+			else
+				webkit_policy_decision_use(decision);
+			break;
+		default:
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 char *
 untildepath(const char *path)
 {
@@ -504,6 +529,9 @@ static void load_tab(RoseWindow *w, int tab_)
 				tab->webview, "web-process-crashed",
 				G_CALLBACK(web_process_terminated_callback), w);
 
+		g_signal_connect(G_OBJECT(tab->webview), "decide-policy",
+			G_CALLBACK(decide_policy), NULL);
+
 		gtk_widget_add_controller(GTK_WIDGET(tab->webview), tab->controller);
 
 		if (gtk_notebook_get_n_pages(GTK_NOTEBOOK(w->tabs)) != w->tab)
@@ -528,8 +556,10 @@ static void move_tab(RoseWindow *w, int move)
 	w->tab += move;
 	load_tab(w, w->tab);
 
-	if (move == TAB_PREV)
+	if (move == TAB_PREV) {
 		gtk_notebook_prev_page(GTK_NOTEBOOK(w->tabs));
-	else if (move == TAB_NEXT)
-		gtk_notebook_next_page(GTK_NOTEBOOK(w->tabs));
+		return;
+	}
+
+	gtk_notebook_next_page(GTK_NOTEBOOK(w->tabs));
 }

@@ -6,9 +6,9 @@ static const char *options[] = {
 };
 
 static int appearance[] = {
-	[HEIGHT]   = DEFAULT,
-	[WIDTH]    = DEFAULT,
-	[DARKMODE] = TRUE,
+	[HEIGHT]       = DEFAULT,
+	[WIDTH]        = DEFAULT,
+	[DARKMODE]     = TRUE,
 	[SMOOTHSCROLL] = TRUE
 };
 
