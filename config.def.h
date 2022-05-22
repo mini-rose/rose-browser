@@ -8,7 +8,8 @@ static const char *options[] = {
 static int appearance[] = {
 	[HEIGHT]   = DEFAULT,
 	[WIDTH]    = DEFAULT,
-	[DARKMODE] = TRUE
+	[DARKMODE] = TRUE,
+	[SMOOTHSCROLL] = TRUE
 };
 
 static const Key keys[] = {

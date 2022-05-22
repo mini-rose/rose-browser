@@ -17,7 +17,8 @@
 #define HEIGHT     0
 #define WIDTH      1
 #define DARKMODE   2
-#define SCROLLBARS 3
+// #define SCROLLBARS 3
+#define SMOOTHSCROLL 3
 
 typedef struct {
 	unsigned modkey;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "keyconf.h"
 #include "window.h"
 #include "rose.h"
 
@@ -382,7 +383,7 @@ RoseWebview *rose_webview_new()
 			"enable-plugins", FALSE,
 			"enable-dns-prefetching", TRUE,
 			"javascript-can-access-clipboard", TRUE,
-			"enable-smooth-scrolling", FALSE,
+			"enable-smooth-scrolling", appearance[SMOOTHSCROLL],
 			NULL
 	);
 
@@ -509,10 +510,10 @@ static void load_tab(RoseWindow *w, int tab_)
 			die("tried to append an unordered page", 1);
 		gtk_notebook_append_page(GTK_NOTEBOOK(w->tabs),
 				GTK_WIDGET(w->webviews[w->tab]->webview), NULL);
-	}
 
-	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
+		webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
 			glob_options[HOMEPAGE]);
+	}
 }
 
 static void move_tab(RoseWindow *w, int move)
