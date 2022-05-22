@@ -18,7 +18,8 @@ static const char **glob_options;
 
 static void die(char *msg, int exit_code)
 {
-	puts(msg);
+	fprintf(stderr, "rose: \033[91merror(%d)\033[0m: \033[1;98m%s\033[0m\n",
+			exit_code, msg);
 	exit(exit_code);
 }
 
@@ -236,6 +237,14 @@ static bool handle_key(RoseWindow *window, int key, int keyval)
 			return GDK_EVENT_STOP;
 		}
 
+		case tabshow: {
+			gtk_notebook_set_show_tabs(
+					GTK_NOTEBOOK(window->tabs),
+					!gtk_notebook_get_show_tabs(GTK_NOTEBOOK(window->tabs))
+			);
+			return GDK_EVENT_STOP;
+		}
+
 		case tabnext:
 			move_tab(window, TAB_NEXT);
 			return GDK_EVENT_STOP;
@@ -246,7 +255,8 @@ static bool handle_key(RoseWindow *window, int key, int keyval)
 
 		case tabsel: {
 			int npage = keyval - 0x31;
-			gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), npage);
+			gtk_notebook_get_n_pages(GTK_NOTEBOOK(window->tabs));
+			gtk_notebook_set_current_page(GTK_NOTEBOOK(window->tabs), npage);
 			return GDK_EVENT_STOP;
 		 }
 	}
@@ -285,7 +295,7 @@ void load_changed_callback(WebKitWebView *webview, WebKitLoadEvent event,
 {
 	if (event == WEBKIT_LOAD_FINISHED) {
 		gtk_notebook_set_tab_label_text(
-			GTK_NOTEBOOK(window->pages),
+			GTK_NOTEBOOK(window->tabs),
 			GTK_WIDGET(webview),
 			webkit_web_view_get_title(webview));
 
@@ -428,9 +438,9 @@ RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
 	gtk_widget_set_has_tooltip(window->window, FALSE);
 	gtk_application_set_menubar(app, FALSE);
 
-	window->pages = gtk_notebook_new();
-	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->pages), FALSE);
-	gtk_window_set_child(GTK_WINDOW(window->window), window->pages);
+	window->tabs = gtk_notebook_new();
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->tabs), FALSE);
+	gtk_window_set_child(GTK_WINDOW(window->window), window->tabs);
 
 	load_tab(window, 0);
 
@@ -460,7 +470,9 @@ static void load_tab(RoseWindow *w, int tab_)
 
 		gtk_widget_add_controller(GTK_WIDGET(tab->webview), tab->controller);
 
-		gtk_notebook_append_page(GTK_NOTEBOOK(w->pages),
+		if (gtk_notebook_get_n_pages(GTK_NOTEBOOK(w->tabs)) != w->tab)
+			die("tried to append an unordered page", 1);
+		gtk_notebook_append_page(GTK_NOTEBOOK(w->tabs),
 				GTK_WIDGET(w->webviews[w->tab]->webview), NULL);
 	}
 
@@ -481,7 +493,7 @@ static void move_tab(RoseWindow *w, int move)
 	load_tab(w, w->tab);
 
 	if (move == TAB_PREV)
-		gtk_notebook_prev_page(GTK_NOTEBOOK(w->pages));
+		gtk_notebook_prev_page(GTK_NOTEBOOK(w->tabs));
 	else if (move == TAB_NEXT)
-		gtk_notebook_next_page(GTK_NOTEBOOK(w->pages));
+		gtk_notebook_next_page(GTK_NOTEBOOK(w->tabs));
 }

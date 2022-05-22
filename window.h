@@ -14,11 +14,11 @@ typedef struct {
 } RoseWebview;
 
 typedef struct {
-	unsigned xid;
-	short tab;
-	GtkWidget *window;
-	GtkWidget *pages;
-	RoseWebview **webviews;
+	unsigned    xid;
+	short       tab;        /* current tab */
+	GtkWidget   *tabs;      /* GtkNotebook with all the tabs */
+	GtkWidget   *window;    /* app window */
+	RoseWebview **webviews; /* array of tabs */
 } RoseWindow;
 
 RoseWindow *rose_window_new(GtkApplication *application, const char *options[]);
