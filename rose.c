@@ -2,6 +2,7 @@
 
 #include <gdk/gdk.h>
 
+#include "gio/gsettingsschema.h"
 #include "window.h"
 
 #define MSGBUFSZ 8
@@ -69,13 +70,14 @@ static void run(GtkApplication *app)
 	   so each file gets its own instace. */
 	window = rose_window_new(app, options);
 
-	if (appearance[DARKMODE]) {
+	if (appearance[DARKMODE])
 		g_object_set(gtk_settings_get_default(),
 				"gtk-application-prefer-dark-theme", true, NULL);
-	}
 
-	/* g_object_set(gtk_settings_get_default(), "gtk-enable-animations", false, */
-			/* NULL); */
+
+	if (!appearance[ANIMATIONS])
+		g_object_set(gtk_settings_get_default(), "gtk-enable-animations", false,
+				NULL);
 
 	glob_xid = rose_window_show(window, options[HOMEPAGE]);
 }

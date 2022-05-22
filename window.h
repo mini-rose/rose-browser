@@ -11,6 +11,7 @@ typedef struct {
 	WebKitWebInspector *inspector;
 	WebKitFindOptions *findopts;
 	GtkEventController *controller;
+	GtkEventController *gestures;
 } RoseWebview;
 
 typedef struct {

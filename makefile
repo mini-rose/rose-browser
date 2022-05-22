@@ -15,7 +15,9 @@ OPTIONS  = -Dgtk_doc=false -Dintrospection=false \
 					 -Dxinerama=false \
 					 -Dcolord=false \
 					 -Db_coverage=false \
-					 -Ddebug=false
+					 -Ddebug=false -Dinspector=disabled \
+					 -Dbuildtype=release
+
 
 PREFIX   ?= /usr/local
 

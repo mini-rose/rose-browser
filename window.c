@@ -243,7 +243,7 @@ static bool handle_key(RoseWindow *window, int key, int keyval)
 		case tabshow: {
 			gtk_notebook_set_show_tabs(
 					GTK_NOTEBOOK(window->tabs),
-					!gtk_notebook_get_show_tabs(GTK_NOTEBOOK(window->tabs))
+					gtk_notebook_get_show_tabs(GTK_NOTEBOOK(window->tabs))
 			);
 			return GDK_EVENT_STOP;
 		}
@@ -262,6 +262,10 @@ static bool handle_key(RoseWindow *window, int key, int keyval)
 			gtk_notebook_set_current_page(GTK_NOTEBOOK(window->tabs), npage);
 			return GDK_EVENT_STOP;
 		 }
+
+		case tabclose:
+			gtk_notebook_remove_page(GTK_NOTEBOOK(window->tabs), window->tab);
+			window->webviews[window->tab--] = NULL;
 	}
 
 	return GDK_EVENT_PROPAGATE;
@@ -395,7 +399,7 @@ RoseWebview *rose_webview_new()
 
 	self->webview = g_object_new(WEBKIT_TYPE_WEB_VIEW,
 			"settings", settings,
-			/* "user-content-manager", contentmanager, */
+			"user-content-manager", contentmanager,
 			"web-context", context, NULL
 	);
 
@@ -449,12 +453,15 @@ RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
 	gtk_application_set_menubar(app, FALSE);
 
 	window->tabs = gtk_notebook_new();
-	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->tabs), FALSE);
+
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->tabs), TRUE);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(window->window), TRUE);
 	gtk_window_set_child(GTK_WINDOW(window->window), window->tabs);
 	gtk_widget_set_focus_child(window->window, window->tabs);
+
 	g_signal_connect(G_OBJECT(window->window), "destroy",
 		G_CALLBACK(destroy), window);
+
 	load_tab(window, 0);
 
 	return window;

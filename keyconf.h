@@ -50,5 +50,6 @@ enum {
 	tabshow,
 	tabnext,
 	tabprev,
-	tabsel
+	tabsel,
+	tabclose
 };
