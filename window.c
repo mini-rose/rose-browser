@@ -20,7 +20,8 @@ static const char **glob_options;
 
 static void die(char *msg, int exit_code)
 {
-	puts(msg);
+	fprintf(stderr, "rose: \033[91merror(%d)\033[0m: \033[1;98m%s\033[0m\n",
+			exit_code, msg);
 	exit(exit_code);
 }
 
@@ -238,6 +239,14 @@ static bool handle_key(RoseWindow *window, int key, int keyval)
 			return GDK_EVENT_STOP;
 		}
 
+		case tabshow: {
+			gtk_notebook_set_show_tabs(
+					GTK_NOTEBOOK(window->tabs),
+					!gtk_notebook_get_show_tabs(GTK_NOTEBOOK(window->tabs))
+			);
+			return GDK_EVENT_STOP;
+		}
+
 		case tabnext:
 			move_tab(window, TAB_NEXT);
 			return GDK_EVENT_STOP;
@@ -247,8 +256,9 @@ static bool handle_key(RoseWindow *window, int key, int keyval)
 			return GDK_EVENT_STOP;
 
 		case tabsel: {
-			int k = keyval - 0x31;
-			gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), k);
+			int npage = keyval - 0x31;
+			gtk_notebook_get_n_pages(GTK_NOTEBOOK(window->tabs));
+			gtk_notebook_set_current_page(GTK_NOTEBOOK(window->tabs), npage);
 			return GDK_EVENT_STOP;
 		 }
 	}
@@ -282,11 +292,12 @@ static void download_callback(WebKitDownload *download)
 		     G_CALLBACK(response_reciver), NULL);
 }
 
-void load_changed_callback(WebKitWebView *webview, WebKitLoadEvent event, RoseWindow *window)
+void load_changed_callback(WebKitWebView *webview, WebKitLoadEvent event,
+		RoseWindow *window)
 {
 	if (event == WEBKIT_LOAD_FINISHED) {
 		gtk_notebook_set_tab_label_text(
-			GTK_NOTEBOOK(window->pages),
+			GTK_NOTEBOOK(window->tabs),
 			GTK_WIDGET(webview),
 			webkit_web_view_get_title(webview));
 
@@ -323,16 +334,16 @@ static void web_process_terminated_callback(WebKitWebView *webview,
 
 RoseWebview *rose_webview_new()
 {
-	RoseWebview *self = malloc(sizeof(RoseWebview));
+	WebKitUserContentManager *contentmanager;
+	WebKitCookieManager *cookiemanager;
+	WebKitWebContext *context;
+	WebKitSettings *settings;
+	RoseWebview *self;
+	char cookiefile[128];
+
+	self = malloc(sizeof(RoseWebview));
 	memset(self, 0, sizeof(*self));
-
 	self->zoom = 1;
-
-	WebKitSettings *settings = webkit_settings_new_with_settings(
-		"auto-load-images", TRUE, "enable-developer-extras", TRUE,
-		"enable-media-stream", TRUE, "enable-plugins", FALSE,
-		"enable-dns-prefetching", TRUE, "javascript-can-access-clipboard", TRUE,
-		"enable-smooth-scrolling", FALSE, NULL);
 
 	if (!glob_options[CACHE]) {
 		const char *HOME = getenv("HOME");
@@ -341,21 +352,17 @@ RoseWebview *rose_webview_new()
 		glob_options[CACHE] = buf;
 	}
 
-	WebKitWebContext *context =
-	webkit_web_context_new_with_website_data_manager(
+	context = webkit_web_context_new_with_website_data_manager(
 		webkit_website_data_manager_new(
 			"base-cache-directory", glob_options[CACHE], "base-data-directory",
-			glob_options[CACHE], NULL));
+			glob_options[CACHE], NULL)
+	);
 
 	webkit_web_context_set_cache_model(context, WEBKIT_CACHE_MODEL_WEB_BROWSER);
 
-	WebKitUserContentManager *contentmanager =
-	webkit_user_content_manager_new();
+	/* Configure cookies. */
 
-	WebKitCookieManager *cookiemanager =
-	webkit_web_context_get_cookie_manager(context);
-
-	char cookiefile[128];
+	cookiemanager = webkit_web_context_get_cookie_manager(context);
 
 	strcpy(cookiefile, glob_options[CACHE]);
 	strcat(cookiefile, "cookies");
@@ -366,27 +373,43 @@ RoseWebview *rose_webview_new()
 	webkit_cookie_manager_set_accept_policy(cookiemanager,
 		WEBKIT_COOKIE_POLICY_ACCEPT_ALWAYS);
 
+	/* Configure webkit itself. */
+
+	settings = webkit_settings_new_with_settings(
+			"auto-load-images", TRUE,
+			"enable-developer-extras", TRUE,
+			"enable-media-stream", TRUE,
+			"enable-plugins", FALSE,
+			"enable-dns-prefetching", TRUE,
+			"javascript-can-access-clipboard", TRUE,
+			"enable-smooth-scrolling", FALSE,
+			NULL
+	);
+
+	contentmanager = webkit_user_content_manager_new();
 	webkit_settings_set_user_agent_with_application_details(
 		settings, "Rose", "0.1");
 
-
-	self->webview = g_object_new(WEBKIT_TYPE_WEB_VIEW, "settings", settings,
+	self->webview = g_object_new(WEBKIT_TYPE_WEB_VIEW,
+			"settings", settings,
 			"user-content-manager", contentmanager,
-			"web-context", context, NULL);
-
+			"web-context", context, NULL
+	);
 
 	self->inspector = webkit_web_view_get_inspector(self->webview);
 
-	g_signal_connect(G_OBJECT(self->webview), "web-process-terminated",
-		     G_CALLBACK(web_process_terminated_callback), NULL);
+	/* Connect used signals to the web view. */
 
+	g_signal_connect(G_OBJECT(self->webview), "web-process-terminated",
+			G_CALLBACK(web_process_terminated_callback), NULL);
 	g_signal_connect(G_OBJECT(context), "download-started",
-		     G_CALLBACK(download_callback), NULL);
+			G_CALLBACK(download_callback), NULL);
 
 	return self;
 }
 
-int rose_window_show(RoseWindow *window, const char *url) {
+int rose_window_show(RoseWindow *window, const char *url)
+{
 	if (url) {
 		load_uri(
 			window->webviews[window->tab], url);
@@ -404,7 +427,7 @@ int rose_window_show(RoseWindow *window, const char *url) {
 	gtk_widget_show(window->window);
 
 	return window->xid = gdk_x11_surface_get_xid(
-	       gtk_native_get_surface(GTK_NATIVE(window->window)));
+			gtk_native_get_surface(GTK_NATIVE(window->window)));
 }
 
 RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
@@ -417,9 +440,9 @@ RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
 	gtk_widget_set_has_tooltip(window->window, FALSE);
 	gtk_application_set_menubar(app, FALSE);
 
-	window->pages = gtk_notebook_new();
-	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->pages), FALSE);
-	gtk_window_set_child(GTK_WINDOW(window->window), window->pages);
+	window->tabs = gtk_notebook_new();
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->tabs), FALSE);
+	gtk_window_set_child(GTK_WINDOW(window->window), window->tabs);
 
 	load_tab(window, 0);
 
@@ -470,21 +493,22 @@ static void load_tab(RoseWindow *w, int tab_)
 		tab = w->webviews[tab_];
 
 		tab->controller = gtk_event_controller_key_new();
+
 		g_signal_connect_swapped(tab->controller, "key-pressed",
-			G_CALLBACK(key_press_callback), w);
-
+				G_CALLBACK(key_press_callback), w);
 		g_signal_connect(
-			tab->webview, "load-changed",
-			G_CALLBACK(load_changed_callback), w);
-
+				tab->webview, "load-changed",
+				G_CALLBACK(load_changed_callback), w);
 		g_signal_connect(
-			tab->webview, "web-process-crashed",
-			G_CALLBACK(web_process_terminated_callback), w);
+				tab->webview, "web-process-crashed",
+				G_CALLBACK(web_process_terminated_callback), w);
 
 		gtk_widget_add_controller(GTK_WIDGET(tab->webview), tab->controller);
 
-		gtk_notebook_append_page(GTK_NOTEBOOK(w->pages),
-			GTK_WIDGET(w->webviews[w->tab]->webview), NULL);
+		if (gtk_notebook_get_n_pages(GTK_NOTEBOOK(w->tabs)) != w->tab)
+			die("tried to append an unordered page", 1);
+		gtk_notebook_append_page(GTK_NOTEBOOK(w->tabs),
+				GTK_WIDGET(w->webviews[w->tab]->webview), NULL);
 	}
 
 	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
@@ -504,7 +528,7 @@ static void move_tab(RoseWindow *w, int move)
 	load_tab(w, w->tab);
 
 	if (move == TAB_PREV)
-		gtk_notebook_prev_page(GTK_NOTEBOOK(w->pages));
+		gtk_notebook_prev_page(GTK_NOTEBOOK(w->tabs));
 	else if (move == TAB_NEXT)
-		gtk_notebook_next_page(GTK_NOTEBOOK(w->pages));
+		gtk_notebook_next_page(GTK_NOTEBOOK(w->tabs));
 }

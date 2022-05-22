@@ -3,8 +3,8 @@
 
 ## Showcase
 
-<img src="https://github.com/mini-rose/rose/blob/master/screenshots/homepage.png?raw=true">
-<img src="https://github.com/mini-rose/rose/blob/master/screenshots/youtube.png?raw=true">
+<img src="https://github.com/mini-rose/rose/blob/master/.github/screenshots/homepage.png?raw=true">
+<img src="https://github.com/mini-rose/rose/blob/master/.github/screenshots/youtube.png?raw=true">
 
 ## Requirements
 In order to build rose you need gtk4 and webkit2gtk-5.0.
@@ -31,5 +31,5 @@ Opening new window with specific website:
 
 ## TODO
 - [x] Add tabs option in config
-- [ ] Improve mass weight image loading time 
+- [ ] Improve mass weight image loading time
 - [ ] Add support for xdg-open and opening files

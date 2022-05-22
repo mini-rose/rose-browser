@@ -32,6 +32,7 @@ static const Key keys[] = {
 	{ MODSFT, GDK_KEY_H,   history     },
 	{ MODKEY, GDK_KEY_g,   gotop       },
 	{ MODSFT, GDK_KEY_G,   gobottom    },
+	{ MODKEY, GDK_KEY_b,   tabshow     },
 	{ ALTKEY, GDK_KEY_h,   tabprev     },
 	{ ALTKEY, GDK_KEY_l,   tabnext     },
 	{ ALTKEY, GDK_KEY_1,   tabsel      },
