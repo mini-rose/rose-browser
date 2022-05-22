@@ -21,7 +21,7 @@ typedef struct {
 	RoseWebview **webviews;
 } RoseWindow;
 
-RoseWindow *rose_window_new(GtkApplication *application);
+RoseWindow *rose_window_new(GtkApplication *application, const char *options[]);
 
 int rose_window_show(RoseWindow *window, const char *url);
 void rose_window_close(RoseWindow *window);

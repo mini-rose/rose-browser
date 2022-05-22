@@ -27,7 +27,7 @@ rose:
 
 debug:
 	$(CC) -g -o rose *.c $(CFLAGS) $(LIBS) -Wall -Wextra \
-		-fsanitize=address
+		-fsanitize=address -Wno-unused-variable
 
 config.h:
 	[ -f "$@" ] || cp config.def.h $@

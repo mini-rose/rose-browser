@@ -49,19 +49,25 @@ static void setup() {
   glob_atoms[AtomUri] = XInternAtom(glob_dpy, "_ROSE_URI", False);
 }
 
-static void run(GtkApplication *app) {
-  RoseWindow *window = rose_window_new(app);
+static void run(GtkApplication *app)
+{
+	RoseWindow *window;
 
-  if (appearance[DARKMODE])
-	g_object_set(gtk_settings_get_default(),
-				 "gtk-application-prefer-dark-theme", true, NULL);
+	if (!options[HOMEPAGE])
+		options[HOMEPAGE] = "https://duckduckgo.com";
 
-  g_object_set(gtk_settings_get_default(), "gtk-enable-animations", false,
-			   NULL);
+	/* We need to pass our instance of options, because it's a static variable
+	   so each file gets its own instace. */
+	window = rose_window_new(app, options);
 
-  if (!options[HOMEPAGE]) options[HOMEPAGE] = "https://duckduckgo.com";
+	if (appearance[DARKMODE])
+		g_object_set(gtk_settings_get_default(),
+			"gtk-application-prefer-dark-theme", true, NULL);
 
-  glob_xid = rose_window_show(window, options[HOMEPAGE]);
+	g_object_set(gtk_settings_get_default(), "gtk-enable-animations", false,
+			NULL);
+
+	glob_xid = rose_window_show(window, options[HOMEPAGE]);
 }
 
 int main(int argc, char **argv) {
