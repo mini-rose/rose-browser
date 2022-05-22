@@ -4,10 +4,10 @@
 #include "rose.h"
 
 #define LENGTH(x)   ((int)(sizeof(x) / sizeof(x[0])))
-#define TABS        9
+#define TABS		 9
 
-#define TAB_NEXT    +1
-#define TAB_PREV    -1
+#define TAB_NEXT	 +1
+#define TAB_PREV	 -1
 
 
 static void load_tab(RoseWindow *w, int tab);
@@ -53,186 +53,186 @@ static bool handle_key(RoseWindow *window, int key, int keyval)
 
 	switch (key) {
 		case goback:
-		    webkit_web_view_go_back(window->webviews[tab]->webview);
+			webkit_web_view_go_back(window->webviews[tab]->webview);
 			return GDK_EVENT_STOP;
 
 		case goforward:
-		    webkit_web_view_go_forward(window->webviews[tab]->webview);
+			webkit_web_view_go_forward(window->webviews[tab]->webview);
 			return GDK_EVENT_STOP;
 
 		case copy_url: {
-		    GdkDisplay *dpy = gdk_display_get_default();
-		    gdk_clipboard_set_text(gdk_display_get_clipboard(dpy),
-					   webkit_web_view_get_uri(
-					       window->webviews[tab]->webview));
+			GdkDisplay *dpy = gdk_display_get_default();
+			gdk_clipboard_set_text(gdk_display_get_clipboard(dpy),
+				webkit_web_view_get_uri(
+					window->webviews[tab]->webview));
 			return GDK_EVENT_STOP;
 		}
 
 		case paste_url: {
-		    GdkDisplay *dpy = gdk_display_get_default();
-		    GdkClipboard *clipboard = gdk_display_get_clipboard(dpy);
-		    gdk_clipboard_read_text_async(
-			clipboard, NULL, read_clipboard,
-			window->webviews[tab]->webview);
+			GdkDisplay *dpy = gdk_display_get_default();
+			GdkClipboard *clipboard = gdk_display_get_clipboard(dpy);
+			gdk_clipboard_read_text_async(
+				clipboard, NULL, read_clipboard,
+				window->webviews[tab]->webview);
 			return GDK_EVENT_STOP;
 		}
 
 		case fullscreen:
-		    if (gtk_window_is_fullscreen(GTK_WINDOW(gtk_widget_get_root(
-			    GTK_WIDGET(window->webviews[tab]->webview)))))
-				gtk_window_unfullscreen(GTK_WINDOW(gtk_widget_get_root(
-					GTK_WIDGET(window->webviews[tab]->webview))));
-		    else
+			if (gtk_window_is_fullscreen(GTK_WINDOW(gtk_widget_get_root(
+				GTK_WIDGET(window->webviews[tab]->webview)))))
+					gtk_window_unfullscreen(GTK_WINDOW(gtk_widget_get_root(
+						GTK_WIDGET(window->webviews[tab]->webview))));
+			else
 				gtk_window_fullscreen(GTK_WINDOW(gtk_widget_get_root(
 					GTK_WIDGET(window->webviews[tab]->webview))));
 			return GDK_EVENT_STOP;
 
 		case search: {
-		    int id = fork();
-		    if (id == 0) {
-			if (glob_dpy) close(ConnectionNumber(glob_dpy));
-			setsid();
-			char xid[16];
+			int id = fork();
+			if (id == 0) {
+				if (glob_dpy)
+					close(ConnectionNumber(glob_dpy));
+				setsid();
+				char xid[16];
 
-			snprintf(xid, 16, "%i", window->xid);
-			char *argument_list[] = {"/bin/sh", "-c", "dmenu_rose",
-						 xid, NULL};
-			execvp("/bin/sh", argument_list);
-			perror(" failed");
-			exit(1);
-		    } else {
-			wait(&id);
-			char *uri = (char *)getatom(AtomGo);
-			webkit_web_view_load_uri(window->webviews[tab]->webview,
-						 uri);
+				snprintf(xid, 16, "%i", window->xid);
+				char *argument_list[] = {"/bin/sh", "-c", "dmenu_rose",
+							 xid, NULL};
+				execvp("/bin/sh", argument_list);
+				perror(" failed");
+				exit(1);
+			} else {
+				wait(&id);
+				char *uri = (char *)getatom(AtomGo);
+				webkit_web_view_load_uri(window->webviews[tab]->webview, uri);
 			return GDK_EVENT_STOP;
-		    }
+			}
 
 		}
 
 		case find: {
-		    int id = fork();
-		    if (id == 0) {
-			if (glob_dpy) close(ConnectionNumber(glob_dpy));
-			setsid();
-			char *argument_list[] = {"/bin/sh", "-c",
+			int id = fork();
+			if (id == 0) {
+				if (glob_dpy) close(ConnectionNumber(glob_dpy));
+					setsid();
+				char *argument_list[] = {"/bin/sh", "-c",
 						 "dmenu_rose\tfind", NULL};
-			execvp("/bin/sh", argument_list);
-			perror(" failed");
-			exit(1);
-		    } else {
-			wait(&id);
-			WebKitFindController *finder =
-			    webkit_web_view_get_find_controller(
-				window->webviews[tab]->webview);
-			webkit_find_controller_search(
-			    finder, getatom(AtomFind),
-			    WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE |
-				WEBKIT_FIND_OPTIONS_WRAP_AROUND,
-			    G_MAXUINT);
-		    }
+				execvp("/bin/sh", argument_list);
+				perror(" failed");
+				exit(1);
+			} else {
+				wait(&id);
+				WebKitFindController *finder =
+					webkit_web_view_get_find_controller(
+						window->webviews[tab]->webview);
+				webkit_find_controller_search(
+					finder, getatom(AtomFind),
+					WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE |
+					WEBKIT_FIND_OPTIONS_WRAP_AROUND,
+					G_MAXUINT);
+			}
 			return GDK_EVENT_STOP;
 		}
 
 		case findnext: {
-		    WebKitFindController *finder =
+			WebKitFindController *finder =
 			webkit_web_view_get_find_controller(
-			    window->webviews[tab]->webview);
-		    webkit_find_controller_search_next(finder);
+				window->webviews[tab]->webview);
+			webkit_find_controller_search_next(finder);
 			return GDK_EVENT_STOP;
 		}
 
 		case findprev: {
-		    WebKitFindController *finder =
+			WebKitFindController *finder =
 			webkit_web_view_get_find_controller(
-			    window->webviews[tab]->webview);
-		    webkit_find_controller_search_previous(finder);
+				window->webviews[tab]->webview);
+			webkit_find_controller_search_previous(finder);
 			return GDK_EVENT_STOP;
 		}
 
 		case zoomin:
-		    window->webviews[tab]->zoom += 0.1;
-		    webkit_web_view_set_zoom_level(
-			window->webviews[tab]->webview,
-			window->webviews[tab]->zoom);
+			window->webviews[tab]->zoom += 0.1;
+			webkit_web_view_set_zoom_level(
+				window->webviews[tab]->webview,
+				window->webviews[tab]->zoom);
 			return GDK_EVENT_STOP;
 
 		case zoomout:
-		    window->webviews[tab]->zoom -= 0.1;
-		    webkit_web_view_set_zoom_level(
+			 window->webviews[tab]->zoom -= 0.1;
+			 webkit_web_view_set_zoom_level(
 			window->webviews[tab]->webview,
 			window->webviews[tab]->zoom);
 			return GDK_EVENT_STOP;
 
 		case zoomreset:
-		    window->webviews[tab]->zoom = 1;
-		    webkit_web_view_set_zoom_level(
+			 window->webviews[tab]->zoom = 1;
+			 webkit_web_view_set_zoom_level(
 			window->webviews[tab]->webview,
 			window->webviews[tab]->zoom);
 			return GDK_EVENT_STOP;
 
 		case inspector:
-		    window->webviews[tab]->inspector =
+			 window->webviews[tab]->inspector =
 			webkit_web_view_get_inspector(
-			    window->webviews[tab]->webview);
-		    if (webkit_web_inspector_is_attached(
-			    window->webviews[tab]->inspector))
+				 window->webviews[tab]->webview);
+			 if (webkit_web_inspector_is_attached(
+				 window->webviews[tab]->inspector))
 			webkit_web_inspector_close(
-			    window->webviews[tab]->inspector);
-		    else
+				 window->webviews[tab]->inspector);
+			 else
 			webkit_web_inspector_show(
-			    window->webviews[tab]->inspector);
-		    return GDK_EVENT_STOP;
+				 window->webviews[tab]->inspector);
+			 return GDK_EVENT_STOP;
 
 		case up:
-		    webkit_web_view_run_javascript(
+			 webkit_web_view_run_javascript(
 			window->webviews[tab]->webview,
 			"window.scrollBy(0,-200);", NULL, NULL, NULL);
 			return GDK_EVENT_STOP;
 
 		case down:
-		    webkit_web_view_run_javascript(
+			 webkit_web_view_run_javascript(
 			window->webviews[tab]->webview,
 			"window.scrollBy(0,200);", NULL, NULL, NULL);
 			return GDK_EVENT_STOP;
 
 		case reload:
-		    webkit_web_view_reload(window->webviews[tab]->webview);
+			 webkit_web_view_reload(window->webviews[tab]->webview);
 			return GDK_EVENT_STOP;
 
 		case reloadforce:
-		    webkit_web_view_reload_bypass_cache(
+			 webkit_web_view_reload_bypass_cache(
 			window->webviews[tab]->webview);
 			return GDK_EVENT_STOP;
 
 		case history: {
-		    int id = fork();
-		    if (id == 0) {
+			 int id = fork();
+			 if (id == 0) {
 			setsid();
 			char *argument_list[] = {"/bin/sh", "-c",
 						 "dmenu_rose\thistory", NULL};
 			execvp("/bin/sh", argument_list);
 			perror(" failed");
 			exit(1);
-		    } else {
+			 } else {
 			wait(&id);
 			char *uri;
 			if (strcmp((uri = (char *)getatom(AtomGo)), ""))
-			    webkit_web_view_load_uri(
+				 webkit_web_view_load_uri(
 				window->webviews[tab]->webview, uri);
-		    }
+			 }
 			return GDK_EVENT_STOP;
 		}
 
 		case gotop: {
-		    webkit_web_view_run_javascript(
+			 webkit_web_view_run_javascript(
 			window->webviews[tab]->webview, "window.scrollTo(0,0);",
 			NULL, NULL, NULL);
 			return GDK_EVENT_STOP;
 		}
 
 		case gobottom: {
-		    webkit_web_view_run_javascript(
+			 webkit_web_view_run_javascript(
 			window->webviews[tab]->webview,
 			"window.scrollTo(0, document.body.scrollHeight);", NULL,
 			NULL, NULL);
@@ -289,7 +289,7 @@ static void response_reciver(WebKitDownload *download)
 static void download_callback(WebKitDownload *download)
 {
 	g_signal_connect(G_OBJECT(download), "notify::response",
-		     G_CALLBACK(response_reciver), NULL);
+			  G_CALLBACK(response_reciver), NULL);
 }
 
 void load_changed_callback(WebKitWebView *webview, WebKitLoadEvent event,
@@ -452,16 +452,16 @@ RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
 char *
 untildepath(const char *path)
 {
-       char *apath, *name, *p;
-       const char *homedir;
+		char *apath, *name, *p;
+		const char *homedir;
 
-       if (path[1] == '/' || path[1] == '\0') {
-               p = (char *)&path[1];
-               homedir = getenv("HOME");
-       }
+		if (path[1] == '/' || path[1] == '\0') {
+			p = (char *)&path[1];
+			homedir = getenv("HOME");
+		}
 
-       apath = g_build_filename(homedir, p, NULL);
-       return apath;
+		apath = g_build_filename(homedir, p, NULL);
+		return apath;
 }
 
 static void load_uri(RoseWebview *view, const char *uri)
@@ -517,8 +517,8 @@ static void load_tab(RoseWindow *w, int tab_)
 
 static void move_tab(RoseWindow *w, int move)
 {
-   /* If move is TAB_NEXT, try to move to the next tab. Otherwise, move should
-      be TAB_PREV and we try to move to the previous tab. */
+	/* If move is TAB_NEXT, try to move to the next tab. Otherwise, move should
+	   be TAB_PREV and we try to move to the previous tab. */
 
 	if ((move == TAB_PREV && w->tab <= 0)
 		|| (move == TAB_NEXT && w->tab >= TABS - 1))
