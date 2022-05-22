@@ -30,6 +30,6 @@ Opening new window with specific website:
 ```$ rose https://duckduckgo.com```
 
 ## TODO
-- [ ] Add tabs option in config
+- [x] Add tabs option in config
 - [ ] Improve mass weight image loading time 
 - [ ] Add support for xdg-open and opening files
