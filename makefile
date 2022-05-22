@@ -23,7 +23,7 @@ all: config.h rose
 
 rose:
 	$(CC) -fPIC -O3 -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS)
-	# strip ./rose
+	strip ./rose
 
 debug:
 	$(CC) -g -o rose *.c $(CFLAGS) $(LIBS) -Wall -Wextra \
@@ -40,7 +40,7 @@ uninstall:
 	rm -f $(PREFIX)/bin/rose $(PREFIX)/bin/dmenu_rose
 
 clean:
-	rm -f rose compile_flags.txt
+	rm -f rose
 
 clean-all: clean
 	rm -f config.h

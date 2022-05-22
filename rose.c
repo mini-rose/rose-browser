@@ -74,8 +74,8 @@ static void run(GtkApplication *app)
 				"gtk-application-prefer-dark-theme", true, NULL);
 	}
 
-	g_object_set(gtk_settings_get_default(), "gtk-enable-animations", false,
-			NULL);
+	/* g_object_set(gtk_settings_get_default(), "gtk-enable-animations", false, */
+			/* NULL); */
 
 	glob_xid = rose_window_show(window, options[HOMEPAGE]);
 }

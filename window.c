@@ -353,15 +353,15 @@ RoseWebview *rose_webview_new()
 		glob_options[CACHE] = buf;
 	}
 
-	context = webkit_web_context_new_with_website_data_manager(
-		webkit_website_data_manager_new(
-			"base-cache-directory", glob_options[CACHE],
-			"base-data-directory", glob_options[CACHE],
-			"hsts-cache-directory", glob_options[CACHE],
-			"offline-application-cache-directory", glob_options[CACHE], NULL)
-	);
+	/* context = webkit_web_context_new_with_website_data_manager( */
+		/* webkit_website_data_manager_new( */
+			/* "base-cache-directory", glob_options[CACHE], */
+			/* "base-data-directory", glob_options[CACHE], */
+			/* "hsts-cache-directory", glob_options[CACHE], */
+			/* "offline-application-cache-directory", glob_options[CACHE], NULL) */
+	/* ); */
 
-	webkit_web_context_set_cache_model(context, WEBKIT_CACHE_MODEL_WEB_BROWSER);
+	/* webkit_web_context_set_cache_model(context, WEBKIT_CACHE_MODEL); */
 
 	/* Configure cookies. */
 
@@ -381,7 +381,6 @@ RoseWebview *rose_webview_new()
 	settings = webkit_settings_new_with_settings(
 			"auto-load-images", TRUE,
 			"enable-developer-extras", TRUE,
-			"enable-write-console-messages-to-stdout", TRUE,
 			"enable-media-stream", TRUE,
 			"enable-plugins", FALSE,
 			"enable-dns-prefetching", TRUE,
@@ -396,7 +395,7 @@ RoseWebview *rose_webview_new()
 
 	self->webview = g_object_new(WEBKIT_TYPE_WEB_VIEW,
 			"settings", settings,
-			"user-content-manager", contentmanager,
+			/* "user-content-manager", contentmanager, */
 			"web-context", context, NULL
 	);
 
@@ -453,7 +452,7 @@ RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->tabs), FALSE);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(window->window), TRUE);
 	gtk_window_set_child(GTK_WINDOW(window->window), window->tabs);
-
+	gtk_widget_set_focus_child(window->window, window->tabs);
 	g_signal_connect(G_OBJECT(window->window), "destroy",
 		G_CALLBACK(destroy), window);
 	load_tab(window, 0);
@@ -546,6 +545,11 @@ static void load_tab(RoseWindow *w, int tab_)
 			die("tried to append an unordered page", 1);
 		gtk_notebook_append_page(GTK_NOTEBOOK(w->tabs),
 				GTK_WIDGET(w->webviews[w->tab]->webview), NULL);
+
+		GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(tab->webview));
+
+		gtk_stack_set_transition_duration(GTK_STACK(parent), 300);
+		gtk_stack_set_transition_type(GTK_STACK(parent), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 
 		webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
 			glob_options[HOMEPAGE]);
