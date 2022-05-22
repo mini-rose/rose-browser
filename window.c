@@ -290,7 +290,7 @@ static void response_reciver(WebKitDownload *download)
 static void download_callback(WebKitDownload *download)
 {
 	g_signal_connect(G_OBJECT(download), "notify::response",
-			  G_CALLBACK(response_reciver), NULL);
+		G_CALLBACK(response_reciver), NULL);
 }
 
 void load_changed_callback(WebKitWebView *webview, WebKitLoadEvent event,
@@ -368,10 +368,10 @@ RoseWebview *rose_webview_new()
 	cookiemanager = webkit_web_context_get_cookie_manager(context);
 
 	strcpy(cookiefile, glob_options[CACHE]);
-	strcat(cookiefile, "cookies");
+	strcat(cookiefile, "cookies.sqlite");
 
 	webkit_cookie_manager_set_persistent_storage(
-	cookiemanager, cookiefile, WEBKIT_COOKIE_PERSISTENT_STORAGE_TEXT);
+	cookiemanager, cookiefile, WEBKIT_COOKIE_PERSISTENT_STORAGE_SQLITE);
 
 	webkit_cookie_manager_set_accept_policy(cookiemanager,
 		WEBKIT_COOKIE_POLICY_ACCEPT_ALWAYS);
@@ -434,6 +434,11 @@ int rose_window_show(RoseWindow *window, const char *url)
 			gtk_native_get_surface(GTK_NATIVE(window->window)));
 }
 
+static void destroy(RoseWindow *window)
+{
+	exit(0);
+}
+
 RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
 {
 	RoseWindow *window = malloc(sizeof(RoseWindow));
@@ -446,8 +451,11 @@ RoseWindow *rose_window_new(GtkApplication *app, const char *options[])
 
 	window->tabs = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(window->tabs), FALSE);
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(window->window), TRUE);
 	gtk_window_set_child(GTK_WINDOW(window->window), window->tabs);
 
+	g_signal_connect(G_OBJECT(window->window), "destroy",
+		G_CALLBACK(destroy), window);
 	load_tab(window, 0);
 
 	return window;
