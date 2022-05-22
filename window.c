@@ -258,47 +258,12 @@ static bool handle_key(RoseWindow *window, int key, int keyval)
 			return GDK_EVENT_STOP;
 			break;
 
-		case tabsel:
-			switch (keyval) {
-				case GDK_KEY_1:
-					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 0);
-					return GDK_EVENT_STOP;
-					break;
-				case GDK_KEY_2:
-					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 1);
-					return GDK_EVENT_STOP;
-					break;
-				case GDK_KEY_3:
-					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 2);
-					return GDK_EVENT_STOP;
-					break;
-				case GDK_KEY_4:
-					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 3);
-					return GDK_EVENT_STOP;
-					break;
-				case GDK_KEY_5:
-					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 4);
-					return GDK_EVENT_STOP;
-					break;
-				case GDK_KEY_6:
-					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 5);
-					return GDK_EVENT_STOP;
-					break;
-				case GDK_KEY_7:
-					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 6);
-					return GDK_EVENT_STOP;
-					break;
-				case GDK_KEY_8:
-					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 7);
-					return GDK_EVENT_STOP;
-					break;
-				case GDK_KEY_9:
-					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 8);
-					return GDK_EVENT_STOP;
-					break;
-			}
-
-
+		case tabsel: {
+			int k = keyval - 0x31;
+			gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), k);
+			return GDK_EVENT_STOP;
+			break;
+		 }
 	}
 
 	return GDK_EVENT_PROPAGATE;
