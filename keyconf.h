@@ -4,11 +4,10 @@
 #include <gdk/gdkkeysyms.h>
 #include <stdbool.h>
 
-#define CTRLKEY
 #define MODKEY GDK_CONTROL_MASK
+#define ALTKEY GDK_ALT_MASK
 #define MODSFT   5
 #define NOMODK   0
-#define ALTKEY GDK_ALT_MASK
 
 #define CACHE      0
 #define HOMEPAGE   1
@@ -49,5 +48,6 @@ enum {
 	gobottom,
 	tabnext,
 	tabprev,
-	tabbar
+	tabbar,
+	tabsel
 };

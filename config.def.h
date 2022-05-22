@@ -1,8 +1,8 @@
 #include "keyconf.h"
 
 static const char *options[] = {
-	[CACHE]    = DEFAULT,
-	[HOMEPAGE] = DEFAULT,
+	[CACHE]       = DEFAULT,
+	[HOMEPAGE]    = DEFAULT,
 };
 
 static int appearance[] = {
@@ -31,5 +31,16 @@ static const Key keys[] = {
 	{ NOMODK, GDK_KEY_F11, fullscreen  },
 	{ MODSFT, GDK_KEY_H,   history     },
 	{ MODKEY, GDK_KEY_g,   gotop       },
-	{ MODSFT, GDK_KEY_G,   gobottom    }
+	{ MODSFT, GDK_KEY_G,   gobottom    },
+	{ ALTKEY, GDK_KEY_h,   tabprev     },
+	{ ALTKEY, GDK_KEY_l,   tabnext     },
+	{ ALTKEY, GDK_KEY_1,   tabsel      },
+	{ ALTKEY, GDK_KEY_2,   tabsel      },
+	{ ALTKEY, GDK_KEY_3,   tabsel      },
+	{ ALTKEY, GDK_KEY_4,   tabsel      },
+	{ ALTKEY, GDK_KEY_5,   tabsel      },
+	{ ALTKEY, GDK_KEY_6,   tabsel      },
+	{ ALTKEY, GDK_KEY_7,   tabsel      },
+	{ ALTKEY, GDK_KEY_8,   tabsel      },
+	{ ALTKEY, GDK_KEY_9,   tabsel      }
 };

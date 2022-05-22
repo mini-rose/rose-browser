@@ -8,7 +8,7 @@
 #define TABS        9
 
 static void load_tab(RoseWindow *w, int tab);
-static bool handle_key(RoseWindow *w, int key);
+static bool handle_key(RoseWindow *w, int key, int keyval);
 
 static void die(char *msg, int exit_code)
 {
@@ -33,13 +33,13 @@ static gboolean key_press_callback(RoseWindow *window, guint keyval,
 	unsigned tab = window->tab;
 	for (int i = 0; i < LENGTH(keys); i++) {
 		if (keys[i].modkey == state && keys[i].keycod == keyval)
-			return handle_key(window, keys[i].funcid);
+			return handle_key(window, keys[i].funcid, keyval);
 	}
 
 	return GDK_EVENT_PROPAGATE;
 }
 
-static bool handle_key(RoseWindow *window, int key)
+static bool handle_key(RoseWindow *window, int key, int keyval)
 {
 	int tab = window->tab;
 
@@ -258,15 +258,47 @@ static bool handle_key(RoseWindow *window, int key)
 			return GDK_EVENT_STOP;
 			break;
 
-		case tabbar:
-			if (gtk_notebook_get_show_tabs(
-					GTK_NOTEBOOK(window->pages)))
-				gtk_notebook_set_show_tabs(
-					GTK_NOTEBOOK(window->pages), false);
-			else
-				gtk_notebook_set_show_tabs(
-					GTK_NOTEBOOK(window->pages), true);
-			return GDK_EVENT_STOP;
+		case tabsel:
+			switch (keyval) {
+				case GDK_KEY_1:
+					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 0);
+					return GDK_EVENT_STOP;
+					break;
+				case GDK_KEY_2:
+					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 1);
+					return GDK_EVENT_STOP;
+					break;
+				case GDK_KEY_3:
+					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 2);
+					return GDK_EVENT_STOP;
+					break;
+				case GDK_KEY_4:
+					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 3);
+					return GDK_EVENT_STOP;
+					break;
+				case GDK_KEY_5:
+					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 4);
+					return GDK_EVENT_STOP;
+					break;
+				case GDK_KEY_6:
+					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 5);
+					return GDK_EVENT_STOP;
+					break;
+				case GDK_KEY_7:
+					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 6);
+					return GDK_EVENT_STOP;
+					break;
+				case GDK_KEY_8:
+					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 7);
+					return GDK_EVENT_STOP;
+					break;
+				case GDK_KEY_9:
+					gtk_notebook_set_current_page(GTK_NOTEBOOK(window->pages), 8);
+					return GDK_EVENT_STOP;
+					break;
+			}
+
+
 	}
 
 	return GDK_EVENT_PROPAGATE;
