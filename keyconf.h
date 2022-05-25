@@ -20,6 +20,10 @@
 #define SMOOTHSCROLL 3
 #define ANIMATIONS 4
 
+#define CACHING   0
+#define COOKIES 1
+#define HISTORY 2
+
 typedef struct {
 	unsigned modkey;
 	unsigned keycod;

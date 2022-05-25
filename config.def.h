@@ -13,6 +13,12 @@ static int appearance[] = {
 	[ANIMATIONS]   = TRUE
 };
 
+static int privacy[] = {
+	[COOKIES] = TRUE,
+	[HISTORY] = TRUE,
+	[CACHING] = TRUE
+};
+
 static const Key keys[] = {
 	{ MODKEY, GDK_KEY_h,   goback      },
 	{ MODKEY, GDK_KEY_l,   goforward   },
