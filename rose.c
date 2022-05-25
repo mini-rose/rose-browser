@@ -1,6 +1,5 @@
 #include "rose.h"
 
-#define MSGBUFSZ 8
 #define LENGTH(x) (sizeof(x) / sizeof(x[0]))
 
 Display *glob_dpy; /* defined in rose.h */
@@ -26,11 +25,11 @@ void setatom(int a, const char *v)
 const char *getatom(int a)
 {
 	union atomdummies dum;
-	static char buf[BUFSIZ];
+	static char buf[8];
 	unsigned char *p = NULL;
 
 	XSync(glob_dpy, False);
-	XGetWindowProperty(glob_dpy, glob_xid, glob_atoms[a], 0L, BUFSIZ, False,
+	XGetWindowProperty(glob_dpy, glob_xid, glob_atoms[a], 0L, 8, False,
 			glob_atoms[AtomUTF8], &dum.a, &dum.i, &dum.l, &dum.l, &p);
 
 	if (p)
@@ -54,18 +53,17 @@ static void setup()
 	glob_atoms[AtomUri] = XInternAtom(glob_dpy, "_ROSE_URI", False);
 }
 
-static void run(GtkApplication *app)
+static void run(GtkApplication *a)
 {
 	RoseWindow *window;
 
 	/* We need to pass our instance of options, because it's a static variable
 	   so each file gets its own instace. */
-	window = rose_window_new(app);
+	window = rose_window_new(a);
 
 	if (appearance[DARKMODE])
 		g_object_set(gtk_settings_get_default(),
 				"gtk-application-prefer-dark-theme", true, NULL);
-
 
 	if (!appearance[ANIMATIONS])
 		g_object_set(gtk_settings_get_default(), "gtk-enable-animations", false,
@@ -76,17 +74,13 @@ static void run(GtkApplication *app)
 
 int main(int argc, char **argv)
 {
-	if (argc == 2) {
-		options[HOMEPAGE] = argv[1];
-		argv++;
-		argc--;
-	}
-
+	/* Setup XAtoms */
 	setup();
-	GtkApplication *app = gtk_application_new("org.gtk.rose",
+
+	GtkApplication *a = gtk_application_new("org.gtk.rose",
 			G_APPLICATION_NON_UNIQUE);
 
-	g_signal_connect(app, "activate", G_CALLBACK(run), NULL);
-	g_application_run(G_APPLICATION(app), argc, argv);
-	g_object_unref(app);
+	g_signal_connect(a, "activate", G_CALLBACK(run), NULL);
+	g_application_run(G_APPLICATION(a), argc, argv);
+	g_object_unref(a);
 }
