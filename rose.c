@@ -1,10 +1,5 @@
 #include "rose.h"
 
-#include <gdk/gdk.h>
-
-#include "gio/gsettingsschema.h"
-#include "window.h"
-
 #define MSGBUFSZ 8
 #define LENGTH(x) (sizeof(x) / sizeof(x[0]))
 
@@ -63,12 +58,9 @@ static void run(GtkApplication *app)
 {
 	RoseWindow *window;
 
-	if (!options[HOMEPAGE])
-		options[HOMEPAGE] = "https://duckduckgo.com";
-
 	/* We need to pass our instance of options, because it's a static variable
 	   so each file gets its own instace. */
-	window = rose_window_new(app, options);
+	window = rose_window_new(app);
 
 	if (appearance[DARKMODE])
 		g_object_set(gtk_settings_get_default(),

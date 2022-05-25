@@ -17,12 +17,12 @@ typedef struct {
 typedef struct {
 	unsigned    xid;
 	short       tab;        /* current tab */
-	GtkWidget   *tabs;      /* GtkNotebook with all the tabs */
+	GtkWidget   *tabview;   /* GtkNotebook with all the tabs */
 	GtkWidget   *window;    /* app window */
-	RoseWebview **webviews; /* array of tabs */
+	RoseWebview **tabs;     /* array of tabs */
 } RoseWindow;
 
-RoseWindow *rose_window_new(GtkApplication *application, const char *options[]);
+RoseWindow *rose_window_new(GtkApplication *a);
 
 int rose_window_show(RoseWindow *window, const char *url);
 void rose_window_close(RoseWindow *window);

@@ -9,8 +9,8 @@
 #include <sys/wait.h>
 #include <webkit2/webkit2.h>
 
-#include "config.h"
 #include "window.h"
+#include "config.h"
 
 enum { AtomFind, AtomGo, AtomUri, AtomUTF8, AtomLast };
 

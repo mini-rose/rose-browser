@@ -4,25 +4,27 @@
 #include <gdk/gdkkeysyms.h>
 #include <stdbool.h>
 
-#define MODKEY GDK_CONTROL_MASK
-#define ALTKEY GDK_ALT_MASK
-#define MODSFT   5
-#define NOMODK   0
+#define MODKEY       GDK_CONTROL_MASK
+#define ALTKEY       GDK_ALT_MASK
+#define MODSFT       5
+#define NOMODK       0
 
-#define CACHE      0
-#define HOMEPAGE   1
+#define CACHE        0
+#define HOMEPAGE     1
 
-#define DEFAULT    0
+#define DEFAULT      0
 
-#define HEIGHT     0
-#define WIDTH      1
-#define DARKMODE   2
+#define HEIGHT       0
+#define WIDTH        1
+#define DARKMODE     2
 #define SMOOTHSCROLL 3
-#define ANIMATIONS 4
+#define ANIMATIONS   4
 
-#define CACHING   0
-#define COOKIES 1
-#define HISTORY 2
+#define CACHING      0
+#define COOKIES      1
+#define HISTORY      2
+
+#define DUCKDUCKGO   "https://duckduckgo.com"
 
 typedef struct {
 	unsigned modkey;
