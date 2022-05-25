@@ -14,6 +14,11 @@ In order to use the functionalities:
   - searchbar/find/history: dmenu
   - download: aria2c
 
+## Features
+  - Builin tabs
+  - Privacy options
+  - History
+
 ## Installation
 
 Run following command to build and install
