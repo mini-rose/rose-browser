@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "keyconf.h"
 #include "window.h"
 #include "rose.h"
@@ -301,10 +298,10 @@ static void rose_download(char *uri)
 	}
 }
 
-static void response_reciver(WebKitDownload *download)
+static void response_reciver(WebKitDownload *d)
 {
 	char *uri = (char *) webkit_uri_response_get_uri(
-	webkit_download_get_response(download));
+	webkit_download_get_response(d));
 	rose_download(uri);
 }
 
@@ -323,6 +320,7 @@ void load_changed_callback(WebKitWebView *v, WebKitLoadEvent e,
 		GTK_NOTEBOOK(w->tabview),
 		GTK_WIDGET(v),
 		webkit_web_view_get_title(v));
+
 
 	if (privacy[HISTORY]) {
 		const char *uri = webkit_web_view_get_uri(v);
@@ -356,9 +354,9 @@ static void web_process_terminated_callback(WebKitWebView *webview,
 			WEBKIT_WEB_PROCESS_TERMINATED_BY_API);
 }
 
-gboolean decide_policy(WebKitWebView *v,
-                       WebKitPolicyDecision *decision,
-                       WebKitPolicyDecisionType type)
+static gboolean decide_policy(WebKitWebView *v,
+					   WebKitPolicyDecision *d,
+					   WebKitPolicyDecisionType type)
 {
 	(void) v;
 	WebKitResponsePolicyDecision *r;
@@ -366,15 +364,20 @@ gboolean decide_policy(WebKitWebView *v,
 	switch (type)
 	{
 		case WEBKIT_POLICY_DECISION_TYPE_RESPONSE:
-			r = WEBKIT_RESPONSE_POLICY_DECISION(decision);
+			r = WEBKIT_RESPONSE_POLICY_DECISION(d);
 			(webkit_response_policy_decision_is_mime_type_supported(r))
-				?	webkit_policy_decision_use(decision)
-				: webkit_policy_decision_download(decision);
-		   return TRUE;
+				?	webkit_policy_decision_use(d)
+				: webkit_policy_decision_download(d);
+			break;
+		case WEBKIT_POLICY_DECISION_TYPE_NAVIGATION_ACTION:
+			break;
+		case WEBKIT_POLICY_DECISION_TYPE_NEW_WINDOW_ACTION:
+			break;
 		default:
-			return FALSE;
+			webkit_policy_decision_ignore(d);
    }
 
+   return TRUE;
 }
 
 RoseWebview *rose_webview_new()
@@ -455,10 +458,8 @@ RoseWebview *rose_webview_new()
 	return self;
 }
 
-int rose_window_show(RoseWindow *w, const char *url)
+int rose_window_show(RoseWindow *w)
 {
-	load_uri(w->tabs[w->tab], url);
-	setatom(AtomUri, url);
 
 	if (!(appearance[WIDTH] && appearance[HEIGHT])) {
 		appearance[WIDTH] = 1280;
@@ -474,31 +475,19 @@ int rose_window_show(RoseWindow *w, const char *url)
 			gtk_native_get_surface(GTK_NATIVE(w->window)));
 }
 
-static void destroy()
-{
-	exit(0);
-}
+static void destroy() { exit(0); }
 
-RoseWindow *rose_window_new(GtkApplication *a)
+static RoseWindow* rose_window_init(GtkApplication *a)
 {
 	RoseWindow *w = malloc(sizeof(RoseWindow));
 	w->tab = 0;
 	w->window = gtk_application_window_new(a);
 	w->tabs = calloc(TABS, sizeof(RoseWebview *));
+	w->tabview = gtk_notebook_new();
+
 	gtk_widget_set_has_tooltip(w->window, FALSE);
 	gtk_application_set_menubar(a, FALSE);
 
-	w->tabview = gtk_notebook_new();
-
-	/* Setup notebook */
-
-	/* TODO: Fix focus when changing tab and after that provide
-	 *       keybind. For now changing tab focusing tab label */
-	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), FALSE);
-
-	gtk_notebook_set_show_border(GTK_NOTEBOOK(w->tabview), FALSE);
-
-	/* Setup window */
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(w->window), TRUE);
 	gtk_window_set_child(GTK_WINDOW(w->window), w->tabview);
 	gtk_widget_set_focus_child(w->window, w->tabview);
@@ -506,13 +495,31 @@ RoseWindow *rose_window_new(GtkApplication *a)
 	g_signal_connect(G_OBJECT(w->window), "destroy",
 		G_CALLBACK(destroy), w);
 
+	return w;
+}
+
+RoseWindow *rose_window_new(GtkApplication *a)
+{
+	RoseWindow *w = rose_window_init(a);
+
+	/* Setup notebook */
+
+	/* TODO: Fix focus when changing tab and after that provide
+	 *       keybind. For now changing tab focusing tab label */
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), TRUE);
+	gtk_notebook_set_show_border(GTK_NOTEBOOK(w->tabview), FALSE);
+
+	/* Setup webkit */
+
 	load_tab(w, 0);
+	load_uri(w->tabs[0], options[HOMEPAGE]);
+
+	setatom(AtomUri, options[HOMEPAGE]);
 
 	return w;
 }
 
-char *
-untildepath(const char *path)
+char* untildepath(const char *path)
 {
 		char *apath, *p;
 		const char *homedir;
@@ -560,11 +567,16 @@ static void load_tab(RoseWindow *w, int tab_)
 	if (w->tabs[tab_]) return;
 
 	w->tabs[tab_] = rose_webview_new();
+
 	tab = w->tabs[tab_];
+
+	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
+		options[HOMEPAGE]);
 
 	tab->controller = gtk_event_controller_key_new();
 
-	g_signal_connect_swapped(tab->controller, "key-pressed",
+	g_signal_connect_swapped(
+		tab->controller, "key-pressed",
 		G_CALLBACK(key_press_callback), w);
 
 	g_signal_connect(
@@ -587,14 +599,10 @@ static void load_tab(RoseWindow *w, int tab_)
 	GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(tab->webview));
 
 	if (appearance[ANIMATIONS]) {
-		gtk_stack_set_transition_duration(GTK_STACK(parent), 200);
+		gtk_stack_set_transition_duration(GTK_STACK(parent), 150);
 		gtk_stack_set_transition_type(GTK_STACK(parent),
 				GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 	}
-
-
-	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
-		options[HOMEPAGE]);
 }
 
 static void move_tab(RoseWindow *w, int move)

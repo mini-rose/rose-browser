@@ -69,7 +69,7 @@ static void run(GtkApplication *a)
 		g_object_set(gtk_settings_get_default(), "gtk-enable-animations", false,
 				NULL);
 
-	glob_xid = rose_window_show(window, options[HOMEPAGE]);
+	glob_xid = rose_window_show(window);
 }
 
 int main(int argc, char **argv)
