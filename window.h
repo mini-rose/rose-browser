@@ -2,6 +2,9 @@
 
 #include <gdk/x11/gdkx.h>
 #include <gtk/gtk.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 #include "rose.h"
 
@@ -17,14 +20,14 @@ typedef struct {
 typedef struct {
 	unsigned    xid;
 	short       tab;        /* current tab */
-	GtkWidget   *tabs;      /* GtkNotebook with all the tabs */
+	GtkWidget   *tabview;   /* GtkNotebook with all the tabs */
 	GtkWidget   *window;    /* app window */
-	RoseWebview **webviews; /* array of tabs */
+	RoseWebview **tabs;     /* array of tabs */
 } RoseWindow;
 
-RoseWindow *rose_window_new(GtkApplication *application, const char *options[]);
+RoseWindow *rose_window_new(GtkApplication *a);
 
-int rose_window_show(RoseWindow *window, const char *url);
+int rose_window_show(RoseWindow *w);
 void rose_window_close(RoseWindow *window);
 
 RoseWebview *rose_webview_new();

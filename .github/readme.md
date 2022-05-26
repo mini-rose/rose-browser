@@ -26,15 +26,5 @@ Run following command to build and install
 
 ```$ make clean install```
 
-## Usage
-
-To set default homepage change config.h
-
-Opening new window with specific website:
-
-```$ rose https://duckduckgo.com```
-
 ## TODO
-- [ ] Replace suckless tools with gtk widgets
-- [ ] Improve mass weight image loading time
-- [ ] Add support for xdg-open and opening files
+- [ ] Add patch for xdg-open

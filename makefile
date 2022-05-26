@@ -27,9 +27,9 @@ rose:
 	$(CC) -fPIC -O3 -o rose *.c $(CFLAGS) $(LIBS) $(OPTIONS)
 	strip ./rose
 
-debug:
+debug: config.h
 	$(CC) -g -o rose *.c $(CFLAGS) $(LIBS) -Wall -Wextra \
-		-fsanitize=address -Wno-unused-variable -DDEVELOPER_MODE=ON
+		-fsanitize=address -Wpedantic
 
 config.h:
 	[ -f "$@" ] || cp config.def.h $@
