@@ -506,7 +506,7 @@ RoseWindow *rose_window_new(GtkApplication *a)
 
 	/* TODO: Fix focus when changing tab and after that provide
 	 *       keybind. For now changing tab focusing tab label */
-	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), TRUE);
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), FALSE);
 	gtk_notebook_set_show_border(GTK_NOTEBOOK(w->tabview), FALSE);
 
 	/* Setup webkit */
