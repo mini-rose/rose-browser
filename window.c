@@ -570,9 +570,6 @@ static void load_tab(RoseWindow *w, int tab_)
 
 	tab = w->tabs[tab_];
 
-	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
-		options[HOMEPAGE]);
-
 	tab->controller = gtk_event_controller_key_new();
 
 	g_signal_connect_swapped(
@@ -603,6 +600,9 @@ static void load_tab(RoseWindow *w, int tab_)
 		gtk_stack_set_transition_type(GTK_STACK(parent),
 				GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 	}
+
+	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(tab->webview),
+		options[HOMEPAGE]);
 }
 
 static void move_tab(RoseWindow *w, int move)
