@@ -1,4 +1,5 @@
 #include "rose.h"
+#include <stdarg.h>
 
 #define LENGTH(x) (sizeof(x) / sizeof(x[0]))
 
@@ -25,7 +26,8 @@ void setatom(int a, const char *v)
 const char *getatom(int a)
 {
 	union atomdummies dum;
-	static char buf[8];
+
+	static char buf[2000];
 	unsigned char *p = NULL;
 
 	XSync(glob_dpy, False);
@@ -53,13 +55,14 @@ static void setup()
 	glob_atoms[AtomUri] = XInternAtom(glob_dpy, "_ROSE_URI", False);
 }
 
-static void run(GtkApplication *a)
+static void run(GtkApplication *a, char *url)
 {
+	va_list args;
 	RoseWindow *window;
 
 	/* We need to pass our instance of options, because it's a static variable
 	   so each file gets its own instace. */
-	window = rose_window_new(a);
+	window = rose_window_new(a, url);
 
 	if (appearance[DARKMODE])
 		g_object_set(gtk_settings_get_default(),
@@ -80,7 +83,9 @@ int main(int argc, char **argv)
 	GtkApplication *a = gtk_application_new("org.gtk.rose",
 			G_APPLICATION_NON_UNIQUE);
 
-	g_signal_connect(a, "activate", G_CALLBACK(run), NULL);
-	g_application_run(G_APPLICATION(a), argc, argv);
+	g_signal_connect(
+		a, "activate", G_CALLBACK(run), (argc > 1) ? argv[1] : NULL);
+
+	g_application_run(G_APPLICATION(a), 0, NULL);
 	g_object_unref(a);
 }
