@@ -1,11 +1,9 @@
-#include "keyconf.h"
-
-static const char *options[] = {
-	[CACHE]       = DEFAULT,
-	[HOMEPAGE]    = DUCKDUCKGO,
+const char *options[] = {
+	[CACHE]    = NULL,
+	[HOMEPAGE] = "https://duckduckgo.com",
 };
 
-static int appearance[] = {
+int appearance[] = {
 	[HEIGHT]       = DEFAULT,
 	[WIDTH]        = DEFAULT,
 	[DARKMODE]     = TRUE,
@@ -13,13 +11,14 @@ static int appearance[] = {
 	[ANIMATIONS]   = TRUE
 };
 
-static int privacy[] = {
+int privacy[] = {
 	[COOKIES] = TRUE,
 	[HISTORY] = TRUE,
 	[CACHING] = TRUE
 };
 
-static const Key keys[] = {
+#define MODKEY GDK_CONTROL_MASK
+const Key keys[] = {
 	{ MODKEY, GDK_KEY_h,   goback      },
 	{ MODKEY, GDK_KEY_l,   goforward   },
 	{ MODKEY, GDK_KEY_y,   copy_url    },
