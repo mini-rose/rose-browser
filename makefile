@@ -1,8 +1,10 @@
 CC     ?= cc
 PREFIX := /usr/local
 
-rose: config.h rose.o
-	$(CC) `pkgconf --libs webkit2gtk-5.0` -o $@ $@.o
+all: config.h rose
+
+rose: rose.o
+	$(CC) `pkgconf --libs webkit2gtk-5.0` -o $@ $?
 
 rose.o: rose.c
 	$(CC) `pkgconf --cflags webkit2gtk-5.0` -c $<
@@ -21,4 +23,4 @@ uninstall:
 clean:
 	rm -f rose rose.o
 
-.SILENT: rose rose.o
+.SILENT: config.h rose rose.o

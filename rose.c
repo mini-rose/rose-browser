@@ -307,6 +307,7 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 {
 	RoseWebview *tab = w->tabs[w->tab];
 
+
 	switch (key) {
 		case goback:
 			webkit_web_view_go_back(tab->webview);
@@ -509,8 +510,13 @@ RoseWindow *rose_window_new(char *uri)
 
 void run(char *url)
 {
+	GSettings *s;
 	RoseWindow *window = rose_window_new(url);
 
+	s = g_settings_new_with_path("org.gtk.gtk4.Settings.Debug",
+	                                        "/org/gtk/gtk4/settings/debug/");
+
+	g_settings_set_boolean(s, "enable-inspector-keybinding", false);
 	if (appearance[DARKMODE])
 		g_object_set(gtk_settings_get_default(),
 				"gtk-application-prefer-dark-theme", true, NULL);

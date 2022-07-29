@@ -26,7 +26,7 @@ const Key keys[] = {
 	{ MODSFT, GDK_KEY_K,   zoomin      },
 	{ MODSFT, GDK_KEY_J,   zoomout     },
 	{ MODSFT, GDK_KEY_Q,   zoomreset   },
-	{ MODKEY, GDK_KEY_i,   inspector   },
+	{ MODSFT, GDK_KEY_I,   inspector   },
 	{ MODKEY, GDK_KEY_j,   down        },
 	{ MODKEY, GDK_KEY_k,   up          },
 	{ MODKEY, GDK_KEY_f,   find        },
