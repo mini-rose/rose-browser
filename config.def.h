@@ -6,18 +6,17 @@ const char *options[] = {
 int appearance[] = {
 	[HEIGHT]       = DEFAULT,
 	[WIDTH]        = DEFAULT,
-	[DARKMODE]     = TRUE,
-	[SMOOTHSCROLL] = FALSE,
-	[ANIMATIONS]   = TRUE
+	[DARKMODE]     = 1,
+	[SMOOTHSCROLL] = 0,
+	[ANIMATIONS]   = 1
 };
 
 int privacy[] = {
-	[COOKIES] = TRUE,
-	[HISTORY] = TRUE,
-	[CACHING] = TRUE
+	[COOKIES] = 1,
+	[HISTORY] = 1,
+	[CACHING] = 1
 };
 
-#define MODKEY GDK_CONTROL_MASK
 const Key keys[] = {
 	{ MODKEY, GDK_KEY_h,   goback      },
 	{ MODKEY, GDK_KEY_l,   goforward   },
@@ -35,7 +34,7 @@ const Key keys[] = {
 	{ MODSFT, GDK_KEY_N,   findprev    },
 	{ MODKEY, GDK_KEY_r,   reload      },
 	{ MODSFT, GDK_KEY_R,   reloadforce },
-	{ NOMODK, GDK_KEY_F11, fullscreen  },
+	{ 0,      GDK_KEY_F11, fullscreen  },
 	{ MODSFT, GDK_KEY_H,   history     },
 	{ MODKEY, GDK_KEY_g,   gotop       },
 	{ MODSFT, GDK_KEY_G,   gobottom    },
