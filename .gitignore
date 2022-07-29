@@ -1,5 +1,6 @@
 compile_commands.json
 compile_flags.txt
 rose
+rose.o
 .cache/
-/config.h
+config.h

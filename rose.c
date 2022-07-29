@@ -397,13 +397,11 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 			                               NULL, NULL, NULL);
 			return GDK_EVENT_STOP;
 
-		case tabshow: {
-			gtk_notebook_set_show_tabs(
-					GTK_NOTEBOOK(w->tabview),
-					gtk_notebook_get_show_tabs(GTK_NOTEBOOK(w->tabview))
-			);
+		case tabshow:
+			gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview),
+			                           gtk_notebook_get_show_tabs(
+			                           GTK_NOTEBOOK(w->tabview)));
 			return GDK_EVENT_STOP;
-		}
 
 		case tabnext:
 			move_tab(w, +1);
@@ -421,9 +419,6 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 
 		case tabclose:
 			gtk_notebook_remove_page(GTK_NOTEBOOK(w->tabview), w->tab);
-
-			if (!gtk_notebook_get_n_pages(GTK_NOTEBOOK(w->tabview)))
-				exit(0);
 
 			int start = w->tab;
 			w->tabs[w->tab] = NULL;
@@ -451,12 +446,12 @@ void rose_window_show(RoseWindow *w)
 		appearance[HEIGHT] = 720;
 	}
 
-	gtk_window_set_default_size(
-			GTK_WINDOW(w->window),
-			appearance[WIDTH], appearance[HEIGHT]);
+	gtk_window_set_default_size(GTK_WINDOW(w->window), appearance[WIDTH],
+	                            appearance[HEIGHT]);
 
 	gtk_widget_remove_css_class(w->window, "solid-csd");
-	gtk_widget_hide(GTK_WIDGET(gtk_window_get_titlebar(GTK_WINDOW(w->window))));
+	gtk_widget_hide(GTK_WIDGET(gtk_window_get_titlebar(
+	                GTK_WINDOW(w->window))));
 	gtk_widget_show(w->window);
 	gtk_window_set_focus(GTK_WINDOW(w->window),
 		GTK_WIDGET(w->tabs[w->tab]->webview));
@@ -482,6 +477,8 @@ RoseWindow* rose_window_init()
 	w->searchbuf = gtk_entry_buffer_new("", 0);
 	w->searchbar = GTK_ENTRY(gtk_entry_new_with_buffer(w->searchbuf));
 
+	gtk_entry_set_placeholder_text(w->searchbar, "Search");
+	gtk_entry_set_icon_from_icon_name(w->searchbar, GTK_ENTRY_ICON_PRIMARY, "edit-find-symbolic");
 	gtk_widget_set_size_request(GTK_WIDGET(w->searchbar), 300, -1);
 	gtk_header_bar_set_title_widget(w->bar, GTK_WIDGET(w->searchbar));
 	gtk_header_bar_set_show_title_buttons(w->bar, FALSE);
