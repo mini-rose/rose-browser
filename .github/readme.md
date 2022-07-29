@@ -20,11 +20,6 @@ In order to use the functionalities:
   - History
 
 ## Installation
+Run following command to build and install:
 
-Run following command to build and install
-(if necessary as root):
-
-```$ make clean install```
-
-## TODO
-- [ ] Add patch for xdg-open
+```# make clean install```
