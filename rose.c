@@ -406,11 +406,14 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 			return GDK_EVENT_STOP;
 
 		case gotop:
+			webkit_web_view_run_javascript(tab->webview,
+			                               "window.scrollTo(0,0)",
+										          NULL, NULL, NULL);
+			return GDK_EVENT_STOP;
+
 		case gobottom:
-			webkit_web_view_run_javascript(tab->webview, (key = gotop)
-			                               ? "self.scrollTo(0,0)"
-			                               : "self.scrollTo"
-			                               "(0,document.body.scrollHeight)",
+			webkit_web_view_run_javascript(tab->webview,
+			                               "window.scrollTo(0,document.body.scrollHeight)",
 			                               NULL, NULL, NULL);
 			return GDK_EVENT_STOP;
 
