@@ -212,9 +212,16 @@ RoseWebview *rose_webview_new()
 	return self;
 }
 
-void toggle_titlebar(RoseWindow *w, bool toggle)
+void toggle_titlebar(RoseWindow *w)
 {
 	GtkWidget *titlebar = gtk_window_get_titlebar(GTK_WINDOW(w->window));
+
+	if (gtk_widget_is_visible(titlebar)) {
+		gtk_widget_hide(titlebar);
+		gtk_window_set_focus(GTK_WINDOW(w->window),
+		                     GTK_WIDGET(w->tabs[w->tab]->webview));
+		return;
+	}
 
 	if (w->tabs[w->tab]->find_mode) {
 		gtk_entry_set_placeholder_text(w->searchbar, "Find");
@@ -224,33 +231,17 @@ void toggle_titlebar(RoseWindow *w, bool toggle)
 		return;
 	}
 
-	if (!toggle) {
-		gtk_widget_hide(titlebar);
-		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), false);
-		return;
-	}
-
-	if (gtk_widget_is_visible(titlebar)) {
-		gtk_widget_hide(titlebar);
-		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), false);
-	} else {
-		gtk_entry_set_placeholder_text(w->searchbar, "Search");
-		gtk_widget_show(titlebar);
-		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), true);
-		gtk_window_set_focus(GTK_WINDOW(w->window),
-		                     GTK_WIDGET(w->searchbar));
-		return;
-	}
-
+	gtk_entry_set_placeholder_text(w->searchbar, "Search");
+	gtk_widget_show(titlebar);
 	gtk_window_set_focus(GTK_WINDOW(w->window),
-		GTK_WIDGET(w->tabs[w->tab]->webview));
+								GTK_WIDGET(w->searchbar));
 }
 
 void append_history(const char *uri)
 {
-		char *cookiefile = calloc(
-				1, sizeof(char) * (strlen(options[CACHE]) + 32) + 1
-		);
+		char *cookiefile;
+		cookiefile= calloc(1,
+		                   sizeof(char) * (strlen(options[CACHE]) + 32) + 1);
 		sprintf(cookiefile, "%s/history", options[CACHE]);
 		FILE *cookie = fopen(cookiefile, "a");
 		fprintf(cookie, "%s\n", uri);
@@ -259,11 +250,14 @@ void append_history(const char *uri)
 }
 
 void load_changed_callback(WebKitWebView *v, WebKitLoadEvent e,
-		RoseWindow *w)
+                           RoseWindow *w)
 {
 	if (e != WEBKIT_LOAD_FINISHED) return;
 
-	toggle_titlebar(w, false);
+	GtkWidget *titlebar = gtk_window_get_titlebar(GTK_WINDOW(w->window));
+	gtk_widget_hide(titlebar);
+	gtk_window_set_focus(GTK_WINDOW(w->window),
+	                     GTK_WIDGET(w->tabs[w->tab]->webview));
 	gtk_notebook_set_tab_label_text(GTK_NOTEBOOK(w->tabview), GTK_WIDGET(v),
 	                                webkit_web_view_get_title(v));
 
@@ -338,7 +332,7 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 			return GDK_EVENT_STOP;
 
 		case search:
-			toggle_titlebar(w, true);
+			toggle_titlebar(w);
 			return GDK_EVENT_STOP;
 
 		case paste_url:
@@ -369,12 +363,12 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 
 		case find:
 			tab->find_mode = 1;
-			toggle_titlebar(w, false);
+			toggle_titlebar(w);
 			return GDK_EVENT_STOP;
 
 		case hidebar:
 			tab->find_mode = 0;
-			toggle_titlebar(w, false);
+			toggle_titlebar(w);
 			return GDK_EVENT_STOP;
 
 		case zoomin:
@@ -494,7 +488,7 @@ void searchbar_activate(GtkEntry *self, RoseWindow *w)
 		                              | WEBKIT_FIND_OPTIONS_WRAP_AROUND,
 		                              G_MAXUINT);
 		w->tabs[w->tab]->find_mode = 0;
-		toggle_titlebar(w, true);
+		toggle_titlebar(w);
 		return;
 	}
 
@@ -549,9 +543,9 @@ void run(char *url)
 	RoseWindow *window = rose_window_new(url);
 
 	s = g_settings_new_with_path("org.gtk.gtk4.Settings.Debug",
-	                                        "/org/gtk/gtk4/settings/debug/");
-
+	                             "/org/gtk/gtk4/settings/debug/");
 	g_settings_set_boolean(s, "enable-inspector-keybinding", false);
+
 	if (appearance[DARKMODE])
 		g_object_set(gtk_settings_get_default(),
 				"gtk-application-prefer-dark-theme", true, NULL);
