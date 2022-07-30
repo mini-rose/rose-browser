@@ -37,7 +37,8 @@ enum functions {
 	tabnext,
 	tabprev,
 	tabsel,
-	tabclose
+	tabclose,
+	hidebar
 };
 
 enum appearance {
@@ -64,6 +65,7 @@ enum options {
 
 typedef struct {
 	double zoom;
+	bool find_mode;
 	WebKitWebView *webview;
 	WebKitWebInspector *inspector;
 	WebKitFindOptions *findopts;
@@ -111,8 +113,8 @@ void load_uri(RoseWebview *view, const char *uri)
 	webkit_web_view_load_uri(view->webview, uri);
 }
 
-gboolean key_press_callback(RoseWindow *window, guint keyval,
-		guint keycode, GdkModifierType state)
+gboolean key_press_callback(RoseWindow *window, int keyval,
+		int keycode, GdkModifierType state)
 {
 	(void) keycode;
 
@@ -214,6 +216,14 @@ void toggle_titlebar(RoseWindow *w, bool toggle)
 {
 	GtkWidget *titlebar = gtk_window_get_titlebar(GTK_WINDOW(w->window));
 
+	if (w->tabs[w->tab]->find_mode) {
+		gtk_entry_set_placeholder_text(w->searchbar, "Find");
+		gtk_widget_show(titlebar);
+		gtk_window_set_focus(GTK_WINDOW(w->window),
+		                     GTK_WIDGET(w->searchbar));
+		return;
+	}
+
 	if (!toggle) {
 		gtk_widget_hide(titlebar);
 		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), false);
@@ -224,8 +234,12 @@ void toggle_titlebar(RoseWindow *w, bool toggle)
 		gtk_widget_hide(titlebar);
 		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), false);
 	} else {
+		gtk_entry_set_placeholder_text(w->searchbar, "Search");
 		gtk_widget_show(titlebar);
 		gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), true);
+		gtk_window_set_focus(GTK_WINDOW(w->window),
+		                     GTK_WIDGET(w->searchbar));
+		return;
 	}
 
 	gtk_window_set_focus(GTK_WINDOW(w->window),
@@ -353,6 +367,16 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 				webkit_web_view_get_find_controller(tab->webview));
 			return GDK_EVENT_STOP;
 
+		case find:
+			tab->find_mode = 1;
+			toggle_titlebar(w, false);
+			return GDK_EVENT_STOP;
+
+		case hidebar:
+			tab->find_mode = 0;
+			toggle_titlebar(w, false);
+			return GDK_EVENT_STOP;
+
 		case zoomin:
 			webkit_web_view_set_zoom_level(tab->webview, tab->zoom += 0.1);
 			return GDK_EVENT_STOP;
@@ -461,6 +485,19 @@ void destroy() { exit(0); }
 
 void searchbar_activate(GtkEntry *self, RoseWindow *w)
 {
+	if (w->tabs[w->tab]->find_mode) {
+		webkit_find_controller_search(webkit_web_view_get_find_controller(
+													w->tabs[w->tab]->webview),
+		                              gtk_entry_buffer_get_text(
+													w->searchbuf),
+		                              WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE
+		                              | WEBKIT_FIND_OPTIONS_WRAP_AROUND,
+		                              G_MAXUINT);
+		w->tabs[w->tab]->find_mode = 0;
+		toggle_titlebar(w, true);
+		return;
+	}
+
 	load_uri(w->tabs[w->tab],
 		gtk_entry_buffer_get_text(w->searchbuf));
 }
@@ -489,6 +526,7 @@ RoseWindow* rose_window_init()
 
 	g_signal_connect(w->searchbar, "activate",
 		G_CALLBACK(searchbar_activate), w);
+
 	g_signal_connect(G_OBJECT(w->window), "destroy",
 		G_CALLBACK(destroy), w);
 
