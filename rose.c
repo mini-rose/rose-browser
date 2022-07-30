@@ -129,7 +129,7 @@ static void rose_download(const char* filename, const char *uri)
 	int id = fork();
 	if (id == 0) {
 		setsid();
-		execlp("aria2c", "aria2c", uri, NULL);
+		execlp("aria2c", "aria2c", uri, (char *)NULL);
 		perror(" failed");
 		exit(1);
 	}
