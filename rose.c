@@ -8,8 +8,8 @@
 
 typedef struct {
 	unsigned modkey;
-	unsigned keycod;
-	short    funcid;
+	int keycod;
+	int funcid;
 } Key;
 
 enum functions {
@@ -63,37 +63,36 @@ enum options {
 
 #include "config.h"
 
-typedef struct {
+typedef struct __attribute__((packed)) {
 	double zoom;
 	bool find_mode;
-	WebKitWebView *webview;
-	WebKitWebInspector *inspector;
-	WebKitFindOptions *findopts;
-	GtkEventController *controller;
+	WebKitWebView *webview __attribute__((packed));
+	WebKitWebInspector *inspector __attribute__((packed));
+	WebKitFindOptions *findopts __attribute__((packed));
+	GtkEventController *controller __attribute__((packed));
 } RoseWebview;
 
 typedef struct {
-	short          tab;        /* current tab */
-	GtkWidget      *tabview;   /* GtkNotebook with all the tabs */
-	GtkWidget      *window;    /* app window */
-	GtkHeaderBar   *bar;      /* header bar */
-	GtkEntry       *searchbar;
-	GtkEntryBuffer *searchbuf;
-	RoseWebview    **tabs;     /* array of tabs */
+	int            tab;        /* current tab */
+	GtkWidget      *tabview __attribute__((packed));   /* GtkNotebook with all the tabs */
+	GtkWidget      *window __attribute__((packed));    /* app window */
+	GtkHeaderBar   *bar __attribute__((packed));      /* header bar */
+	GtkEntry       *searchbar __attribute__((packed));
+	GtkEntryBuffer *searchbuf __attribute__((packed));
+	RoseWebview    **tabs __attribute__((packed));     /* array of tabs */
 } RoseWindow;
 
 static bool handle_key(RoseWindow *w, int key, int keyval);
 
-void read_clipboard(GObject *object, GAsyncResult *res,
-		gpointer webview)
+static void read_clipboard(GObject *object, GAsyncResult *res,
+                              gpointer webview)
 {
 	GdkClipboard *clipboard = GDK_CLIPBOARD(object);
-	webkit_web_view_load_uri(
-		WEBKIT_WEB_VIEW(webview),
-		gdk_clipboard_read_text_finish(clipboard, res, NULL));
+	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(webview),
+	                         gdk_clipboard_read_text_finish(clipboard, res, NULL));
 }
 
-bool has_prefix(const char *uri)
+static bool has_prefix(const char *uri)
 {
 	return g_str_has_prefix(uri, "http://")
 		|| g_str_has_prefix(uri, "https://")
@@ -101,7 +100,7 @@ bool has_prefix(const char *uri)
 	 	|| g_str_has_prefix(uri, "about:");
 }
 
-void load_uri(RoseWebview *view, const char *uri)
+static void load_uri(RoseWebview *view, const char *uri)
 {
 	if (!has_prefix(uri)) {
 		char tmp[254];
@@ -113,7 +112,7 @@ void load_uri(RoseWebview *view, const char *uri)
 	webkit_web_view_load_uri(view->webview, uri);
 }
 
-gboolean key_press_callback(RoseWindow *window, int keyval,
+static gboolean key_press_callback(RoseWindow *window, int keyval,
 		int keycode, GdkModifierType state)
 {
 	(void) keycode;
@@ -125,7 +124,7 @@ gboolean key_press_callback(RoseWindow *window, int keyval,
 	return GDK_EVENT_PROPAGATE;
 }
 
-void rose_download(char *uri)
+static void rose_download(const char *uri)
 {
 	int id = fork();
 	if (id == 0) {
@@ -136,20 +135,20 @@ void rose_download(char *uri)
 	}
 }
 
-void response_reciver(WebKitDownload *d)
+static void response_reciver(WebKitDownload *d)
 {
-	char *uri = (char *) webkit_uri_response_get_uri(
+	const char *uri = webkit_uri_response_get_uri(
 	webkit_download_get_response(d));
 	rose_download(uri);
 }
 
-void download_callback(WebKitDownload *download)
+static void download_callback(WebKitDownload *download)
 {
 	g_signal_connect(G_OBJECT(download), "notify::response",
 		G_CALLBACK(response_reciver), NULL);
 }
 
-RoseWebview *rose_webview_new()
+static RoseWebview *rose_webview_new(void)
 {
 	WebKitUserContentManager *contentmanager;
 	WebKitCookieManager *cookiemanager;
@@ -211,7 +210,7 @@ RoseWebview *rose_webview_new()
 	return self;
 }
 
-void toggle_titlebar(RoseWindow *w)
+static void toggle_titlebar(RoseWindow *w)
 {
 	GtkWidget *titlebar = gtk_window_get_titlebar(GTK_WINDOW(w->window));
 
@@ -236,24 +235,26 @@ void toggle_titlebar(RoseWindow *w)
 								GTK_WIDGET(w->searchbar));
 }
 
-void append_history(const char *uri)
+static void append_history(const char *uri)
 {
 		char *cookiefile;
+		FILE *cookie;
 		cookiefile= calloc(1,
 		                   sizeof(char) * (strlen(options[CACHE]) + 32) + 1);
 		sprintf(cookiefile, "%s/history", options[CACHE]);
-		FILE *cookie = fopen(cookiefile, "a");
+		cookie = fopen(cookiefile, "a");
 		fprintf(cookie, "%s\n", uri);
 		fclose(cookie);
 		free(cookiefile);
 }
 
-void load_changed_callback(WebKitWebView *v, WebKitLoadEvent e,
+static void load_changed_callback(WebKitWebView *v, WebKitLoadEvent e,
                            RoseWindow *w)
 {
+	GtkWidget *titlebar;
 	if (e != WEBKIT_LOAD_FINISHED) return;
 
-	GtkWidget *titlebar = gtk_window_get_titlebar(GTK_WINDOW(w->window));
+	titlebar = gtk_window_get_titlebar(GTK_WINDOW(w->window));
 	gtk_widget_hide(titlebar);
 	gtk_window_set_focus(GTK_WINDOW(w->window),
 	                     GTK_WIDGET(w->tabs[w->tab]->webview));
@@ -266,10 +267,10 @@ void load_changed_callback(WebKitWebView *v, WebKitLoadEvent e,
 	}
 }
 
-void load_tab(RoseWindow *w, int n)
+static void load_tab(RoseWindow *w, int n)
 {
 	RoseWebview *tab;
-
+	GtkWidget *parent;
 	if (w->tabs[n]) return;
 
 	w->tabs[n] = rose_webview_new();
@@ -290,7 +291,7 @@ void load_tab(RoseWindow *w, int n)
 	gtk_notebook_append_page(GTK_NOTEBOOK(w->tabview),
 			GTK_WIDGET(w->tabs[w->tab]->webview), NULL);
 
-	GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(tab->webview));
+	parent = gtk_widget_get_parent(GTK_WIDGET(tab->webview));
 
 	if (appearance[ANIMATIONS]) {
 		gtk_stack_set_transition_duration(GTK_STACK(parent), 150);
@@ -301,7 +302,7 @@ void load_tab(RoseWindow *w, int n)
 	webkit_web_view_load_uri(tab->webview, options[HOMEPAGE]);
 }
 
-void move_tab(RoseWindow *w, int move)
+static void move_tab(RoseWindow *w, int move)
 {
 	if ((move == -1 && w->tab == 0) || (move == 1 && w->tab == 8)) return;
 	load_tab(w, w->tab += move);
@@ -437,10 +438,12 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 				GTK_NOTEBOOK(w->tabview), ((w->tab = keyval - 0x31)));
 			return GDK_EVENT_STOP;
 
-		case tabclose:
-			gtk_notebook_remove_page(GTK_NOTEBOOK(w->tabview), w->tab);
+		case tabclose: {
+			int start;
 
-			int start = w->tab;
+			gtk_notebook_remove_page(GTK_NOTEBOOK(w->tabview), w->tab);
+			start = w->tab;
+
 			w->tabs[w->tab] = NULL;
 
 			w->tab = gtk_notebook_get_current_page(
@@ -454,12 +457,13 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 			}
 
 			return GDK_EVENT_STOP;
+		}
 	}
 
 	return GDK_EVENT_PROPAGATE;
 }
 
-void rose_window_show(RoseWindow *w)
+static void rose_window_show(RoseWindow *w)
 {
 	if (!(appearance[WIDTH] && appearance[HEIGHT])) {
 		appearance[WIDTH] = 1280;
@@ -477,10 +481,12 @@ void rose_window_show(RoseWindow *w)
 		GTK_WIDGET(w->tabs[w->tab]->webview));
 }
 
-void destroy() { exit(0); }
+static _Noreturn void destroy(void) { exit(0); }
 
-void searchbar_activate(GtkEntry *self, RoseWindow *w)
+static void searchbar_activate(GtkEntry *self, RoseWindow *w)
 {
+	(void) self;
+
 	if (w->tabs[w->tab]->find_mode) {
 		webkit_find_controller_search(webkit_web_view_get_find_controller(
 													w->tabs[w->tab]->webview),
@@ -498,10 +504,11 @@ void searchbar_activate(GtkEntry *self, RoseWindow *w)
 		gtk_entry_buffer_get_text(w->searchbuf));
 }
 
-RoseWindow* rose_window_init()
+static RoseWindow* rose_window_init(void)
 {
+	RoseWindow *w;
 	setenv("GST_PLUGIN_FEATURE_RANK", "avdec_av1:NONE", 1);
-	RoseWindow *w = malloc(sizeof(RoseWindow));
+	w = malloc(sizeof(RoseWindow));
 	w->tab = 0;
 	w->window = gtk_window_new();
 	w->tabs = calloc(9, sizeof(RoseWebview *));
@@ -529,7 +536,7 @@ RoseWindow* rose_window_init()
 	return w;
 }
 
-RoseWindow *rose_window_new(char *uri)
+static RoseWindow* rose_window_new(char *uri)
 {
 	RoseWindow *w = rose_window_init();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), FALSE);
@@ -539,7 +546,7 @@ RoseWindow *rose_window_new(char *uri)
 	return w;
 }
 
-void run(char *url)
+static void run(char *url)
 {
 	GSettings *s;
 	RoseWindow *window = rose_window_new(url);
@@ -564,5 +571,4 @@ int main(int argc, char **argv)
 	gtk_init();
 	run((argc > 1) ? argv[1] : NULL);
 	while (1) g_main_context_iteration(NULL, TRUE);
-	return 0;
 }

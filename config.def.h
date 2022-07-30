@@ -1,9 +1,9 @@
-const char *options[] = {
+static char *options[] = {
 	[CACHE]    = NULL,
 	[HOMEPAGE] = "https://duckduckgo.com",
 };
 
-int appearance[] = {
+static int appearance[] = {
 	[HEIGHT]       = DEFAULT,
 	[WIDTH]        = DEFAULT,
 	[DARKMODE]     = 1,
@@ -11,13 +11,13 @@ int appearance[] = {
 	[ANIMATIONS]   = 1
 };
 
-int privacy[] = {
+static int privacy[] = {
 	[COOKIES] = 1,
 	[HISTORY] = 1,
 	[CACHING] = 1
 };
 
-const Key keys[] = {
+static Key keys[] = {
 	{ MODKEY, GDK_KEY_h,      goback      },
 	{ MODKEY, GDK_KEY_l,      goforward   },
 	{ MODKEY, GDK_KEY_y,      copy_url    },
