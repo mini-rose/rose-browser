@@ -1,4 +1,5 @@
 #define _XOPEN_SOURCE 500
+#define _POSIX_C_SOURCE 200112
 
 #include <webkit2/webkit2.h>
 
