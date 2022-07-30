@@ -166,7 +166,7 @@ static RoseWebview *rose_webview_new(void)
 
 	if (!options[CACHE] && privacy[CACHING]) {
 		const char *HOME = getenv("HOME");
-		size_t bufsiz = sizeof(char) * (strlen(HOME) + 32) + 1;
+		size_t bufsiz = strlen(HOME) + 33;
 		char *buf = calloc(1, bufsiz);
 
 		snprintf(buf, bufsiz - 1, "%s/.cache/rose/", HOME);
@@ -245,7 +245,7 @@ static void append_history(const char *uri)
 {
 		char *cookiefile;
 		FILE *cookie;
-		size_t bufsiz = sizeof(char) * (strlen(options[CACHE]) + 32) + 1;
+		size_t bufsiz = strlen(options[CACHE]) + 33;
 		cookiefile= calloc(1, bufsiz);
 		snprintf(cookiefile, bufsiz - 1, "%s/history", options[CACHE]);
 		cookie = fopen(cookiefile, "a");
