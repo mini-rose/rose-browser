@@ -113,7 +113,7 @@ static void load_uri(RoseWebview *view, const char *uri)
 }
 
 static gboolean key_press_callback(RoseWindow *window, int keyval,
-		int keycode, GdkModifierType state)
+		int keycode, int state)
 {
 	(void) keycode;
 
@@ -124,7 +124,7 @@ static gboolean key_press_callback(RoseWindow *window, int keyval,
 	return GDK_EVENT_PROPAGATE;
 }
 
-static void rose_download(const char *uri)
+static void rose_download(const char* filename, const char *uri)
 {
 	int id = fork();
 	if (id == 0) {
@@ -137,14 +137,16 @@ static void rose_download(const char *uri)
 
 static void response_reciver(WebKitDownload *d)
 {
-	const char *uri = webkit_uri_response_get_uri(
-	webkit_download_get_response(d));
-	rose_download(uri);
+	WebKitURIResponse *r = webkit_download_get_response(d);
+	const char *uri = webkit_uri_response_get_uri(r);
+	const char *filename = webkit_uri_response_get_suggested_filename(r);
+	rose_download(filename, uri);
 }
 
-static void download_callback(WebKitDownload *download)
+static void download_callback(WebKitDownload *d)
 {
-	g_signal_connect(G_OBJECT(download), "notify::response",
+	// TODO: fix download signal `response_reciver`
+	g_signal_connect(d, "notify::response",
 		G_CALLBACK(response_reciver), NULL);
 }
 
@@ -167,7 +169,7 @@ static RoseWebview *rose_webview_new(void)
 		options[CACHE] = buf;
 	}
 
-	context = (privacy[CACHING])
+	context = privacy[CACHING]
 		? webkit_web_context_new_with_website_data_manager(
 			webkit_website_data_manager_new(
 				"base-cache-directory", options[CACHE],
@@ -306,7 +308,7 @@ static void move_tab(RoseWindow *w, int move)
 {
 	if ((move == -1 && w->tab == 0) || (move == 1 && w->tab == 8)) return;
 	load_tab(w, w->tab += move);
-	(move == -1)
+	move == -1
 		? gtk_notebook_prev_page(GTK_NOTEBOOK(w->tabview))
 		: gtk_notebook_next_page(GTK_NOTEBOOK(w->tabview));
 }
@@ -392,7 +394,7 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 
 		case up:
 		case down:
-			webkit_web_view_run_javascript(tab->webview, (key == up)
+			webkit_web_view_run_javascript(tab->webview, key == up
 			                               ? "self.scrollBy(0,-200)"
 			                               : "self.scrollBy(0,200)", NULL,
 			                               NULL, NULL);
@@ -518,7 +520,8 @@ static RoseWindow* rose_window_init(void)
 	w->searchbar = GTK_ENTRY(gtk_entry_new_with_buffer(w->searchbuf));
 
 	gtk_entry_set_placeholder_text(w->searchbar, "Search");
-	gtk_entry_set_icon_from_icon_name(w->searchbar, GTK_ENTRY_ICON_PRIMARY, "edit-find-symbolic");
+	gtk_entry_set_icon_from_icon_name(w->searchbar, GTK_ENTRY_ICON_PRIMARY,
+	                                  "edit-find-symbolic");
 	gtk_widget_set_size_request(GTK_WIDGET(w->searchbar), 300, -1);
 	gtk_header_bar_set_title_widget(w->bar, GTK_WIDGET(w->searchbar));
 	gtk_header_bar_set_show_title_buttons(w->bar, FALSE);
@@ -542,7 +545,7 @@ static RoseWindow* rose_window_new(char *uri)
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), FALSE);
 	gtk_notebook_set_show_border(GTK_NOTEBOOK(w->tabview), FALSE);
 	load_tab(w, 0);
-	load_uri(w->tabs[0], (uri) ? uri : options[HOMEPAGE]);
+	load_uri(w->tabs[0], uri ? uri : options[HOMEPAGE]);
 	return w;
 }
 
@@ -569,6 +572,6 @@ static void run(char *url)
 int main(int argc, char **argv)
 {
 	gtk_init();
-	run((argc > 1) ? argv[1] : NULL);
+	run(argc > 1 ? argv[1] : NULL);
 	while (1) g_main_context_iteration(NULL, TRUE);
 }
