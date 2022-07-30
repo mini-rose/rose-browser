@@ -128,8 +128,7 @@ void rose_download(char *uri)
 	int id = fork();
 	if (id == 0) {
 		setsid();
-		char *argv[] = {"/bin/sh", "-c", "\"aria2c \\", uri, "\"", NULL};
-		execvp("/bin/sh", argv);
+		execlp("aria2c", "aria2c", uri, NULL);
 		perror(" failed");
 		exit(1);
 	}
