@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 500
+
 #include <webkit2/webkit2.h>
 
 #define LENGTH(x) (int)(sizeof(x) / sizeof(x[0]))
@@ -104,7 +106,7 @@ static void load_uri(RoseWebview *view, const char *uri)
 {
 	if (!has_prefix(uri)) {
 		char tmp[254];
-		sprintf(tmp, "https://duckduckgo.com/?q=%s", uri);
+		snprintf(tmp, sizeof(tmp) - 1, "https://duckduckgo.com/?q=%s", uri);
 		webkit_web_view_load_uri(view->webview, tmp);
 		return;
 	}
@@ -164,8 +166,10 @@ static RoseWebview *rose_webview_new(void)
 
 	if (!options[CACHE] && privacy[CACHING]) {
 		const char *HOME = getenv("HOME");
-		char *buf = calloc(1, sizeof(char) * (strlen(HOME) + 32) + 1);
-		sprintf(buf, "%s/.cache/rose/", HOME);
+		size_t bufsiz = sizeof(char) * (strlen(HOME) + 32) + 1;
+		char *buf = calloc(1, bufsiz);
+
+		snprintf(buf, bufsiz - 1, "%s/.cache/rose/", HOME);
 		options[CACHE] = buf;
 	}
 
@@ -241,9 +245,9 @@ static void append_history(const char *uri)
 {
 		char *cookiefile;
 		FILE *cookie;
-		cookiefile= calloc(1,
-		                   sizeof(char) * (strlen(options[CACHE]) + 32) + 1);
-		sprintf(cookiefile, "%s/history", options[CACHE]);
+		size_t bufsiz = sizeof(char) * (strlen(options[CACHE]) + 32) + 1;
+		cookiefile= calloc(1, bufsiz);
+		snprintf(cookiefile, bufsiz - 1, "%s/history", options[CACHE]);
 		cookie = fopen(cookiefile, "a");
 		fprintf(cookie, "%s\n", uri);
 		fclose(cookie);
