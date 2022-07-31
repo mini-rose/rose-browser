@@ -12,8 +12,6 @@ rose.o: rose.c
 config.h:
 	cp config.def.h $@
 
-.PHONY:
-
 install: rose
 	cp -f ./rose $(PREFIX)/bin/rose
 
@@ -24,3 +22,4 @@ clean:
 	rm -f rose rose.o
 
 .SILENT: config.h rose rose.o
+.PHONY: all install uninstall clean
