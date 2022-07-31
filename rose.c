@@ -34,16 +34,26 @@ typedef struct __attribute__((packed)) {
 } RoseWebview;
 
 typedef struct __attribute__((packed)) {
-	int            tab;
-	GtkWidget      *tabview;
-	GtkWidget      *window;
-	GtkHeaderBar   *bar;
-	GtkEntry       *searchbar;
-	GtkEntryBuffer *searchbuf;
-	RoseWebview    **tabs;
+	int             tab;
+	GtkWidget       *tabview;
+	GtkPaned        *layout;
+	GtkStackSidebar *sidebar;
+	GtkWidget       *window;
+	GtkHeaderBar    *bar;
+	GtkEntry        *searchbar;
+	GtkEntryBuffer  *searchbuf;
+	RoseWebview     **tabs;
 } RoseWindow;
 
 static bool handle_key(RoseWindow *w, int key, int keyval);
+
+static char* get_stack_page_name(int n)
+{
+	size_t size =  sizeof(char) + 1;
+	char *num = calloc(1, size);
+	snprintf(num, size, "%i", n);
+	return num;
+}
 
 static void read_clipboard(GObject *object, GAsyncResult *res,
                            gpointer webview)
@@ -225,8 +235,13 @@ static void load_changed(WebKitWebView *v, WebKitLoadEvent e,
 	gtk_widget_hide(titlebar);
 	gtk_window_set_focus(GTK_WINDOW(w->window),
 	                     GTK_WIDGET(w->tabs[w->tab]->webview));
-	gtk_notebook_set_tab_label_text(GTK_NOTEBOOK(w->tabview), GTK_WIDGET(v),
-	                                webkit_web_view_get_title(v));
+
+	gtk_stack_page_set_title(
+		gtk_stack_get_page(
+			GTK_STACK(w->tabview),
+			gtk_stack_get_visible_child(GTK_STACK(w->tabview))),
+			webkit_web_view_get_title(w->tabs[w->tab]->webview)
+	);
 
 	if (privacy[HISTORY]) {
 		const char *uri = webkit_web_view_get_uri(v);
@@ -252,13 +267,13 @@ static void load_tab(RoseWindow *w, int n)
 
 	gtk_widget_add_controller(GTK_WIDGET(tab->webview), tab->controller);
 
-	gtk_notebook_append_page(GTK_NOTEBOOK(w->tabview),
-			GTK_WIDGET(w->tabs[w->tab]->webview), NULL);
+
+	gtk_stack_add_titled(GTK_STACK(w->tabview), GTK_WIDGET(tab->webview),
+	                     get_stack_page_name(n), "");
 
 	if (appearance[ANIMATIONS]) {
-		parent = gtk_widget_get_parent(GTK_WIDGET(tab->webview));
-		gtk_stack_set_transition_duration(GTK_STACK(parent), 150);
-		gtk_stack_set_transition_type(GTK_STACK(parent),
+		gtk_stack_set_transition_duration(GTK_STACK(w->tabview), 150);
+		gtk_stack_set_transition_type(GTK_STACK(w->tabview),
 				GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 	}
 
@@ -269,9 +284,9 @@ static void move_tab(RoseWindow *w, int move)
 {
 	if ((move == -1 && w->tab == 0) || (move == 1 && w->tab == 8)) return;
 	load_tab(w, w->tab += move);
-	move == -1
-		? gtk_notebook_prev_page(GTK_NOTEBOOK(w->tabview))
-		: gtk_notebook_next_page(GTK_NOTEBOOK(w->tabview));
+	gtk_stack_set_visible_child(GTK_STACK(w->tabview),
+		gtk_stack_get_child_by_name(GTK_STACK(w->tabview),
+			get_stack_page_name(w->tab)));
 }
 
 bool handle_key(RoseWindow *w, int func, int key)
@@ -381,31 +396,39 @@ bool handle_key(RoseWindow *w, int func, int key)
 			                               NULL, NULL, NULL);
 			break;
 
-		case tabshow:
-			gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview),
-			                           gtk_notebook_get_show_tabs(
-			                           GTK_NOTEBOOK(w->tabview)));
-			break;
-
 		case tabnext:
 		case tabprev:
 			move_tab(w, func == tabnext ? 1 : -1);
 			break;
 
-		case tabsel: gtk_notebook_set_current_page(GTK_NOTEBOOK(w->tabview),
-			                                        ((w->tab = key - 0x31)));
+		case tabsel:
+			gtk_stack_set_visible_child(
+				GTK_STACK(w->tabview),
+				gtk_stack_get_child_by_name(
+					GTK_STACK(w->tabview),
+					get_stack_page_name((w->tab = key - 0x31))
+				)
+			);
+
 			break;
 
 		case tabclose: {
 			int start;
 
-			gtk_notebook_remove_page(GTK_NOTEBOOK(w->tabview), w->tab);
-			start = w->tab;
+			gtk_stack_remove(GTK_STACK(w->tabview),
+				gtk_stack_get_child_by_name(
+					GTK_STACK(w->tabview),
+					get_stack_page_name(w->tab)
+			));
 
-			w->tabs[w->tab] = NULL;
+			start = w->tab--;
 
-			w->tab = gtk_notebook_get_current_page(
-					GTK_NOTEBOOK(w->tabview));
+			gtk_stack_set_visible_child(GTK_STACK(w->tabview),
+				gtk_stack_get_child_by_name(
+					GTK_STACK(w->tabview),
+					get_stack_page_name(w->tab)
+				)
+			);
 
 			for (int i = start; i < 8; i++) {
 				if (!w->tabs[i + 1]) break;
@@ -464,21 +487,28 @@ static RoseWindow* rose_window_init(void)
 	w->tab = 0;
 	w->window = gtk_window_new();
 	w->tabs = calloc(9, sizeof(RoseWebview *));
-	w->tabview = gtk_notebook_new();
+	w->tabview = gtk_stack_new();
 	w->bar = GTK_HEADER_BAR(gtk_header_bar_new());
 	w->searchbuf = gtk_entry_buffer_new("", 0);
 	w->searchbar = GTK_ENTRY(gtk_entry_new_with_buffer(w->searchbuf));
+	w->layout = GTK_PANED(gtk_paned_new(GTK_ORIENTATION_HORIZONTAL));
+	w->sidebar = GTK_STACK_SIDEBAR(gtk_stack_sidebar_new());
 
+	gtk_stack_sidebar_set_stack(w->sidebar, GTK_STACK(w->tabview));
+	gtk_paned_set_start_child(w->layout, GTK_WIDGET(w->sidebar));
+	gtk_paned_set_end_child(w->layout, GTK_WIDGET(w->tabview));
 	gtk_entry_set_placeholder_text(w->searchbar, "Search");
 	gtk_entry_set_icon_from_icon_name(w->searchbar, GTK_ENTRY_ICON_PRIMARY,
 	                                  "edit-find-symbolic");
+
+	gtk_widget_set_size_request(GTK_WIDGET(w->sidebar), -1, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(w->tabview), 300, -1);
 	gtk_widget_set_size_request(GTK_WIDGET(w->searchbar), 300, -1);
 	gtk_header_bar_set_title_widget(w->bar, GTK_WIDGET(w->searchbar));
 	gtk_header_bar_set_show_title_buttons(w->bar, 0);
 	gtk_window_set_titlebar(GTK_WINDOW(w->window), GTK_WIDGET(w->bar));
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(w->window), 1);
-	gtk_window_set_child(GTK_WINDOW(w->window), w->tabview);
-	gtk_widget_set_focus_child(w->window, w->tabview);
+	gtk_window_set_child(GTK_WINDOW(w->window), GTK_WIDGET(w->layout));
 
 	g_signal_connect(w->searchbar, "activate",
 		(void*) searchbar_activate, w);
@@ -492,8 +522,6 @@ static RoseWindow* rose_window_init(void)
 static RoseWindow* rose_window_new(char *uri)
 {
 	RoseWindow *w = rose_window_init();
-	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), 0);
-	gtk_notebook_set_show_border(GTK_NOTEBOOK(w->tabview), 0);
 	load_tab(w, 0);
 	load_uri(w->tabs[0], uri ? uri : options[HOMEPAGE]);
 	return w;
@@ -506,7 +534,7 @@ static void run(char *url)
 
 	s = g_settings_new_with_path("org.gtk.gtk4.Settings.Debug",
 	                             "/org/gtk/gtk4/settings/debug/");
-	g_settings_set_boolean(s, "enable-inspector-keybinding", 0);
+	g_settings_set_boolean(s, "enable-inspector-keybinding", true);
 
 	if (appearance[DARKMODE])
 		g_object_set(gtk_settings_get_default(),
