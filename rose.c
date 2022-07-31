@@ -3,36 +3,30 @@
 
 #include <webkit2/webkit2.h>
 
-#define LENGTH(x) (int)(sizeof(x) / sizeof(x[0]))
-
 #define ALTKEY 1 << 3
 #define MODKEY 1 << 2
 #define MODSFT 5
 
 typedef struct {
-	unsigned modkey;
-	int keycod;
-	int funcid;
+	unsigned mod;
+	int key, func;
 } Key;
 
 enum functions {
 	goback, goforward, copy_url, paste_url, fullscreen, inspector, search,
 	find, findnext, findprev, zoomin, zoomout, zoomreset, down, up, reload,
 	reloadforce, history, gotop, gobottom, tabshow, tabnext, tabprev,
-	tabsel, tabclose, hidebar
-};
+	tabsel, tabclose, hidebar };
 
 enum appearance { HEIGHT, WIDTH, DARKMODE, SMOOTHSCROLL, ANIMATIONS };
-
 enum privacy { CACHING, COOKIES, HISTORY };
-
 enum options { DEFAULT, CACHE, HOMEPAGE };
 
 #include "config.h"
 
 typedef struct __attribute__((packed)) {
 	double zoom;
-	bool find_mode;
+	unsigned find_mode;
 	WebKitWebView *webview;
 	WebKitWebInspector *inspector;
 	WebKitFindOptions *findopts;
@@ -40,13 +34,13 @@ typedef struct __attribute__((packed)) {
 } RoseWebview;
 
 typedef struct __attribute__((packed)) {
-	int            tab;        /* current tab */
-	GtkWidget      *tabview;   /* GtkNotebook with all the tabs */
-	GtkWidget      *window;    /* app window */
-	GtkHeaderBar   *bar;      /* header bar */
+	int            tab;
+	GtkWidget      *tabview;
+	GtkWidget      *window;
+	GtkHeaderBar   *bar;
 	GtkEntry       *searchbar;
 	GtkEntryBuffer *searchbuf;
-	RoseWebview    **tabs;     /* array of tabs */
+	RoseWebview    **tabs;
 } RoseWindow;
 
 static bool handle_key(RoseWindow *w, int key, int keyval);
@@ -80,16 +74,16 @@ static void load_uri(RoseWebview *view, const char *uri)
 	webkit_web_view_load_uri(view->webview, tmp);
 }
 
-static gboolean key_press_callback(RoseWindow *window, int keyval,
-                                   int keycode, unsigned state)
+static gboolean key_press(RoseWindow *window, int key,
+                                   int keycode, unsigned mod)
 {
 	(void) keycode;
 
-	for (int i = 0; i < LENGTH(keys); i++)
-		if (keys[i].modkey == state && keys[i].keycod == keyval)
-			return handle_key(window, keys[i].funcid, keyval);
+	for (int i = 0; i < sizeof(keys) / sizeof(keys[0]); i++)
+		if (keys[i].mod == mod && keys[i].key == key)
+			return handle_key(window, keys[i].func, key);
 
-	return GDK_EVENT_PROPAGATE;
+	return 0;
 }
 
 static void rose_download(const char *uri)
@@ -111,7 +105,7 @@ static void response_reciver(WebKitDownload *d)
 	rose_download(uri);
 }
 
-static void download_callback(WebKitDownload *d)
+static void download(WebKitDownload *d)
 {
 	g_signal_connect(d, "notify::response",
 		(void*) response_reciver, NULL);
@@ -163,14 +157,12 @@ static RoseWebview *rose_webview_new(void)
 	}
 
 	settings = webkit_settings_new_with_settings(
-		"enable-developer-extras", TRUE,
-		"enable-media-stream", TRUE,
-		"javascript-can-access-clipboard", TRUE,
-		"enable-smooth-scrolling", TRUE, NULL);
+		"enable-developer-extras", 1,
+		"enable-media-stream", 1,
+		"javascript-can-access-clipboard", 1,
+		"enable-smooth-scrolling", 1, NULL);
 
 	contentmanager = webkit_user_content_manager_new();
-	webkit_settings_set_user_agent_with_application_details(settings,
-	                                                        "Rose", "0.2");
 
 	webkit_web_context_set_process_model(context, 1);
 
@@ -180,9 +172,7 @@ static RoseWebview *rose_webview_new(void)
 		"web-context", context, NULL);
 
 	self->inspector = webkit_web_view_get_inspector(self->webview);
-
-	g_signal_connect(context, "download-started",
-		(void*) download_callback, NULL);
+	g_signal_connect(context, "download-started", (void*) download, NULL);
 
 	return self;
 }
@@ -225,7 +215,7 @@ static void append_history(const char *uri)
 		free(cookiefile);
 }
 
-static void load_changed_callback(WebKitWebView *v, WebKitLoadEvent e,
+static void load_changed(WebKitWebView *v, WebKitLoadEvent e,
                                   RoseWindow *w)
 {
 	GtkWidget *titlebar;
@@ -254,23 +244,19 @@ static void load_tab(RoseWindow *w, int n)
 	tab = w->tabs[n];
 	tab->controller = gtk_event_controller_key_new();
 
-	g_signal_connect_swapped(
-		tab->controller, "key-pressed",
-		(void*) key_press_callback, w);
+	g_signal_connect_swapped(tab->controller, "key-pressed",
+	                         (void*) key_press, w);
 
-	g_signal_connect(
-		tab->webview, "load-changed",
-		(void*) load_changed_callback, w);
+	g_signal_connect(tab->webview, "load-changed",
+	                 (void*) load_changed, w);
 
-	gtk_widget_add_controller(
-		GTK_WIDGET(tab->webview), tab->controller);
+	gtk_widget_add_controller(GTK_WIDGET(tab->webview), tab->controller);
 
 	gtk_notebook_append_page(GTK_NOTEBOOK(w->tabview),
 			GTK_WIDGET(w->tabs[w->tab]->webview), NULL);
 
-	parent = gtk_widget_get_parent(GTK_WIDGET(tab->webview));
-
 	if (appearance[ANIMATIONS]) {
+		parent = gtk_widget_get_parent(GTK_WIDGET(tab->webview));
 		gtk_stack_set_transition_duration(GTK_STACK(parent), 150);
 		gtk_stack_set_transition_type(GTK_STACK(parent),
 				GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
@@ -288,35 +274,35 @@ static void move_tab(RoseWindow *w, int move)
 		: gtk_notebook_next_page(GTK_NOTEBOOK(w->tabview));
 }
 
-bool handle_key(RoseWindow *w, int key, int keyval)
+bool handle_key(RoseWindow *w, int func, int key)
 {
 	RoseWebview *tab = w->tabs[w->tab];
 
-
-	switch (key) {
+	switch (func) {
 		case goback:
 			webkit_web_view_go_back(tab->webview);
-			return GDK_EVENT_STOP;
+			break;
 
 		case goforward:
 			webkit_web_view_go_forward(tab->webview);
-			return GDK_EVENT_STOP;
+			break;
 
 		case copy_url:
 			gdk_clipboard_set_text(gdk_display_get_clipboard(
 			                       gdk_display_get_default()),
 			                       webkit_web_view_get_uri(tab->webview));
-			return GDK_EVENT_STOP;
+			break;
 
 		case search:
+			tab->find_mode = 0;
 			toggle_titlebar(w);
-			return GDK_EVENT_STOP;
+			break;
 
 		case paste_url:
 			gdk_clipboard_read_text_async(gdk_display_get_clipboard(
 			                              gdk_display_get_default()), NULL,
 			                              read_clipboard, tab->webview);
-			return GDK_EVENT_STOP;
+			break;
 
 		case fullscreen:
 			if (gtk_window_is_fullscreen(GTK_WINDOW(gtk_widget_get_root(
@@ -326,92 +312,89 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 			else
 				gtk_window_fullscreen(GTK_WINDOW(gtk_widget_get_root(
 					GTK_WIDGET(tab->webview))));
-			return GDK_EVENT_STOP;
+			break;
 
 		case findnext:
 			webkit_find_controller_search_next(
 				webkit_web_view_get_find_controller(tab->webview));
-			return GDK_EVENT_STOP;
+			break;
 
 		case findprev:
 			webkit_find_controller_search_previous(
 				webkit_web_view_get_find_controller(tab->webview));
-			return GDK_EVENT_STOP;
+			break;
 
 		case find:
 			tab->find_mode = 1;
 			toggle_titlebar(w);
-			return GDK_EVENT_STOP;
+			break;
 
 		case hidebar:
 			tab->find_mode = 0;
 			toggle_titlebar(w);
-			return GDK_EVENT_STOP;
+			break;
 
 		case zoomin:
 			webkit_web_view_set_zoom_level(tab->webview, tab->zoom += 0.1);
-			return GDK_EVENT_STOP;
+			break;
 
 		case zoomout:
 			webkit_web_view_set_zoom_level(tab->webview, tab->zoom -= 0.1);
-			return GDK_EVENT_STOP;
+			break;
 
 		case zoomreset:
 			webkit_web_view_set_zoom_level(tab->webview, tab->zoom = 1);
-			return GDK_EVENT_STOP;
+			break;
 
 		case inspector:
-			tab->inspector = webkit_web_view_get_inspector(tab->webview);
 			if (webkit_web_inspector_is_attached(tab->inspector))
 				webkit_web_inspector_close(tab->inspector);
 			else webkit_web_inspector_show(tab->inspector);
-			return GDK_EVENT_STOP;
+			break;
 
 		case up:
 		case down:
-			webkit_web_view_run_javascript(tab->webview, key == up
+			webkit_web_view_run_javascript(tab->webview, func == up
 			                               ? "self.scrollBy(0,-200)"
 			                               : "self.scrollBy(0,200)", NULL,
 			                               NULL, NULL);
-			return GDK_EVENT_STOP;
+			break;
 
 		case reload:
 			webkit_web_view_reload(tab->webview);
-			return GDK_EVENT_STOP;
+			break;
 
 		case reloadforce:
 			webkit_web_view_reload_bypass_cache(tab->webview);
-			return GDK_EVENT_STOP;
+			break;
 
 		case gotop:
 			webkit_web_view_run_javascript(tab->webview,
 			                               "window.scrollTo(0,0)",
 			                               NULL, NULL, NULL);
-			return GDK_EVENT_STOP;
+			break;
 
 		case gobottom:
 			webkit_web_view_run_javascript(tab->webview,
 			                               "window.scrollTo"
 			                               "(0,document.body.scrollHeight)",
 			                               NULL, NULL, NULL);
-			return GDK_EVENT_STOP;
+			break;
 
 		case tabshow:
 			gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview),
 			                           gtk_notebook_get_show_tabs(
 			                           GTK_NOTEBOOK(w->tabview)));
-			return GDK_EVENT_STOP;
+			break;
 
 		case tabnext:
 		case tabprev:
-			move_tab(w, key == tabnext ? 1 : -1);
-			return GDK_EVENT_STOP;
+			move_tab(w, func == tabnext ? 1 : -1);
+			break;
 
-		case tabsel:
-			gtk_notebook_get_n_pages(GTK_NOTEBOOK(w->tabview));
-			gtk_notebook_set_current_page(GTK_NOTEBOOK(w->tabview),
-			                              ((w->tab = keyval - 0x31)));
-			return GDK_EVENT_STOP;
+		case tabsel: gtk_notebook_set_current_page(GTK_NOTEBOOK(w->tabview),
+			                                        ((w->tab = key - 0x31)));
+			break;
 
 		case tabclose: {
 			int start;
@@ -430,29 +413,27 @@ bool handle_key(RoseWindow *w, int key, int keyval)
 				w->tabs[i + 1] = NULL;
 			}
 
-			return GDK_EVENT_STOP;
+			break;
 		}
+
+		default:
+			return 0;
 	}
 
-	return GDK_EVENT_PROPAGATE;
+	return 1;
 }
 
 static void rose_window_show(RoseWindow *w)
 {
-	if (!(appearance[WIDTH] && appearance[HEIGHT])) {
-		appearance[WIDTH] = 1280;
-		appearance[HEIGHT] = 720;
-	}
+	if (!(appearance[WIDTH] && appearance[HEIGHT]))
+		appearance[WIDTH] = 1280, appearance[HEIGHT] = 720;
 
 	gtk_window_set_default_size(GTK_WINDOW(w->window), appearance[WIDTH],
 	                            appearance[HEIGHT]);
-
 	gtk_widget_remove_css_class(w->window, "solid-csd");
 	gtk_widget_hide(GTK_WIDGET(gtk_window_get_titlebar(
 	                GTK_WINDOW(w->window))));
 	gtk_widget_show(w->window);
-	gtk_window_set_focus(GTK_WINDOW(w->window),
-		GTK_WIDGET(w->tabs[w->tab]->webview));
 }
 
 static _Noreturn void destroy(void) { exit(0); }
@@ -462,19 +443,17 @@ static void searchbar_activate(GtkEntry *self, RoseWindow *w)
 	(void) self;
 
 	if (w->tabs[w->tab]->find_mode) {
-		webkit_find_controller_search(webkit_web_view_get_find_controller(
-		                              w->tabs[w->tab]->webview),
-		                              gtk_entry_buffer_get_text(w->searchbuf),
-		                              WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE
-		                              | WEBKIT_FIND_OPTIONS_WRAP_AROUND,
-		                              G_MAXUINT);
-		w->tabs[w->tab]->find_mode = 0;
-		toggle_titlebar(w);
+		load_uri(w->tabs[w->tab], gtk_entry_buffer_get_text(w->searchbuf));
 		return;
 	}
 
-	load_uri(w->tabs[w->tab],
-		gtk_entry_buffer_get_text(w->searchbuf));
+	webkit_find_controller_search(webkit_web_view_get_find_controller(
+											w->tabs[w->tab]->webview),
+											gtk_entry_buffer_get_text(w->searchbuf),
+											WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE
+											| WEBKIT_FIND_OPTIONS_WRAP_AROUND,
+											G_MAXUINT);
+	toggle_titlebar(w);
 }
 
 static RoseWindow* rose_window_init(void)
@@ -495,16 +474,16 @@ static RoseWindow* rose_window_init(void)
 	                                  "edit-find-symbolic");
 	gtk_widget_set_size_request(GTK_WIDGET(w->searchbar), 300, -1);
 	gtk_header_bar_set_title_widget(w->bar, GTK_WIDGET(w->searchbar));
-	gtk_header_bar_set_show_title_buttons(w->bar, FALSE);
+	gtk_header_bar_set_show_title_buttons(w->bar, 0);
 	gtk_window_set_titlebar(GTK_WINDOW(w->window), GTK_WIDGET(w->bar));
-	gtk_window_set_destroy_with_parent(GTK_WINDOW(w->window), TRUE);
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(w->window), 1);
 	gtk_window_set_child(GTK_WINDOW(w->window), w->tabview);
 	gtk_widget_set_focus_child(w->window, w->tabview);
 
 	g_signal_connect(w->searchbar, "activate",
 		(void*) searchbar_activate, w);
 
-	g_signal_connect(G_OBJECT(w->window), "destroy",
+	g_signal_connect(w->window, "destroy",
 		(void*) destroy, w);
 
 	return w;
@@ -513,8 +492,8 @@ static RoseWindow* rose_window_init(void)
 static RoseWindow* rose_window_new(char *uri)
 {
 	RoseWindow *w = rose_window_init();
-	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), FALSE);
-	gtk_notebook_set_show_border(GTK_NOTEBOOK(w->tabview), FALSE);
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(w->tabview), 0);
+	gtk_notebook_set_show_border(GTK_NOTEBOOK(w->tabview), 0);
 	load_tab(w, 0);
 	load_uri(w->tabs[0], uri ? uri : options[HOMEPAGE]);
 	return w;
@@ -527,15 +506,15 @@ static void run(char *url)
 
 	s = g_settings_new_with_path("org.gtk.gtk4.Settings.Debug",
 	                             "/org/gtk/gtk4/settings/debug/");
-	g_settings_set_boolean(s, "enable-inspector-keybinding", false);
+	g_settings_set_boolean(s, "enable-inspector-keybinding", 0);
 
 	if (appearance[DARKMODE])
 		g_object_set(gtk_settings_get_default(),
-		             "gtk-application-prefer-dark-theme", true, NULL);
+		             "gtk-application-prefer-dark-theme", 1, NULL);
 
 	if (!appearance[ANIMATIONS])
 		g_object_set(gtk_settings_get_default(), "gtk-enable-animations",
-		             false, NULL);
+		             0, NULL);
 
 	rose_window_show(window);
 }
@@ -544,5 +523,5 @@ int main(int argc, char **argv)
 {
 	gtk_init();
 	run(argc > 1 ? argv[1] : NULL);
-	while (1) g_main_context_iteration(NULL, TRUE);
+	while (1) g_main_context_iteration(NULL, 1);
 }
