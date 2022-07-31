@@ -1,24 +1,28 @@
-<h1 align="center">Rose Browser</h1>
-<p align="center">Simple browser based on webkit2-5.0/GTK4.</p>
-
-## Showcase
-
+<h3 align="center">Rose Browser</h1>
+<h4 align="center">Simple browser based on webkit2gtk-5.0</h4>
+&nbsp;
 <img src="https://github.com/mini-rose/rose/blob/master/.github/screenshots/homepage.png?raw=true">
-<img src="https://github.com/mini-rose/rose/blob/master/.github/screenshots/youtube.png?raw=true">
 
-## Requirements
-In order to build rose you need gtk4 and webkit2gtk-5.0.
+#### Requirements
+In order to build rose you need gtk4 and webkit2gtk-5.0. <br>
+For more features see [this](https://github.com/mini-rose/rose/wiki#additional-features).
 
-In order to use the functionalities:
-  - video support: gst-libav, gst-plugins-good
-  - download: aria2c
-
-## Features
+#### Features
   - Builin tabs
   - Privacy options
-  - History
+  - cli support
+  - easy to extend
 
-## Installation
-Run following command to build and install:
+#### Installation
+See wiki page to see how to [build and use](https://github.com/mini-rose/rose/wiki#build--use).
 
-```# make clean install```
+#
+### 👐 Contribute
+See [contributing.md](https://github.com/mini-rose/rose/.github/contributing.md).
+
+### 📜 License
+Rose is released under own license, which grants the following permissions:
+-   Commercial use
+-   Distribution
+-   Modification
+-   Private use
