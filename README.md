@@ -1,5 +1,3 @@
-<img src="https://github.com/mini-rose/rose/blob/master/.github/screenshots/homepage.png?raw=true">
-
 <h3 align=center> Rose Browser</h1>
 <h4 align=center>Minimal browser based on webkit2gtk</h4>
 
