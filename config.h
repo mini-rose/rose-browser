@@ -15,10 +15,12 @@
 /* See more: https://webkitgtk.org/reference/webkit2gtk/stable/class.Settings.html */
 #define WEBKIT \
 	"enable-back-forward-navigation-gestures", true, \
-	"enable-developer-extras", true
+	"enable-developer-extras", true, \
+	"enable-smooth-scrolling", false
 
 #define GTK \
-	"gtk-application-prefer-dark-theme", true
+	"gtk-application-prefer-dark-theme", true, \
+	"gtk-enable-animations", false
 
 #define HOME "https://duckduckgo.com"
 #define SEARCH "https://duckduckgo.com/?q=%s"

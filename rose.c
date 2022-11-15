@@ -10,10 +10,7 @@
  * Author: fenze <contact@fenze.dev>
  */
 
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
 #include <webkit2/webkit2.h>
-
 #include "config.h"
 
 #define CACHE                                               \
@@ -31,7 +28,6 @@
 enum {
 	_SEARCH, _FIND
 };
-
 
 static int entry_mode;
 static GtkWindow *window;
@@ -125,7 +121,8 @@ void notebook_append(GtkNotebook *notebook, const char *uri)
 	int n = gtk_notebook_append_page(notebook, GTK_WIDGET(view), NULL);
 	gtk_notebook_set_tab_reorderable(notebook, GTK_WIDGET(view), true);
 	gtk_widget_show_all(GTK_WIDGET(window));
-	webkit_web_view_set_background_color (view, &rgba);
+	gtk_widget_hide(GTK_WIDGET(bar));
+	webkit_web_view_set_background_color(view, rgba);
 	load_uri(view, (uri) ? uri : HOME);
 	gtk_notebook_set_current_page(notebook, n);
 }
@@ -299,7 +296,8 @@ int keypress(void *self, GdkEvent *e, GtkNotebook *notebook)
 void search_activate(GtkEntry *self, GtkNotebook *notebook)
 {
 	if (entry_mode == _SEARCH)
-		load_uri(notebook_get_webview(notebook), gtk_entry_buffer_get_text(search_buf));
+		load_uri(notebook_get_webview(notebook),
+			 gtk_entry_buffer_get_text(search_buf));
 	else if (entry_mode == _FIND)
 		webkit_find_controller_search(
 			webkit_web_view_get_find_controller(
@@ -352,6 +350,8 @@ void setup(GtkNotebook *notebook, const char* uri)
 	window_init(notebook);
 	notebook_init(notebook, uri);
 
+	g_object_set(gtk_settings_get_default(), GTK, NULL);
+
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(notebook));
 	gtk_widget_show_all(GTK_WIDGET(window));
 	gtk_widget_hide(GTK_WIDGET(bar));
@@ -361,7 +361,6 @@ int main(int argc, char **argv)
 {
 	GtkNotebook *notebook;
 	gtk_init(NULL, NULL);
-	g_object_set(gtk_settings_get_default(), GTK, NULL);
 	setup(notebook, argc > 1 ? argv[1] : NULL);
 	gtk_main();
 }
