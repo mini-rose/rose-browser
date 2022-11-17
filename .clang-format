@@ -1,0 +1,37 @@
+# vim:ft=yaml
+
+IndentWidth: 8
+BreakBeforeBraces: Linux
+UseTab: Always
+AlignArrayOfStructures: Left
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: True
+AlwaysBreakBeforeMultilineStrings: True
+BreakBeforeTernaryOperators: True
+BreakStringLiterals: True
+ColumnLimit: 100
+IncludeBlocks: Regroup
+KeepEmptyLinesAtTheStartOfBlocks: True
+RemoveBracesLLVM: True
+SortIncludes: CaseInsensitive
+SortUsingDeclarations: True
+SpaceAfterLogicalNot: True
+SpaceAfterCStyleCast: True
+SpaceAfterTemplateKeyword: False
+PointerAlignment: Right
+SpaceBeforeAssignmentOperators: True
+SpaceBeforeCaseColon: False
+SpaceBeforeCpp11BracedList: True
+SpaceBeforeCtorInitializerColon: False
+SpaceBeforeInheritanceColon: False
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+    AfterControlStatements: True
+    AfterForeachMacros: True
+    AfterFunctionDeclarationName: False
+    AfterFunctionDefinitionName: False
+    AfterIfMacros: True
+    AfterOverloadedOperator: False
+    BeforeNonEmptyParentheses: False
+SpaceBeforeRangeBasedForLoopColon: True

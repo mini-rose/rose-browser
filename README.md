@@ -7,7 +7,8 @@
   - ~400L code base
   - custom gtk and websites css
   - hackable without any knowledge
-  
+  - builtin script nativefier
+
 #
 ### 👐 Contribute
 See [contributing.md](https://github.com/mini-rose/rose/.github/contributing.md).
