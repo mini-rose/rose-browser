@@ -1,9 +1,0 @@
-#!/bin/sh
-
-test "$1" = "--help" && {
-	echo "usage: rose-nativefier <alias> <url>"
-}
-
-test -z "$1" || test -z "$2" || {
-	echo -e "#!/bin/sh\n\nrose $2" > /usr/bin/$1
-}

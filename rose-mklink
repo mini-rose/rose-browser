@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [ "$1" = "--help" ] || [ -z "$1" ]; then
+	echo -e "usage: rose-mklink <alias> <url>\n"
+	echo "Create a /usr/bin link to a website."
+fi
+
+test -z "$1" || test -z "$2" || {
+	[ -f "/usr/bin/$1" ] && {
+		echo "/usr/bin/$1 already exists, remove it first"
+		exit 1
+	}
+
+	echo -e "#!/bin/sh\n\nrose $2" > /usr/bin/$1
+	chmod +x /usr/bin/$1
+}

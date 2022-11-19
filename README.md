@@ -7,7 +7,7 @@
   - ~400L code base
   - custom gtk and websites css
   - hackable without any knowledge
-  - builtin script nativefier
+  - builtin rose-mklink script for in-shell static links
 
 #
 ### 👐 Contribute
