@@ -27,11 +27,11 @@ SpaceBeforeCtorInitializerColon: False
 SpaceBeforeInheritanceColon: False
 SpaceBeforeParens: Custom
 SpaceBeforeParensOptions:
-    AfterControlStatements: True
-    AfterForeachMacros: True
-    AfterFunctionDeclarationName: False
-    AfterFunctionDefinitionName: False
-    AfterIfMacros: True
-    AfterOverloadedOperator: False
-    BeforeNonEmptyParentheses: False
+  AfterControlStatements: True
+  AfterForeachMacros: True
+  AfterFunctionDeclarationName: False
+  AfterFunctionDefinitionName: False
+  AfterIfMacros: True
+  AfterOverloadedOperator: False
+  BeforeNonEmptyParentheses: False
 SpaceBeforeRangeBasedForLoopColon: True
