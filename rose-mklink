@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 test "$1" = "--help" || test -z "$1" && {
 	echo -e "usage: rose-mklink <alias> <url>\n"
