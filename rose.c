@@ -296,7 +296,7 @@ void setup(GtkNotebook *notebook, const char *uri)
 	bar = GTK_HEADER_BAR(gtk_header_bar_new());
 	search_buf = GTK_ENTRY_BUFFER(gtk_entry_buffer_new("", 0));
 	search = GTK_ENTRY(gtk_entry_new_with_buffer(search_buf));
-
+        gtk_window_set_default_size(window, WIDTH, HEIGHT);
 	window_init(notebook);
 	notebook_init(notebook, uri);
 

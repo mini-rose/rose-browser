@@ -28,6 +28,8 @@
 #define ZOOM 1	    /* Starting zoom level */
 #define ZOOM_VAL .1 /* Zooming value in zoomin/zoomout functions */
 #define BG_COLOR "#1E1E2E"
+#define WIDTH 500
+#define HEIGHT 400
 
 typedef enum {
 	goback,
