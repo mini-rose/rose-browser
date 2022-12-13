@@ -1,4 +1,4 @@
-<h3 align=center> Rose Browser</h1>
+<h3 align=center> Rose Browser</h3>
 <h4 align=center>Minimal browser based on webkit2gtk</h4>
 
 #### Features
