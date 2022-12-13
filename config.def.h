@@ -20,8 +20,8 @@
 
 #define GTK "gtk-application-prefer-dark-theme", true, "gtk-enable-animations", false
 
-#define HOME "https://duckduckgo.com"
-#define SEARCH "https://duckduckgo.com/?q=%s"
+#define HOME "https://lite.duckduckgo.com/html/"
+#define SEARCH "https://lite.duckduckgo.com/html/?q=%s"
 #define CACHE_DIR "/home/fenze/.cache/rose"
 
 #define KEY(x) GDK_KEY_##x
