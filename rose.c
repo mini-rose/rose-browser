@@ -296,7 +296,7 @@ void setup(GtkNotebook *notebook, const char *uri)
 	bar = GTK_HEADER_BAR(gtk_header_bar_new());
 	search_buf = GTK_ENTRY_BUFFER(gtk_entry_buffer_new("", 0));
 	search = GTK_ENTRY(gtk_entry_new_with_buffer(search_buf));
-
+        gtk_window_set_default_size(window, WIDTH, HEIGHT);
 	window_init(notebook);
 	notebook_init(notebook, uri);
 
@@ -305,6 +305,8 @@ void setup(GtkNotebook *notebook, const char *uri)
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(notebook));
 	gtk_widget_show_all(GTK_WIDGET(window));
 	gtk_widget_hide(GTK_WIDGET(bar));
+         webkit_web_view_set_zoom_level(notebook_get_webview(notebook), ZOOM);
+
 }
 
 int main(int argc, char **argv)
