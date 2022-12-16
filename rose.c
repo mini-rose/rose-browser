@@ -7,7 +7,7 @@
  * sublicense copies of this sotware for their own use.
  * This code does not come with any warranty.
  *
- * Author: fenze <contact@fenze.dev>
+ * @author: fenze <contact@fenze.dev>
  */
 
 #include "config.h"
@@ -233,7 +233,12 @@ int handle_key(func id, GtkNotebook *notebook)
 		webkit_find_controller_search_previous(
 		    webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
 		break;
+
+	case newtab:
+		notebook_append(notebook, NULL);
+		gtk_notebook_set_show_tabs(notebook, true);
 	}
+
 
 	return 1;
 }

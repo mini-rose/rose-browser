@@ -27,7 +27,7 @@
 #define KEY(x) GDK_KEY_##x
 #define ZOOM 1	    /* Starting zoom level */
 #define ZOOM_VAL .1 /* Zooming value in zoomin/zoomout functions */
-#define BG_COLOR "#1E1E2E" /* or e.g., "#FEFEFE" if not using dark theme */ 
+#define BG_COLOR "#1E1E2E" /* or e.g., "#FEFEFE" if not using dark theme */
 #define WIDTH 500
 #define HEIGHT 400
 
@@ -47,7 +47,8 @@ typedef enum {
 	show_searchbar,
 	show_finder,
 	finder_next,
-	finder_prev
+	finder_prev,
+	newtab
 } func;
 
 #define SFT  1 << 0
@@ -74,7 +75,8 @@ static struct {
     { CTRL,	   KEY(e),     show_searchbar	 },
     { CTRL,	   KEY(f),     show_finder       },
     { CTRL,	   KEY(n),     finder_next       },
-    { CTRL | SFT,  KEY(N),     finder_prev	 }
+    { CTRL | SFT,  KEY(N),     finder_prev	 },
+    { CTRL,        KEY(t),     newtab            }
 };
 /* For controls more akin to normal browsers, use:
 {
