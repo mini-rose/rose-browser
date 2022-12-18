@@ -1,5 +1,6 @@
 CC=clang
 SRC=rose.c
+REQS=./plugins/*/*.c
 DEPS=('webkit2gtk-4.0')
 
 INCS=`pkg-config --cflags ${DEPS[@]}`
@@ -9,4 +10,4 @@ LIBS=`pkg-config --libs ${DEPS[@]}`
 WYEBAB='-L/usr/lib/wyebrowser/adblock.so'
 
 cp -f config.def.h config.h
-$CC $INCS $LIBS $SRC $WYEBAB -o rose
+$CC $INCS $LIBS $REQS $SRC $WYEBAB -o rose

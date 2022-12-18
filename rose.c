@@ -9,10 +9,12 @@
  *
  * @author: fenze <contact@fenze.dev>
  */
+#include <string.h>
+#include <stdbool.h>
+#include <webkit2/webkit2.h>
 
 #include "config.h"
-
-#include <webkit2/webkit2.h>
+#include "plugins/libre_redirect/libre_redirect.h"
 
 #define CACHE                               			\
 	"base-cache-directory", CACHE_DIR,                   	\
@@ -78,14 +80,42 @@ void load_uri(WebKitWebView *view, const char *uri)
 	}
 }
 
+void redirect_if_annoying(WebKitWebView *view, const char *uri){
+        int l = LIBRE_N + strlen(uri) + 1;
+        char uri_filtered[l];
+        str_init(uri_filtered, l);
+
+        int check = libre_redirect(uri, uri_filtered);
+        if(check == 2){
+                webkit_web_view_load_uri(view, uri_filtered);
+        }
+
+}
+
 void load_changed(WebKitWebView *self, WebKitLoadEvent load_event, GtkNotebook *notebook)
 {
-	if (load_event == WEBKIT_LOAD_FINISHED) {
-		gtk_notebook_set_tab_label_text(notebook, GTK_WIDGET(self),
-						webkit_web_view_get_title(self));
-		gtk_widget_hide(GTK_WIDGET(bar));
-	}
+        switch (load_event) {
+        /* see <https://webkitgtk.org/reference/webkit2gtk/2.5.1/WebKitWebView.html> */
+                case WEBKIT_LOAD_STARTED:
+                                redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                break;
+                case WEBKIT_LOAD_REDIRECTED:
+                                redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                break;
+                case WEBKIT_LOAD_COMMITTED:
+                                redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                break;
+                case WEBKIT_LOAD_FINISHED:
+                {
+                                const char* title = webkit_web_view_get_title(self);
+                                gtk_notebook_set_tab_label_text(notebook, GTK_WIDGET(self),
+                                                title == NULL ? "—" : title );
+                                // gtk_widget_hide(GTK_WIDGET(bar));
+                                break;
+                }
+        }
 }
+
 
 void notebook_append(GtkNotebook *notebook, const char *uri)
 {
