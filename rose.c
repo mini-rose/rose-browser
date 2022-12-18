@@ -6,8 +6,6 @@
  * files to modify, copy, merge, publish, distribute and/or
  * sublicense copies of this sotware for their own use.
  * This code does not come with any warranty.
- *
- * @author: fenze <contact@fenze.dev>
  */
 #include <string.h>
 #include <stdbool.h>
@@ -28,7 +26,7 @@
 	"offline-application-cache-directory", CACHE_DIR, 	\
 	"service-worker-registrations-directory", CACHE_DIR
 
-enum { _SEARCH, _FIND };
+enum { _SEARCH, _FIND, _HIDDEN };
 
 static int entry_mode;
 static GtkWindow *window;
@@ -86,7 +84,8 @@ void redirect_if_annoying(WebKitWebView *view, const char *uri){
         str_init(uri_filtered, l);
 
         int check = libre_redirect(uri, uri_filtered);
-        if(check == 2){
+
+        if (check == 2){
                 webkit_web_view_load_uri(view, uri_filtered);
         }
 
@@ -153,12 +152,15 @@ void show_bar(GtkNotebook *notebook)
 		gtk_entry_buffer_set_text(search_buf, url, strlen(url));
 		gtk_widget_show(GTK_WIDGET(bar));
 		gtk_window_set_focus(window, GTK_WIDGET(search));
+	} else if (entry_mode == _HIDDEN) {
+		gtk_widget_hide(GTK_WIDGET(bar));
 	} else {
 		const char *search_text = webkit_find_controller_get_search_text(
 		    webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
 
 		if (search_text != NULL)
 			gtk_entry_buffer_set_text(search_buf, search_text, strlen(search_text));
+
 		gtk_entry_set_placeholder_text(search, "Find");
 		gtk_widget_show(GTK_WIDGET(bar));
 		gtk_window_set_focus(window, GTK_WIDGET(search));
@@ -267,9 +269,11 @@ int handle_key(func id, GtkNotebook *notebook)
 	case newtab:
 		notebook_append(notebook, NULL);
 		gtk_notebook_set_show_tabs(notebook, true);
+
+	case hidebar:
+		entry_mode = _HIDDEN;
+		show_bar(notebook);
 	}
-
-
 	return 1;
 }
 
@@ -301,17 +305,14 @@ void search_activate(GtkEntry *self, GtkNotebook *notebook)
 void window_init(GtkNotebook *notebook)
 {
 	GtkCssProvider *css = gtk_css_provider_new();
-
 	gtk_css_provider_load_from_path(css, "/usr/share/themes/rose/style.css", NULL);
 	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(css),
 						  800);
-
 	gtk_entry_buffer_new("", 0);
 	gtk_entry_set_alignment(search, 0.48);
 	gtk_widget_set_size_request(GTK_WIDGET(search), 300, -1);
 	gtk_header_bar_set_custom_title(bar, GTK_WIDGET(search));
 	gtk_window_set_titlebar(window, GTK_WIDGET(bar));
-
 	g_signal_connect(search, "activate", G_CALLBACK(search_activate), notebook);
 	g_signal_connect(window, "key-press-event", G_CALLBACK(keypress), notebook);
 	g_signal_connect(window, "destroy", G_CALLBACK(exit), notebook);
@@ -340,8 +341,7 @@ void setup(GtkNotebook *notebook, const char *uri)
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(notebook));
 	gtk_widget_show_all(GTK_WIDGET(window));
 	gtk_widget_hide(GTK_WIDGET(bar));
-         webkit_web_view_set_zoom_level(notebook_get_webview(notebook), ZOOM);
-
+        webkit_web_view_set_zoom_level(notebook_get_webview(notebook), ZOOM);
 }
 
 int main(int argc, char **argv)

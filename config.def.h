@@ -14,11 +14,14 @@
 
 /* See more:
  * https://webkitgtk.org/reference/webkit2gtk/stable/class.Settings.html */
-#define WEBKIT                                                                                     \
-	"enable-back-forward-navigation-gestures", true, "enable-developer-extras", true,          \
-	    "enable-smooth-scrolling", false
+#define WEBKIT                                           \
+	"enable-back-forward-navigation-gestures", true, \
+	"enable-developer-extras", true,                 \
+	"enable-smooth-scrolling", false
 
-#define GTK "gtk-application-prefer-dark-theme", true, "gtk-enable-animations", false
+#define GTK                                        \
+	"gtk-application-prefer-dark-theme", true, \
+	"gtk-enable-animations", false
 
 #define HOME "https://lite.duckduckgo.com/html/"
 #define SEARCH "https://lite.duckduckgo.com/html/?q=%s"
@@ -48,7 +51,8 @@ typedef enum {
 	show_finder,
 	finder_next,
 	finder_prev,
-	newtab
+	newtab,
+	hidebar
 } func;
 
 #define SFT  1 << 0
@@ -60,23 +64,24 @@ static struct {
 	unsigned key;
 	func id;
 } keys[] = {
-    { CTRL,	   KEY(h),     goback            },
-    { CTRL,	   KEY(l),     goforward         },
-    { CTRL,	   KEY(r),     refresh	         },
-    { CTRL | SFT,  KEY(R),     refresh_force     },
-    { CTRL | SFT,  KEY(H),     back_to_home      },
-    { CTRL,	   KEY(equal), zoomin	         },
-    { CTRL,	   KEY(minus), zoomout	         },
-    { CTRL,	   KEY(0),     zoom_reset	 },
-    { ALT,	   KEY(h),     prev_tab	         },
-    { ALT,	   KEY(l),     next_tab	         },
-    { CTRL,	   KEY(w),     close_tab	 },
-    { 0x0,	   KEY(F11),   toggle_fullscreen },
-    { CTRL,	   KEY(e),     show_searchbar	 },
-    { CTRL,	   KEY(f),     show_finder       },
-    { CTRL,	   KEY(n),     finder_next       },
-    { CTRL | SFT,  KEY(N),     finder_prev	 },
-    { CTRL,        KEY(t),     newtab            }
+    { CTRL,	   KEY(h),      goback            },
+    { CTRL,	   KEY(l),      goforward         },
+    { CTRL,	   KEY(r),      refresh	          },
+    { CTRL | SFT,  KEY(R),      refresh_force     },
+    { CTRL | SFT,  KEY(H),      back_to_home      },
+    { CTRL,	   KEY(equal),  zoomin	          },
+    { CTRL,	   KEY(minus),  zoomout	          },
+    { CTRL,	   KEY(0),      zoom_reset	  },
+    { ALT,	   KEY(h),      prev_tab	  },
+    { ALT,	   KEY(l),      next_tab	  },
+    { CTRL,	   KEY(w),      close_tab	  },
+    { 0x0,	   KEY(F11),    toggle_fullscreen },
+    { CTRL,	   KEY(e),      show_searchbar	  },
+    { CTRL,	   KEY(f),      show_finder       },
+    { CTRL,	   KEY(n),      finder_next       },
+    { CTRL | SFT,  KEY(N),      finder_prev	  },
+    { CTRL,        KEY(t),      newtab            },
+    { 0x0,         KEY(Escape), hidebar           }
 };
 /* For controls more akin to normal browsers, use:
 {
