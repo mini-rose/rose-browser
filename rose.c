@@ -13,6 +13,7 @@
 
 #include "config.h"
 // #include "plugins/libre_redirect/libre_redirect.h"
+// #include "plugins/readability/readability.h"
 
 #define CACHE                               			\
 	"base-cache-directory", CACHE_DIR,                   	\
@@ -207,107 +208,124 @@ int handle_key(func id, GtkNotebook *notebook)
 	static bool is_fullscreen = 0;
 
 	switch (id) {
-	case goback:
-		webkit_web_view_go_back(notebook_get_webview(notebook));
-		break;
-	case goforward:
-		webkit_web_view_go_forward(notebook_get_webview(notebook));
-		break;
+    case goback:
+      webkit_web_view_go_back(notebook_get_webview(notebook));
+      break;
+    case goforward:
+      webkit_web_view_go_forward(notebook_get_webview(notebook));
+      break;
 
-	case refresh:
-		webkit_web_view_reload(notebook_get_webview(notebook));
-		break;
-	case refresh_force:
-		webkit_web_view_reload_bypass_cache(notebook_get_webview(notebook));
-		break;
+    case refresh:
+      webkit_web_view_reload(notebook_get_webview(notebook));
+      break;
+    case refresh_force:
+      webkit_web_view_reload_bypass_cache(notebook_get_webview(notebook));
+      break;
 
-	case back_to_home:
-		load_uri(notebook_get_webview(notebook), HOME);
-		break;
+    case back_to_home:
+      load_uri(notebook_get_webview(notebook), HOME);
+      break;
 
-	case zoomin:
-		webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom += ZOOM_VAL));
-		break;
+    case zoomin:
+      webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom += ZOOM_VAL));
+      break;
 
-	case zoomout:
-		webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom -= ZOOM_VAL));
-		break;
+    case zoomout:
+      webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom -= ZOOM_VAL));
+      break;
 
-	case zoom_reset:
-		webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom = ZOOM));
-		break;
+    case zoom_reset:
+      webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom = ZOOM));
+      break;
 
-	case prev_tab:
-		if (gtk_notebook_get_current_page(notebook) == 0) {
-			gtk_notebook_set_current_page(notebook,
-						      gtk_notebook_get_n_pages(notebook) - 1);
-		} else {
-			gtk_notebook_prev_page(notebook);
-		}
+    case prev_tab:
+      if (gtk_notebook_get_current_page(notebook) == 0) {
+        gtk_notebook_set_current_page(notebook,
+                    gtk_notebook_get_n_pages(notebook) - 1);
+      } else {
+        gtk_notebook_prev_page(notebook);
+      }
 
-		break;
+      break;
 
-	case next_tab:
-		if (gtk_notebook_get_current_page(notebook) ==
-		    gtk_notebook_get_n_pages(notebook) - 1) {
-			notebook_append(notebook, NULL);
-			gtk_notebook_set_show_tabs(notebook, true);
-		} else {
-			gtk_notebook_next_page(notebook);
-		}
-		break;
+    case next_tab:
+      if (gtk_notebook_get_current_page(notebook) ==
+          gtk_notebook_get_n_pages(notebook) - 1) {
+        notebook_append(notebook, NULL);
+        gtk_notebook_set_show_tabs(notebook, true);
+      } else {
+        gtk_notebook_next_page(notebook);
+      }
+      break;
 
-	case close_tab:
-		gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(notebook));
+    case close_tab:
+      gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(notebook));
 
-		switch (gtk_notebook_get_n_pages(notebook)) {
-		case 0:
-			exit(0);
-			break;
-		case 1:
-			gtk_notebook_set_show_tabs(notebook, false);
-			break;
-		}
+      switch (gtk_notebook_get_n_pages(notebook)) {
+      case 0:
+        exit(0);
+        break;
+      case 1:
+        gtk_notebook_set_show_tabs(notebook, false);
+        break;
+      }
 
-		break;
+      break;
 
-	case toggle_fullscreen:
-		if (is_fullscreen)
-			gtk_window_unfullscreen(window);
-		else
-			gtk_window_fullscreen(window);
+    case toggle_fullscreen:
+      if (is_fullscreen)
+        gtk_window_unfullscreen(window);
+      else
+        gtk_window_fullscreen(window);
 
-		is_fullscreen = ! is_fullscreen;
-		break;
+      is_fullscreen = ! is_fullscreen;
+      break;
 
-	case show_searchbar:
-		entry_mode = _SEARCH;
-		show_bar(notebook);
-		break;
+    case show_searchbar:
+      entry_mode = _SEARCH;
+      show_bar(notebook);
+      break;
 
-	case show_finder:
-		entry_mode = _FIND;
-		show_bar(notebook);
-		break;
+    case show_finder:
+      entry_mode = _FIND;
+      show_bar(notebook);
+      break;
 
-	case finder_next:
-		webkit_find_controller_search_next(
-		    webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
-		break;
+    case finder_next:
+      webkit_find_controller_search_next(
+          webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
+      break;
 
-	case finder_prev:
-		webkit_find_controller_search_previous(
-		    webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
-		break;
+    case finder_prev:
+      webkit_find_controller_search_previous(
+          webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
+      break;
 
-	case newtab:
-		notebook_append(notebook, NULL);
-		gtk_notebook_set_show_tabs(notebook, true);
+    case newtab:
+      notebook_append(notebook, NULL);
+      gtk_notebook_set_show_tabs(notebook, true);
+      break;
 
-	case hidebar:
-		entry_mode = _HIDDEN;
-		show_bar(notebook);
+    case hidebar:
+      entry_mode = _HIDDEN;
+      show_bar(notebook);
+    break;
+    /*
+  	case prettify:
+    {
+
+      char* readability_js = malloc(READABILITY_N+1);
+      read_readability_js(readability_js);
+      webkit_web_view_run_javascript(notebook_get_webview(notebook), 
+                  readability_js, 
+                  NULL, NULL, NULL);
+      free(readability_js);
+                  
+      break;
+	  }
+    */
 	}
+  
 	return 1;
 }
 
