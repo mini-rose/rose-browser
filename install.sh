@@ -1,3 +1,5 @@
+#!/bin/sh
+
 ./build.sh && {
 	cp -f rose /usr/bin
 	mkdir -p /usr/share/themes/rose

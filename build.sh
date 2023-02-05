@@ -1,3 +1,5 @@
+#!/bin/bash
+
 CC=clang
 SRC=rose.c
 REQS= #./plugins/*/*.c
