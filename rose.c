@@ -115,6 +115,25 @@ void load_changed(WebKitWebView *self, WebKitLoadEvent load_event, GtkNotebook *
         }
 }
 
+void notebook_append(GtkNotebook *notebook, const char *uri); 
+/* notebook_append calls handle_create, but  handle_create also calls notebook_append.
+ * Therefore we need to declare notebook_append, so that handle_create_new_tab knows its type.
+ */
+
+GtkWidget* handle_create_new_tab(WebKitWebView *self, WebKitNavigationAction *navigation_action, GtkNotebook *notebook){
+	WebKitURIRequest *uri_request = webkit_navigation_action_get_request(navigation_action);
+	const char *uri = webkit_uri_request_get_uri (uri_request);
+	printf("Creating new window: %s\n", uri);
+	notebook_append(notebook, uri);
+	gtk_notebook_set_show_tabs(notebook, true);
+	return NULL;
+	/* WebKitGTK documentation recommends returning the new webview. 
+	 * I imagine that this might allow e.g., to go back in a new tab
+	 * or generally to keep track of history.
+	 * However, this would require either modifying notebook_append
+	 * or duplicating its contents, for unclear gain. 
+	 */
+}
 
 void notebook_append(GtkNotebook *notebook, const char *uri)
 {
@@ -128,6 +147,7 @@ void notebook_append(GtkNotebook *notebook, const char *uri)
 
 	gtk_widget_set_visual(GTK_WIDGET(window), rgba_visual);
 	g_signal_connect(view, "load_changed", G_CALLBACK(load_changed), notebook);
+  g_signal_connect(view, "create", G_CALLBACK(handle_create_new_tab), notebook);
 
 	int n = gtk_notebook_append_page(notebook, GTK_WIDGET(view), NULL);
 	gtk_notebook_set_tab_reorderable(notebook, GTK_WIDGET(view), true);
