@@ -6,7 +6,7 @@ To enable it:
 
 ## In build.sh
 
-Uncomment this line:
+In `build.sh`, uncomment this line:
 
 ```
 REQS= #./plugins/*/*.c

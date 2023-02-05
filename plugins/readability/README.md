@@ -5,7 +5,13 @@ Taken from <https://raw.githubusercontent.com/ushnisha/readability-reader-webext
 
 ## To enable it
 
-In rose.c uncomment:
+In `build.sh`, uncomment this line:
+
+```
+REQS= #./plugins/*/*.c
+```
+
+In `rose.c` uncomment:
 
 ```
 

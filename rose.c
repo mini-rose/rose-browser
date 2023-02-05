@@ -14,6 +14,7 @@
 #include "config.h"
 // #include "plugins/libre_redirect/libre_redirect.h"
 // #include "plugins/readability/readability.h"
+// #include "plugins/style/style.h"
 
 #define CACHE                               			\
 	"base-cache-directory", CACHE_DIR,                   	\
@@ -106,6 +107,15 @@ void load_changed(WebKitWebView *self, WebKitLoadEvent load_event, GtkNotebook *
                                 break;
                 case WEBKIT_LOAD_COMMITTED:
                                 // redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                // Add custom style
+                                /*  
+                                char* style_js = malloc(STYLE_N+1);
+                                read_style_js(style_js);
+                                webkit_web_view_run_javascript(notebook_get_webview(notebook), 
+                                            style_js, 
+                                            NULL, NULL, NULL);
+                                free(style_js);
+                                */
                                 break;
                 case WEBKIT_LOAD_FINISHED:
                 {
