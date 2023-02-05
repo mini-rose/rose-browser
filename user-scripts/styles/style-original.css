@@ -1,0 +1,37 @@
+@define-color Surface0 #313244;
+@define-color Surface1 #45475a;
+@define-color Base     #1e1e2e;
+@define-color Mantle   #181825;
+@define-color Lavender #b4befe;
+@define-color Text     #cdd6f4;
+
+* {
+	padding: 0px;
+	margin: 0px;
+	outline-color: @Lavender;
+	color: @Text;
+	border-bottom-color: @Base;
+}
+
+window, notebook, headerbar {
+	background: @Base;
+}
+
+tabs {
+	background-color: @Base;
+	padding: 3px;
+}
+
+tab {
+	background-color: @Base;
+	margin: 5px;
+}
+
+entry {
+	background-color: @Surface0;
+	padding-left: 10px;
+}
+
+entry:focus {
+	box-shadow: none;
+}

@@ -9,7 +9,6 @@
   - hackable without any knowledge
   - builtin rose-mklink script for in-shell static links
 
-#
 ### 👐 Contribute
 See [contributing.md](https://github.com/mini-rose/rose/.github/contributing.md).
 
@@ -19,3 +18,9 @@ Rose is released under own license, which grants the following permissions:
 -   Distribution
 -   Modification
 -   Private use
+
+### To do
+
+- [x] Add open in new tab functionality
+- [x] Test open in new tab functionality
+- [ ] Isolate plugins so that they aren't active by default
