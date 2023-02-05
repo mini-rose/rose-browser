@@ -23,4 +23,5 @@ Rose is released under own license, which grants the following permissions:
 
 - [x] Add open in new tab functionality
 - [x] Test open in new tab functionality
+- [x] Add styles tab
 - [ ] Isolate plugins so that they aren't active by default
