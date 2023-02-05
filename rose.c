@@ -12,7 +12,7 @@
 #include <webkit2/webkit2.h>
 
 #include "config.h"
-#include "plugins/libre_redirect/libre_redirect.h"
+// #include "plugins/libre_redirect/libre_redirect.h"
 
 #define CACHE                               			\
 	"base-cache-directory", CACHE_DIR,                   	\
@@ -78,6 +78,7 @@ void load_uri(WebKitWebView *view, const char *uri)
 	}
 }
 
+/*
 void redirect_if_annoying(WebKitWebView *view, const char *uri){
         int l = LIBRE_N + strlen(uri) + 1;
         char uri_filtered[l];
@@ -90,19 +91,20 @@ void redirect_if_annoying(WebKitWebView *view, const char *uri){
         }
 
 }
+*/
 
 void load_changed(WebKitWebView *self, WebKitLoadEvent load_event, GtkNotebook *notebook)
 {
         switch (load_event) {
         /* see <https://webkitgtk.org/reference/webkit2gtk/2.5.1/WebKitWebView.html> */
                 case WEBKIT_LOAD_STARTED:
-                                redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                // redirect_if_annoying(self, webkit_web_view_get_uri(self));
                                 break;
                 case WEBKIT_LOAD_REDIRECTED:
-                                redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                // redirect_if_annoying(self, webkit_web_view_get_uri(self));
                                 break;
                 case WEBKIT_LOAD_COMMITTED:
-                                redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                // redirect_if_annoying(self, webkit_web_view_get_uri(self));
                                 break;
                 case WEBKIT_LOAD_FINISHED:
                 {
