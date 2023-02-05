@@ -82,7 +82,7 @@ static struct {
     { CTRL,	   KEY(n),      finder_next       },
     { CTRL | SFT,  KEY(N),      finder_prev	  },
     { CTRL,        KEY(t),      newtab            },
-    //     { CTRL,        KEY(p),      prettify            },
+    { CTRL,        KEY(p),      prettify            },
     { 0x0,         KEY(Escape), hidebar           }
 };
 /* For controls more akin to normal browsers, use:
@@ -102,7 +102,9 @@ static struct {
     { CTRL,        KEY(l),          show_searchbar     },
     { CTRL,        KEY(f),          show_finder        },
     { CTRL,        KEY(n),          finder_next        },
-    { CTRL | SFT,  KEY(N),          finder_prev        }
+    { CTRL | SFT,  KEY(N),          finder_prev        },
+    { CTRL,        KEY(p),          prettify            },
+
 };
 */
 /* Reference for the key shorthand:

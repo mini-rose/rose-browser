@@ -12,9 +12,21 @@
 #include <webkit2/webkit2.h>
 
 #include "config.h"
+
 // #include "plugins/libre_redirect/libre_redirect.h"
 // #include "plugins/readability/readability.h"
 // #include "plugins/style/style.h"
+
+int LIBRE_REDIRECT_ENABLED = false;
+int READABILITY_ENABLED = false;
+int CUSTOM_STYLE_ENABLED = false;
+
+// to enable plugins, 
+// 1. uncomment their #include statement
+// 2. set their variable to true;
+// 3. in build.sh, uncomment:
+//    REQS= #./plugins/*/*.c
+
 
 #define CACHE                               			\
 	"base-cache-directory", CACHE_DIR,                   	\
@@ -80,7 +92,6 @@ void load_uri(WebKitWebView *view, const char *uri)
 	}
 }
 
-/*
 void redirect_if_annoying(WebKitWebView *view, const char *uri){
         int l = LIBRE_N + strlen(uri) + 1;
         char uri_filtered[l];
@@ -93,29 +104,33 @@ void redirect_if_annoying(WebKitWebView *view, const char *uri){
         }
 
 }
-*/
 
 void load_changed(WebKitWebView *self, WebKitLoadEvent load_event, GtkNotebook *notebook)
 {
         switch (load_event) {
         /* see <https://webkitgtk.org/reference/webkit2gtk/2.5.1/WebKitWebView.html> */
                 case WEBKIT_LOAD_STARTED:
-                                // redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                if(LIBRE_REDIRECT_ENABLED){
+                                    redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                }
                                 break;
                 case WEBKIT_LOAD_REDIRECTED:
-                                // redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                if(LIBRE_REDIRECT_ENABLED){
+                                    redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                }
                                 break;
                 case WEBKIT_LOAD_COMMITTED:
-                                // redirect_if_annoying(self, webkit_web_view_get_uri(self));
-                                // Add custom style
-                                /*  
-                                char* style_js = malloc(STYLE_N+1);
-                                read_style_js(style_js);
-                                webkit_web_view_run_javascript(notebook_get_webview(notebook), 
-                                            style_js, 
-                                            NULL, NULL, NULL);
-                                free(style_js);
-                                */
+                                if(LIBRE_REDIRECT_ENABLED){
+                                    redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                }
+                                if(CUSTOM_STYLE_ENABLED){
+                                    char* style_js = malloc(STYLE_N+1);
+                                    read_style_js(style_js);
+                                    webkit_web_view_run_javascript(notebook_get_webview(notebook), 
+                                                style_js, 
+                                                NULL, NULL, NULL);
+                                    free(style_js);
+                                }  
                                 break;
                 case WEBKIT_LOAD_FINISHED:
                 {
@@ -320,20 +335,20 @@ int handle_key(func id, GtkNotebook *notebook)
       entry_mode = _HIDDEN;
       show_bar(notebook);
     break;
-    /*
+
   	case prettify:
     {
+      if(READABILITY_ENABLED){
+          char* readability_js = malloc(READABILITY_N+1);
+          read_readability_js(readability_js);
+          webkit_web_view_run_javascript(notebook_get_webview(notebook), 
+                      readability_js, 
+                      NULL, NULL, NULL);
+          free(readability_js);
 
-      char* readability_js = malloc(READABILITY_N+1);
-      read_readability_js(readability_js);
-      webkit_web_view_run_javascript(notebook_get_webview(notebook), 
-                  readability_js, 
-                  NULL, NULL, NULL);
-      free(readability_js);
-                  
+      }
       break;
 	  }
-    */
 	}
   
 	return 1;
