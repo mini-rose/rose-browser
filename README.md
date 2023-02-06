@@ -10,8 +10,4 @@
   - builtin rose-mklink script for in-shell static links
 
 ### 📜 License
-Rose is released under own license, which grants the following permissions:
--   Commercial use
--   Distribution
--   Modification
--   Private use
+Rose is released under the [MIT license](https://github.com/mini-rose/rose/blob/master/license).
