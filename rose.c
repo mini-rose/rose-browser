@@ -12,7 +12,21 @@
 #include <webkit2/webkit2.h>
 
 #include "config.h"
-#include "plugins/libre_redirect/libre_redirect.h"
+
+// #include "plugins/libre_redirect/libre_redirect.h"
+// #include "plugins/readability/readability.h"
+// #include "plugins/style/style.h"
+
+int LIBRE_REDIRECT_ENABLED = false;
+int READABILITY_ENABLED = false;
+int CUSTOM_STYLE_ENABLED = false;
+
+// to enable plugins, 
+// 1. uncomment their #include statement
+// 2. set their variable to true;
+// 3. in build.sh, uncomment:
+//    REQS= #./plugins/*/*.c
+
 
 #define CACHE                               			\
 	"base-cache-directory", CACHE_DIR,                   	\
@@ -96,25 +110,70 @@ void load_changed(WebKitWebView *self, WebKitLoadEvent load_event, GtkNotebook *
         switch (load_event) {
         /* see <https://webkitgtk.org/reference/webkit2gtk/2.5.1/WebKitWebView.html> */
                 case WEBKIT_LOAD_STARTED:
-                                redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                if(LIBRE_REDIRECT_ENABLED){
+                                    redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                }
                                 break;
                 case WEBKIT_LOAD_REDIRECTED:
-                                redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                if(LIBRE_REDIRECT_ENABLED){
+                                    redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                }
                                 break;
                 case WEBKIT_LOAD_COMMITTED:
-                                redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                if(LIBRE_REDIRECT_ENABLED){
+                                    redirect_if_annoying(self, webkit_web_view_get_uri(self));
+                                }
+                                if(CUSTOM_STYLE_ENABLED){
+                                    char* style_js = malloc(STYLE_N+1);
+                                    read_style_js(style_js);
+                                    webkit_web_view_run_javascript(notebook_get_webview(notebook), 
+                                                style_js, 
+                                                NULL, NULL, NULL);
+                                    free(style_js);
+                                }  
                                 break;
                 case WEBKIT_LOAD_FINISHED:
                 {
-                                const char* title = webkit_web_view_get_title(self);
+                                /* Add gtk tab title */
+                                const char* webpage_title = webkit_web_view_get_title(self);
+                                const int max_length = 25;
+                                char tab_title[max_length + 1];
+                                if(webpage_title != NULL){
+                                    for(int i = 0; i<(max_length); i++){
+                                        tab_title[i] = webpage_title[i];
+                                        if(webpage_title[i] == '\0'){
+                                            break;
+                                        }
+                                    }
+                                  tab_title[max_length] = '\0';
+                                }
+
                                 gtk_notebook_set_tab_label_text(notebook, GTK_WIDGET(self),
-                                                title == NULL ? "—" : title );
+                                webpage_title == NULL ? "—" : tab_title );
                                 // gtk_widget_hide(GTK_WIDGET(bar));
-                                break;
                 }
         }
 }
 
+void notebook_append(GtkNotebook *notebook, const char *uri); 
+/* notebook_append calls handle_create, but  handle_create also calls notebook_append.
+ * Therefore we need to declare notebook_append, so that handle_create_new_tab knows its type.
+ */
+
+GtkWidget* handle_create_new_tab(WebKitWebView *self, WebKitNavigationAction *navigation_action, GtkNotebook *notebook){
+	WebKitURIRequest *uri_request = webkit_navigation_action_get_request(navigation_action);
+	const char *uri = webkit_uri_request_get_uri (uri_request);
+	printf("Creating new window: %s\n", uri);
+	notebook_append(notebook, uri);
+	gtk_notebook_set_show_tabs(notebook, true);
+	return NULL;
+	/* WebKitGTK documentation recommends returning the new webview. 
+	 * I imagine that this might allow e.g., to go back in a new tab
+	 * or generally to keep track of history.
+	 * However, this would require either modifying notebook_append
+	 * or duplicating its contents, for unclear gain. 
+	 */
+}
 
 void notebook_append(GtkNotebook *notebook, const char *uri)
 {
@@ -128,6 +187,7 @@ void notebook_append(GtkNotebook *notebook, const char *uri)
 
 	gtk_widget_set_visual(GTK_WIDGET(window), rgba_visual);
 	g_signal_connect(view, "load_changed", G_CALLBACK(load_changed), notebook);
+  g_signal_connect(view, "create", G_CALLBACK(handle_create_new_tab), notebook);
 
 	int n = gtk_notebook_append_page(notebook, GTK_WIDGET(view), NULL);
 	gtk_notebook_set_tab_reorderable(notebook, GTK_WIDGET(view), true);
@@ -173,107 +233,124 @@ int handle_key(func id, GtkNotebook *notebook)
 	static bool is_fullscreen = 0;
 
 	switch (id) {
-	case goback:
-		webkit_web_view_go_back(notebook_get_webview(notebook));
-		break;
-	case goforward:
-		webkit_web_view_go_forward(notebook_get_webview(notebook));
-		break;
+    case goback:
+      webkit_web_view_go_back(notebook_get_webview(notebook));
+      break;
+    case goforward:
+      webkit_web_view_go_forward(notebook_get_webview(notebook));
+      break;
 
-	case refresh:
-		webkit_web_view_reload(notebook_get_webview(notebook));
-		break;
-	case refresh_force:
-		webkit_web_view_reload_bypass_cache(notebook_get_webview(notebook));
-		break;
+    case refresh:
+      webkit_web_view_reload(notebook_get_webview(notebook));
+      break;
+    case refresh_force:
+      webkit_web_view_reload_bypass_cache(notebook_get_webview(notebook));
+      break;
 
-	case back_to_home:
-		load_uri(notebook_get_webview(notebook), HOME);
-		break;
+    case back_to_home:
+      load_uri(notebook_get_webview(notebook), HOME);
+      break;
 
-	case zoomin:
-		webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom += ZOOM_VAL));
-		break;
+    case zoomin:
+      webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom += ZOOM_VAL));
+      break;
 
-	case zoomout:
-		webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom -= ZOOM_VAL));
-		break;
+    case zoomout:
+      webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom -= ZOOM_VAL));
+      break;
 
-	case zoom_reset:
-		webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom = ZOOM));
-		break;
+    case zoom_reset:
+      webkit_web_view_set_zoom_level(notebook_get_webview(notebook), (zoom = ZOOM));
+      break;
 
-	case prev_tab:
-		if (gtk_notebook_get_current_page(notebook) == 0) {
-			gtk_notebook_set_current_page(notebook,
-						      gtk_notebook_get_n_pages(notebook) - 1);
-		} else {
-			gtk_notebook_prev_page(notebook);
-		}
+    case prev_tab:
+      if (gtk_notebook_get_current_page(notebook) == 0) {
+        gtk_notebook_set_current_page(notebook,
+                    gtk_notebook_get_n_pages(notebook) - 1);
+      } else {
+        gtk_notebook_prev_page(notebook);
+      }
 
-		break;
+      break;
 
-	case next_tab:
-		if (gtk_notebook_get_current_page(notebook) ==
-		    gtk_notebook_get_n_pages(notebook) - 1) {
-			notebook_append(notebook, NULL);
-			gtk_notebook_set_show_tabs(notebook, true);
-		} else {
-			gtk_notebook_next_page(notebook);
-		}
-		break;
+    case next_tab:
+      if (gtk_notebook_get_current_page(notebook) ==
+          gtk_notebook_get_n_pages(notebook) - 1) {
+        notebook_append(notebook, NULL);
+        gtk_notebook_set_show_tabs(notebook, true);
+      } else {
+        gtk_notebook_next_page(notebook);
+      }
+      break;
 
-	case close_tab:
-		gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(notebook));
+    case close_tab:
+      gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(notebook));
 
-		switch (gtk_notebook_get_n_pages(notebook)) {
-		case 0:
-			exit(0);
-			break;
-		case 1:
-			gtk_notebook_set_show_tabs(notebook, false);
-			break;
-		}
+      switch (gtk_notebook_get_n_pages(notebook)) {
+      case 0:
+        exit(0);
+        break;
+      case 1:
+        gtk_notebook_set_show_tabs(notebook, false);
+        break;
+      }
 
-		break;
+      break;
 
-	case toggle_fullscreen:
-		if (is_fullscreen)
-			gtk_window_unfullscreen(window);
-		else
-			gtk_window_fullscreen(window);
+    case toggle_fullscreen:
+      if (is_fullscreen)
+        gtk_window_unfullscreen(window);
+      else
+        gtk_window_fullscreen(window);
 
-		is_fullscreen = ! is_fullscreen;
-		break;
+      is_fullscreen = ! is_fullscreen;
+      break;
 
-	case show_searchbar:
-		entry_mode = _SEARCH;
-		show_bar(notebook);
-		break;
+    case show_searchbar:
+      entry_mode = _SEARCH;
+      show_bar(notebook);
+      break;
 
-	case show_finder:
-		entry_mode = _FIND;
-		show_bar(notebook);
-		break;
+    case show_finder:
+      entry_mode = _FIND;
+      show_bar(notebook);
+      break;
 
-	case finder_next:
-		webkit_find_controller_search_next(
-		    webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
-		break;
+    case finder_next:
+      webkit_find_controller_search_next(
+          webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
+      break;
 
-	case finder_prev:
-		webkit_find_controller_search_previous(
-		    webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
-		break;
+    case finder_prev:
+      webkit_find_controller_search_previous(
+          webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
+      break;
 
-	case newtab:
-		notebook_append(notebook, NULL);
-		gtk_notebook_set_show_tabs(notebook, true);
+    case newtab:
+      notebook_append(notebook, NULL);
+      gtk_notebook_set_show_tabs(notebook, true);
+      break;
 
-	case hidebar:
-		entry_mode = _HIDDEN;
-		show_bar(notebook);
+    case hidebar:
+      entry_mode = _HIDDEN;
+      show_bar(notebook);
+    break;
+
+  	case prettify:
+    {
+      if(READABILITY_ENABLED){
+          char* readability_js = malloc(READABILITY_N+1);
+          read_readability_js(readability_js);
+          webkit_web_view_run_javascript(notebook_get_webview(notebook), 
+                      readability_js, 
+                      NULL, NULL, NULL);
+          free(readability_js);
+
+      }
+      break;
+	  }
 	}
+  
 	return 1;
 }
 
@@ -310,7 +387,7 @@ void window_init(GtkNotebook *notebook)
 						  800);
 	gtk_entry_buffer_new("", 0);
 	gtk_entry_set_alignment(search, 0.48);
-	gtk_widget_set_size_request(GTK_WIDGET(search), 300, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(search), 1200, -1);
 	gtk_header_bar_set_custom_title(bar, GTK_WIDGET(search));
 	gtk_window_set_titlebar(window, GTK_WIDGET(bar));
 	g_signal_connect(search, "activate", G_CALLBACK(search_activate), notebook);
