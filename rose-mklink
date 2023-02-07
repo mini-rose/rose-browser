@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
 test "$1" = "--help" || test -z "$1" && {
-	echo -e "usage: rose-mklink <alias> <url>\n"
-	echo "Create a /usr/bin link to a website."
+    printf "%s\n" "usage: rose-mklink <alias> <url>" \
+        "Create a /usr/bin link to a website."
 	exit
 }
 
@@ -12,6 +12,6 @@ test -z "$2" || {
 		exit 1
 	}
 
-	echo -e "#!/bin/sh\n\nrose $2" > /usr/bin/$1
+	printf "#!/bin/sh\n\nrose %s" "$2" > /usr/bin/$1
 	chmod +x /usr/bin/$1
 }
