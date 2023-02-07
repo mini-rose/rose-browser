@@ -6,7 +6,9 @@
  * files to modify, copy, merge, publish, distribute and/or
  * sublicense copies of this sotware for their own use.
  * This code does not come with any warranty.
+ *
  */
+#include <stdlib.h> // necessary for free, malloc.
 #include <string.h>
 #include <stdbool.h>
 #include <webkit2/webkit2.h>
@@ -17,16 +19,20 @@
 // #include "plugins/readability/readability.h"
 // #include "plugins/style/style.h"
 
+#include "plugins/stand_in/stand_in.h"
+
 int LIBRE_REDIRECT_ENABLED = false;
 int READABILITY_ENABLED = false;
 int CUSTOM_STYLE_ENABLED = false;
 
 // to enable plugins, 
-// 1. uncomment their #include statement
-// 2. set their variable to true;
-// 3. in build.sh, uncomment:
-//    REQS= #./plugins/*/*.c
-
+// 1. Enable them:
+//   - uncomment their #include statement
+//   - set their variable to true
+//   - in build.sh, uncomment: REQS= #./plugins/*/*.c
+// 2. Remove stand_in code;
+//   - Comment out #include "plugins/stand_in/stand_in.h" line, or edit it together with stand_in.c so as to not include the plugin functions.
+//   - In build.sh, comment out REQS=./plugins/stand_in/stand_in.c
 
 #define CACHE                               			\
 	"base-cache-directory", CACHE_DIR,                   	\
@@ -80,12 +86,19 @@ WebKitWebView *webview_new()
 			    "user-content-manager", contentmanager, NULL);
 }
 
+WebKitWebView *notebook_get_webview(GtkNotebook *notebook)
+  {
+    return WEBKIT_WEB_VIEW(
+        gtk_notebook_get_nth_page(notebook, gtk_notebook_get_current_page(notebook)));
+  }
+
 void load_uri(WebKitWebView *view, const char *uri)
 {
 	if (g_str_has_prefix(uri, "http://") || g_str_has_prefix(uri, "https://") ||
 	    g_str_has_prefix(uri, "file://") || g_str_has_prefix(uri, "about:")) {
 		webkit_web_view_load_uri(view, uri);
 	} else {
+		// webkit_web_view_load_uri(view, uri);
 		char tmp[strlen(uri) + strlen(SEARCH)];
 		snprintf(tmp, sizeof(tmp), SEARCH, uri);
 		webkit_web_view_load_uri(view, tmp);
@@ -196,12 +209,7 @@ void notebook_append(GtkNotebook *notebook, const char *uri)
 	webkit_web_view_set_background_color(view, &rgba);
 	load_uri(view, (uri) ? uri : HOME);
 	gtk_notebook_set_current_page(notebook, n);
-}
-
-WebKitWebView *notebook_get_webview(GtkNotebook *notebook)
-{
-	return WEBKIT_WEB_VIEW(
-	    gtk_notebook_get_nth_page(notebook, gtk_notebook_get_current_page(notebook)));
+	gtk_notebook_set_tab_label_text(notebook, GTK_WIDGET(view), "-" );
 }
 
 void show_bar(GtkNotebook *notebook)
@@ -278,6 +286,7 @@ int handle_key(func id, GtkNotebook *notebook)
           gtk_notebook_get_n_pages(notebook) - 1) {
         notebook_append(notebook, NULL);
         gtk_notebook_set_show_tabs(notebook, true);
+				webkit_web_view_set_zoom_level(notebook_get_webview(notebook), zoom);
       } else {
         gtk_notebook_next_page(notebook);
       }
@@ -326,12 +335,14 @@ int handle_key(func id, GtkNotebook *notebook)
           webkit_web_view_get_find_controller(notebook_get_webview(notebook)));
       break;
 
-    case newtab:
+    case new_tab:
       notebook_append(notebook, NULL);
       gtk_notebook_set_show_tabs(notebook, true);
+			entry_mode = _SEARCH;
+			show_bar(notebook);
       break;
 
-    case hidebar:
+    case hide_bar:
       entry_mode = _HIDDEN;
       show_bar(notebook);
     break;
@@ -409,16 +420,15 @@ void setup(GtkNotebook *notebook, const char *uri)
 	bar = GTK_HEADER_BAR(gtk_header_bar_new());
 	search_buf = GTK_ENTRY_BUFFER(gtk_entry_buffer_new("", 0));
 	search = GTK_ENTRY(gtk_entry_new_with_buffer(search_buf));
-        gtk_window_set_default_size(window, WIDTH, HEIGHT);
+  gtk_window_set_default_size(window, WIDTH, HEIGHT);
 	window_init(notebook);
 	notebook_init(notebook, uri);
-
 	g_object_set(gtk_settings_get_default(), GTK, NULL);
 
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(notebook));
 	gtk_widget_show_all(GTK_WIDGET(window));
 	gtk_widget_hide(GTK_WIDGET(bar));
-        webkit_web_view_set_zoom_level(notebook_get_webview(notebook), ZOOM);
+  webkit_web_view_set_zoom_level(notebook_get_webview(notebook), ZOOM);
 }
 
 int main(int argc, char **argv)
