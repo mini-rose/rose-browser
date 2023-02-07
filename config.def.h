@@ -51,9 +51,9 @@ typedef enum {
 	show_finder,
 	finder_next,
 	finder_prev,
-	newtab,
-  /*prettify,*/
-	hidebar
+	new_tab,
+  prettify,
+	hide_bar
 } func;
 
 #define SFT  1 << 0
@@ -81,9 +81,9 @@ static struct {
     { CTRL,	   KEY(f),      show_finder       },
     { CTRL,	   KEY(n),      finder_next       },
     { CTRL | SFT,  KEY(N),      finder_prev	  },
-    { CTRL,        KEY(t),      newtab            },
+    { CTRL,        KEY(t),      new_tab            },
     { CTRL,        KEY(p),      prettify            },
-    { 0x0,         KEY(Escape), hidebar           }
+    { 0x0,         KEY(Escape), hide_bar           }
 };
 /* For controls more akin to normal browsers, use:
 {
