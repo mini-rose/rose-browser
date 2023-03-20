@@ -1,3 +1,15 @@
+# Copyright (c) 2023 fenze
+
+#  Targets:
+#
+#   make		build the browser
+#   make clean		remove the build dir
+#   make install	install the rose binary
+#   make uninstall	remove the rose binary
+
+
+# -- Options --
+
 CC ?= cc
 
 PREFIX   := /usr
@@ -11,11 +23,11 @@ CFLAGS  := -std=c17 -Werror -Wextra -O3 \
 CFLAGS += `$(PKGCONFIG) --cflags webkit2gtk-4.0`
 LDFLAGS := `$(PKGCONFIG) --libs webkit2gtk-4.0`
 
-CP   := cp -f
-ECHO := @echo
-
 SOURCE := src/rose.c
 OUTPUT := $(BUILDDIR)/rose
+
+
+# -- Targets --
 
 $(OUTPUT): $(BUILDDIR) $(SOURCE)
 	$(CC) $(LDFLAGS) $(CFLAGS) $(SOURCE) -o $@
@@ -25,7 +37,7 @@ $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
 install: $(OUTPUT)
-	$(CP) $(OUTPUT) $(BINDIR)
+	cp -f $(OUTPUT) $(BINDIR)
 
 uninstall:
 	$(RM) $(BINDIR)/$(notdir $(OUTPUT))
@@ -35,6 +47,6 @@ clean:
 	$(RM) compile_flags.txt
 
 compile_flags.txt:
-	$(ECHO) $(CFLAGS) | tr " " "\n" > compile_flags.txt
+	echo $(CFLAGS) | tr " " "\n" > compile_flags.txt
 
 .PHONY: install uninstall clean compile_flags.txt
