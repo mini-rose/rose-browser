@@ -37,9 +37,6 @@ WebKitWebView *webview_new()
 
 	webkit_cookie_manager_set_accept_policy(cookiemanager, WEBKIT_COOKIE_POLICY_ACCEPT_ALWAYS);
 
-	webkit_web_context_set_process_model(web_context,
-					     WEBKIT_PROCESS_MODEL_MULTIPLE_SECONDARY_PROCESSES);
-
 	if (g_file_get_contents("~/.config/rose/style.css", &style, NULL, NULL))
 		webkit_user_content_manager_add_style_sheet(
 		    contentmanager,
