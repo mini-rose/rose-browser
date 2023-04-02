@@ -29,6 +29,8 @@
 #define WEBKIT \
 	"enable-back-forward-navigation-gestures", true, \
 	"enable-developer-extras", true, \
+	"hardware-acceleration-policy", WEBKIT_HARDWARE_ACCELERATION_POLICY_ALWAYS, \
+	"enable-webgl", true, \
 	"enable-smooth-scrolling", false
 
 #define GTK \

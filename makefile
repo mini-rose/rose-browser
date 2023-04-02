@@ -29,7 +29,7 @@ OUTPUT := $(BUILDDIR)/rose
 
 # -- Targets --
 
-$(OUTPUT): $(BUILDDIR) $(SOURCE)
+$(OUTPUT): $(BUILDDIR) $(SOURCE) src/config.h
 	$(CC) $(LDFLAGS) $(CFLAGS) $(SOURCE) -o $@
 
 $(BUILDDIR):

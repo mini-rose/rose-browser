@@ -259,7 +259,6 @@ void window_init(GtkNotebook *notebook)
 	gtk_widget_set_size_request(GTK_WIDGET(search), 300, -1);
 	gtk_header_bar_set_custom_title(bar, GTK_WIDGET(search));
 	gtk_window_set_titlebar(window, GTK_WIDGET(bar));
-
 	g_signal_connect(search, "activate", G_CALLBACK(search_activate), notebook);
 	g_signal_connect(window, "key-press-event", G_CALLBACK(keypress), notebook);
 	g_signal_connect(window, "destroy", G_CALLBACK(exit), notebook);
@@ -292,7 +291,7 @@ void setup(GtkNotebook *notebook, const char *uri)
 
 int main(int argc, char **argv)
 {
-	GtkNotebook *notebook;
+	GtkNotebook *notebook = NULL;
 	gtk_init(NULL, NULL);
 	setup(notebook, argc > 1 ? argv[1] : NULL);
 	gtk_main();
