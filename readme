@@ -5,31 +5,31 @@ NAME
 	rose - Minimal browser based on webkit2gtk.
 
 DESCRIPTION
-	Rose is just basement for creating your own browser
-	using gtk and webkit libraries. Every element inside
-	is necessery for surfing and the end-user can just add
-	what he need.
+	Rose is a basement for creating your own browser
+	using the gtk and webkit libraries. Every element inside
+	it is necessary for surfing, and the end-user can just add
+	what he needs.
 
 RATIONALE
 	Nowadays browsers are generally full of useless
-	functionalities with tones of code behind them.
+	functionalities with tons of code behind them.
 	Rose has only tabs, cookies, caching and custom
-	css support, but very hackable without any special
-	knowledge. Bultin minimal user interface with
-	autohiding distracting elements.
+	css support, but it's very hackable without any 
+	special knowledge. It just has a bultin minimal 
+	user interface with autohiding distracting elements.
 
 USAGE
 	We have two main files - config.h and rose.c.
-	First one is for changing settings, second for
-	manipulating web content and gtk widgets. Just
-	write own configuration and build using make.
+	The first one is for changing settings, the second 
+	for manipulating web content and gtk widgets. Just
+	write your own configuration and build using make.
 	rose.h is file with all yank macros etc.
 	You can change global style.css in:
 		~/.config/rose/style.css
 	I think thats all, have a nice day!
 
 LICENSE
-	Argparser is released under the MIT license,
+	rose is released under the MIT license,
 	which grants the following permissions:
 	 - commercial use,
 	 - distibution,
