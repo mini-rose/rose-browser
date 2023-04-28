@@ -1,0 +1,44 @@
+---
+---
+IncludeBlocks: Regroup
+UseTab: ForContinuationAndIndentation
+AllowShortIfStatementsOnASingleLine: false
+IndentWidth: 4
+TabWidth: 4
+IndentCaseLabels: false
+AllowShortFunctionsOnASingleLine: Empty
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: true
+  AfterStruct: true
+  AfterFunction: true
+  AfterUnion: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeWhile: false
+SpaceAfterCStyleCast: true
+PointerAlignment: Right
+ReferenceAlignment: Left
+AlignOperands: AlignAfterOperator
+AlignConsecutiveMacros: true
+ColumnLimit: 80
+SpaceBeforeSquareBrackets: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterFunctionDefinitionName: false
+  AfterOverloadedOperator: false
+SpacesInCStyleCastParentheses: false
+BitFieldColonSpacing: Both
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: LogicalBlock
+IndentGotoLabels: false
+IndentPPDirectives: AfterHash
+PPIndentWidth: 1
+SpaceInEmptyBlock: true
+SeparateDefinitionBlocks: Leave
+...

@@ -1,52 +1,49 @@
-# Copyright (c) 2023 fenze
+-include build/makedeps.mk
+include config.mk
 
-#  Targets:
-#
-#   make		build the browser
-#   make clean		remove the build dir
-#   make install	install the rose binary
-#   make uninstall	remove the rose binary
+MAKEFLAGS += -j$(nproc)
+SOURCE := $(shell find src -type f -name '*.c')
+OBJECT := $(patsubst src/%.c,build/%.o,$(SOURCE))
+SRCDIR := $(shell find src -type d -wholename 'src/*' | sed 's/^src/build/g')
+OUTPUT := build/rose
 
+ifeq ($(DEBUG), 1)
+	CFLAGS += -O0 -ggdb -DDEBUG=1 -fsanitize=address
+else
+	CFLAGS += -Ofast
+endif
 
-# -- Options --
+rose: build build/makedeps.mk $(OUTPUT)
 
-CC ?= cc
+build:
+	mkdir -p build $(SRCDIR)
 
-PREFIX   := /usr
-BINDIR   := $(PREFIX)/bin
-BUILDDIR := build
-PKGCONFIG := pkg-config
+build/makedeps.mk: build $(SOURCE)
+	$(CC) -MM $(CFLAGS) $(SOURCE) | \
+		sed 's/\b\([a-zA-Z0-9_]*\.o\)\b/build\/\1/g' > build/makedeps.mk
 
-CFLAGS  := -std=c17 -Werror -Wextra -O3 \
-	   -march=native -fomit-frame-pointer -funroll-loops
+run:
+	make
+	$(OUTPUT)
 
-CFLAGS += `$(PKGCONFIG) --cflags webkit2gtk-4.0`
-LDFLAGS := `$(PKGCONFIG) --libs webkit2gtk-4.0`
-
-SOURCE := src/rose.c
-OUTPUT := $(BUILDDIR)/rose
-
-
-# -- Targets --
-
-$(OUTPUT): $(BUILDDIR) $(SOURCE) src/config.h
-	$(CC) $(LDFLAGS) $(CFLAGS) $(SOURCE) -o $@
-
-$(BUILDDIR):
-	$(RM) $(BUILDDIR)
-	mkdir -p $(BUILDDIR)
-
-install: $(OUTPUT)
-	cp -f $(OUTPUT) $(BINDIR)
+install:
+	cp -f $(OUTPUT) $(BINDIR)/mcc
 
 uninstall:
-	$(RM) $(BINDIR)/$(notdir $(OUTPUT))
+	$(RM) $(BINDIR)/mcc
 
 clean:
-	$(RM) -r $(BUILDDIR)
-	$(RM) compile_flags.txt
+	$(RM) -r build
 
-compile_flags.txt:
-	echo $(CFLAGS) | tr " " "\n" > compile_flags.txt
+compile_flags.txt: makefile
+	echo $(CFLAGS) | tr ' ' '\n' > compile_flags.txt
 
-.PHONY: install uninstall clean compile_flags.txt
+$(OUTPUT): $(OBJECT)
+	$(CC) -o $@ $(USE_LD) $(CFLAGS) $(LDFLAGS) $^
+
+build/%.o: src/%.c
+	$(CC) -c -o $@ $(CFLAGS) $<
+
+.PHONY: install uninstall clean
+.SILENT: build/makedeps.mk
+.DEFAULT_GOAL := rose
