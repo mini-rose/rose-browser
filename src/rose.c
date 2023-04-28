@@ -1,5 +1,6 @@
 #include "client.h"
 #include <stdlib.h>
+#include <signal.h>
 
 void at_exit()
 {
@@ -12,6 +13,10 @@ int main()
 	gtk_init();
 	srand(time(NULL));
 	atexit(at_exit);
+
+	signal(SIGINT, (void *)rose_client_destroy_all);
+	signal(SIGTERM, (void *)rose_client_destroy_all);
+	signal(SIGKILL, (void *)rose_client_destroy_all);
 
 	rose_client_new();
 

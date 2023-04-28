@@ -1,5 +1,6 @@
 #include "client.h"
 #include "window.h"
+#include "debug.h"
 
 typedef struct
 {
@@ -61,6 +62,7 @@ void rose_client_destroy_by_window(RoseWindow *window)
 
 	for (int i = 0; i < rcs->n_clients; i++) {
 		if (rcs->clients[i]->window == window) {
+			debug("Destroying window (id: %i)", rcs->clients[i]->id);
 			free(rcs->clients[i]);
 			rcs->clients[i] = NULL;
 
@@ -80,6 +82,7 @@ void rose_client_destroy_by_id(int id)
 
 	for (int i = 0; i < rcs->n_clients; i++) {
         if (rcs->clients[i]->id == id) {
+			debug("Destroying window (id: %i)", rcs->clients[i]->id);
             free(rcs->clients[i]);
             rcs->clients[i] = NULL;
 
@@ -100,6 +103,8 @@ void rose_client_destroy_all(void)
 
 	for (int i = 0; i < rcs->n_clients; i++) {
 		rose_window_destroy(rcs->clients[i]->window);
-		free(rcs->clients[i]);
 	}
+
+	free(rcs->clients);
+	exit(0);
 }
