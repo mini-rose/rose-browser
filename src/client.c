@@ -72,6 +72,9 @@ void rose_client_destroy_by_window(RoseWindow *window)
 
 			rcs->n_clients--;
 			rcs->clients = realloc(rcs->clients, rcs->n_clients * sizeof(RoseClient*));
+
+			if (rcs->n_clients == 0)
+				exit(0);
 		}
 	}
 }
@@ -92,6 +95,9 @@ void rose_client_destroy_by_id(int id)
 
             rcs->n_clients--;
             rcs->clients = realloc(rcs->clients, rcs->n_clients * sizeof(RoseClient*));
+
+			if (rcs->n_clients == 0)
+				exit(0);
             return;
         }
     }
@@ -106,5 +112,4 @@ void rose_client_destroy_all(void)
 	}
 
 	free(rcs->clients);
-	exit(0);
 }

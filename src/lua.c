@@ -1,6 +1,8 @@
 #include "lua.h"
 #include "debug.h"
-#include <lua.h>
+#include "path.h"
+
+#include <lualib.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -25,7 +27,25 @@ void rose_lua_add_table(char *name)
 	lua_setglobal(L, name);
 }
 
-void rose_lua_table_add_field(char *glob_var, const char* fieldpath)
+bool rose_lua_value_boolean(char *fieldpath)
+{
+	lua_State *L = rose_lua_state_get();
+
+	char *path_part = strtok(fieldpath, ".");
+	lua_getglobal(L, path_part);
+
+	while (path_part != NULL) {
+		lua_pushstring(L, path_part);
+		lua_gettable(L, -2);
+		if (lua_isnil(L, -1))
+			error("cannot access `%s`, the `%s` does not exits", fieldpath, path_part);
+		path_part = strtok(NULL, ".");
+	}
+
+	return lua_toboolean(L, -1);
+}
+
+void rose_lua_table_add_field(char *glob_var, const char *fieldpath)
 {
 	lua_State *L = rose_lua_state_get();
 	lua_getglobal(L, glob_var);
@@ -60,7 +80,9 @@ lua_State *rose_lua_state_get()
 
 	if (L == NULL) {
 		L = luaL_newstate();
+		luaL_openlibs(L);
 		rose_lua_setup();
+		luaL_dofile(L, buildpath(2, getenv("HOME"), ".config/rose/init.lua"));
 	}
 
 	return L;

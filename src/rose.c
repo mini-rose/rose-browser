@@ -1,4 +1,5 @@
 #include "client.h"
+#include "lua.h"
 #include <stdlib.h>
 #include <signal.h>
 
@@ -18,6 +19,7 @@ int main()
 	signal(SIGTERM, (void *)rose_client_destroy_all);
 	signal(SIGKILL, (void *)rose_client_destroy_all);
 
+	rose_lua_state_get();
 	rose_client_new();
 
 	while (1)
