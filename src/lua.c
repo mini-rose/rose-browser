@@ -27,22 +27,57 @@ void rose_lua_add_table(char *name)
 	lua_setglobal(L, name);
 }
 
+static void rose_lua_value(char *fieldpath)
+{
+	lua_State *L = rose_lua_state_get();
+	lua_pop(L, -1);
+
+	char *path = strdup(fieldpath);
+	char *path_chunk = strtok(path, ".");
+	lua_getglobal(L, path_chunk);
+
+	if (lua_isnil(L, -1)) {
+		warn("cannot access `%s`, the `%s` does not exist", fieldpath, path_chunk);
+		free(path);
+		return;
+	}
+
+	while (path_chunk != NULL) {
+		path_chunk = strtok(NULL, ".");
+
+		if (path_chunk == NULL)
+			break;
+
+		lua_getfield(L, -1, path_chunk);
+
+		if (lua_isnil(L, -1)) {
+			warn("cannot access `%s`, the field `%s` does not exist", fieldpath, path_chunk);
+			free(path);
+			return;
+		}
+	}
+
+	free(path);
+}
+
 bool rose_lua_value_boolean(char *fieldpath)
 {
 	lua_State *L = rose_lua_state_get();
+	rose_lua_value(fieldpath);
+	bool value = lua_toboolean(L, -1);
+	lua_pop(L, -1);
+	return value;
+}
 
-	char *path_part = strtok(fieldpath, ".");
-	lua_getglobal(L, path_part);
+char *rose_lua_value_string(char *fieldpath)
+{
+	lua_State *L = rose_lua_state_get();
 
-	while (path_part != NULL) {
-		lua_pushstring(L, path_part);
-		lua_gettable(L, -2);
-		if (lua_isnil(L, -1))
-			error("cannot access `%s`, the `%s` does not exits", fieldpath, path_part);
-		path_part = strtok(NULL, ".");
-	}
+	rose_lua_value(fieldpath);
 
-	return lua_toboolean(L, -1);
+	char *value = strdup(lua_tostring(L, -1));
+	lua_pop(L, -1);
+	return value;
 }
 
 void rose_lua_table_add_field(char *glob_var, const char *fieldpath)
