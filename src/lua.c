@@ -64,6 +64,10 @@ bool rose_lua_value_boolean(char *fieldpath)
 {
 	lua_State *L = rose_lua_state_get();
 	rose_lua_value(fieldpath);
+
+	if (lua_isnil(L, -1))
+		return false;
+
 	bool value = lua_toboolean(L, -1);
 	lua_pop(L, -1);
 	return value;
@@ -74,6 +78,9 @@ char *rose_lua_value_string(char *fieldpath)
 	lua_State *L = rose_lua_state_get();
 
 	rose_lua_value(fieldpath);
+
+	if (lua_isnil(L, -1))
+		return NULL;
 
 	char *value = strdup(lua_tostring(L, -1));
 	lua_pop(L, -1);
