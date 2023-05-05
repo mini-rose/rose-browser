@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void rose_lua_setup()
+static void rose_lua_setup(void)
 {
 	rose_lua_add_table("rose");
 	rose_lua_table_add_field("rose", "webkit.settings");
@@ -120,11 +120,15 @@ lua_State *rose_lua_state_get()
 {
 	static lua_State *L = NULL;
 
+	// Create state if not already exist
 	if (L == NULL) {
 		L = luaL_newstate();
 		luaL_openlibs(L);
 		rose_lua_setup();
-		luaL_dofile(L, buildpath(2, getenv("HOME"), ".config/rose/init.lua"));
+		char *config_path = buildpath(getenv("HOME"), ".config/rose/init.lua", NULL);
+		warn("%s", config_path);
+		luaL_dofile(L, config_path);
+		free(config_path);
 	}
 
 	return L;

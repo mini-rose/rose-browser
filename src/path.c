@@ -1,21 +1,25 @@
-#include <linux/limits.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <string.h>
-#include "path.h"
 
-char *buildpath(int n, ...)
+char *buildpath(char *dir, ...)
 {
-	va_list args;
-	static char buf[PATH_MAX];
-	va_start(args, n);
-	*buf = 0;
+	char path[PATH_MAX];
+	char *path_part;
 
-	for (int i = 0; i < n; i++) {
-		strcat(buf, va_arg(args, char*));
-		if (i + 1 != n)
-			strcat(buf, "/");
+	va_list args;
+	va_start(args, dir);
+
+	*path = 0;
+	strcat(path, dir);
+
+	path_part = va_arg(args, char *);
+	while (path_part != NULL) {
+		strcat(path, "/");
+		strcat(path, path_part);
+		path_part = va_arg(args, char *);
 	}
 
 	va_end(args);
-	return buf;
+	return strdup(path);
 }

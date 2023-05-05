@@ -4,6 +4,7 @@
 
 #include "debug.h"
 
+#if defined(DEBUG)
 void _debug(char *fmt, ...)
 {
 	va_list args;
@@ -13,6 +14,7 @@ void _debug(char *fmt, ...)
 	fputc('\n', stderr);
 	va_end(args);
 }
+#endif
 
 void warn(char *fmt, ...)
 {

@@ -7,9 +7,11 @@ OBJECT := $(patsubst src/%.c,build/%.o,$(SOURCE))
 SRCDIR := $(shell find src -type d -wholename 'src/*' | sed 's/^src/build/g')
 OUTPUT := build/rose
 
-ifeq ($(DEBUG), 1)
+BUILDTYPE ?= DEBUG
+
+ifeq ($(BUILDTYPE), DEBUG)
 	CFLAGS += -O0 -ggdb -DDEBUG=1 -fsanitize=address
-else
+else ifeq ($(BUILDTYPE), RELEASE)
 	CFLAGS += -Ofast
 endif
 

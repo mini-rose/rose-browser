@@ -8,5 +8,5 @@ noreturn void error(char *fmt, ...);
 void _debug(char *fmt, ...);
 # define debug(...) _debug(__VA_ARGS__)
 #else
-# define debug(fmt, ...) (void) fmt;
+# define debug(...) (void) __VA_ARGS__
 #endif

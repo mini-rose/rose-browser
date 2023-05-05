@@ -1,4 +1,4 @@
 #pragma once
 
 /* Returns path string */
-char *buildpath(int n, ...);
+char *buildpath(char *dir, ...);
