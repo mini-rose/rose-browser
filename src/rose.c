@@ -11,7 +11,11 @@ void at_exit()
 int main()
 {
 	/* Setup */
+#if GTK == 3
+	gtk_init(0, NULL);
+#elif GTK == 4
 	gtk_init();
+#endif
 	srand(time(NULL));
 	atexit(at_exit);
 

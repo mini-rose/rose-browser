@@ -14,14 +14,25 @@ RoseWindow *rose_window_new(void)
 	debug("Initializing new window");
 	RoseWindow *rw = calloc(1, sizeof(RoseWindow));
 
+#if GTK == 3
+	rw->window = GTK_WINDOW(gtk_window_new(0));
+#elif GTK == 4
 	rw->window = GTK_WINDOW(gtk_window_new());
+#endif
+
 	rw->paned = GTK_PANED(gtk_paned_new(GTK_ORIENTATION_HORIZONTAL));
 	rw->stack = GTK_STACK(gtk_stack_new());
 
+	debug("Opens new window");
+#if GTK == 3
+	gtk_container_add(GTK_CONTAINER(rw->window), GTK_WIDGET(rw->stack));
+	gtk_stack_add_named(rw->stack, GTK_WIDGET(rose_webview_new()), "0");
+	gtk_widget_show_all(GTK_WIDGET(rw->window));
+#elif GTK == 4
 	gtk_window_set_child(rw->window, GTK_WIDGET(rw->stack));
 	gtk_stack_add_child(rw->stack, GTK_WIDGET(rose_webview_new()));
-	debug("Opens new window");
 	gtk_window_present(rw->window);
+#endif
 
 	g_signal_connect(rw->window, "destroy",
 				     G_CALLBACK(rose_window_destroy_cb), rw);
