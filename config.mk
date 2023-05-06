@@ -10,7 +10,8 @@ LIBPREFIX := $(PREFIX)/lib
 LIBDIR := $(LIBPREFIX)/rose
 
 # Gtk version (3|4)
-GTK := 3
+# Default is 3
+GTK ?= 3
 
 # Includes and libraries
 ifeq ($(GTK), 4)
