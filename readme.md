@@ -23,7 +23,7 @@ Small browser built on gtk and webkit. <br>
 ## 📦 Installation
 ```sh
 $ git clone https://github.com/mini-rose/rose && cd rose
-# GTK=(3|4) BUILDTYPE=RELEASE make install
+$ (doas|sudo) GTK=(3|4) BUILDTYPE=RELEASE make install
 ```
 
 ## 🚀 Usage
