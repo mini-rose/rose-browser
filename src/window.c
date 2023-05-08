@@ -18,6 +18,7 @@ static int rose_handle_key(RoseKeymap *rk)
 	return 1;
 }
 
+#if GTK == 3
 static int rose_keypress_event(void *self, GdkEvent *e)
 {
 	(void) self;
@@ -32,6 +33,23 @@ static int rose_keypress_event(void *self, GdkEvent *e)
 
 	return 0;
 }
+#elif GTK == 4
+static int rose_keypress_event(void *self, int keyval, int keycode,
+							   GdkModifierType state, void *controller)
+{
+	(void) self, (void) keycode, (void) controller;
+
+	RoseKeymapList *rkl = rose_keymap_list_get();
+
+	for (int i = 0; i < rkl->n_keymaps; i++) {
+		if ((int) state == rkl->keymaps[i]->state
+		 && (int) keyval == rkl->keymaps[i]->keyval)
+			return rose_handle_key(rkl->keymaps[i]);
+	}
+
+	return 0;
+}
+#endif
 
 RoseWindow *rose_window_get(void)
 {
@@ -65,6 +83,16 @@ RoseWindow *rose_window_new(void)
 
 	gtk_window_set_default_size(rw->window, width, height);
 
+	// Connect signals
+#if GTK == 3
+	g_signal_connect(rw->window, "key-press-event",
+	                 G_CALLBACK(rose_keypress_event), NULL);
+#elif GTK == 4
+	GtkEventController *event_controller = gtk_event_controller_key_new();
+	g_signal_connect(rw->window, "key-pressed", G_CALLBACK(rose_keypress_event), NULL);
+	gtk_widget_add_controller(GTK_WIDGET(rw->window), event_controller);
+#endif
+
 #if GTK == 3
 	gtk_container_add(GTK_CONTAINER(rw->window), GTK_WIDGET(rw->stack));
 	gtk_stack_add_named(rw->stack, GTK_WIDGET(rose_webview_new()), "0");
@@ -75,10 +103,6 @@ RoseWindow *rose_window_new(void)
 	gtk_window_present(rw->window);
 #endif
 
-
-	// Connect signals
-	g_signal_connect(rw->window, "key-press-event",
-	                 G_CALLBACK(rose_keypress_event), NULL);
 
 	g_signal_connect(rw->window, "destroy",
 				     G_CALLBACK(rose_window_destroy_cb), rw);

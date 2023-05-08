@@ -23,7 +23,7 @@ int main()
 {
 	/* Setup */
 #if GTK == 3
-	gtk_init(0, NULL);
+	gtk_init(NULL, NULL);
 #elif GTK == 4
 	gtk_init();
 #endif
