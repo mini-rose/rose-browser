@@ -28,20 +28,7 @@ $ (doas|sudo) GTK=(3|4) BUILDTYPE=RELEASE make install
 ```
 
 ## 🚀 Usage
-Configure rose in ~/.config/rose/init.lua:
-```lua
-rose.startpage = "https://duckduckgo.com"
-
-rose.webkit = {
-	gestures = true
-}
-```
-
-## Work in progress
-
-For now i recommend to use old rose (at "old" branch).
-
-Moved to main becouse old branch will not be maintained.
+See how to configure rose [here](https://github.com/mini-rose/rose/wiki#configuring-rose).
 
 ## 📝 TODO
 Here is a list of tasks to be completed for the next releases of the Rose:
