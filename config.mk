@@ -22,9 +22,12 @@ else ifeq ($(GTK), 3)
 	WEBKIT_LIBS := `$(PKGCONFIG) --libs webkit2gtk-4.0 webkit2gtk-web-extension-4.0`
 endif
 
+LUA_INCS := `$(PKGCONFIG) --cflags lua`
+LUA_LIBS := `$(PKGCONFIG) --libs lua`
+
 CFLAGS  := -Wall -Wextra -Iinclude \
 		   -march=native -flto -pipe \
 		   -DVERSION=\"$(VERSION)\" -DGTK=$(GTK) \
-		   $(WEBKIT_INCS)
+		   $(WEBKIT_INCS) $(LUA_INCS)
 
-LDFLAGS := $(WEBKIT_LIBS) -llua
+LDFLAGS := $(WEBKIT_LIBS) $(LUA_LIBS)
