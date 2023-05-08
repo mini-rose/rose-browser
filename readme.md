@@ -5,6 +5,10 @@
 Small browser built on gtk and webkit. <br>
 </p>
 
+## 🌌 Showcase
+![image](https://user-images.githubusercontent.com/93622468/236818028-9d90bc83-7bf9-4666-b95a-763a6a1fd3b1.png)
+
+
 ## ⚡️ Requirements
   - lua (5.0+)
   - webkitgtk (4.0|6.0)
