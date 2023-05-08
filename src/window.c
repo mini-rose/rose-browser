@@ -5,6 +5,10 @@
 #include "debug.h"
 #include "keymap.h"
 
+#if GTK == 3
+static void rose_window_state_event(void *win, GdkEventWindowState *event);
+#endif
+
 static void rose_window_destroy_cb(GtkWindow *window, RoseWindow *rw)
 {
 	(void) window;
@@ -97,12 +101,12 @@ RoseWindow *rose_window_new(void)
 	gtk_container_add(GTK_CONTAINER(rw->window), GTK_WIDGET(rw->stack));
 	gtk_stack_add_named(rw->stack, GTK_WIDGET(rose_webview_new()), "0");
 	gtk_widget_show_all(GTK_WIDGET(rw->window));
+	g_signal_connect(rw->window, "window-state-event", G_CALLBACK(rose_window_state_event), NULL);
 #elif GTK == 4
 	gtk_window_set_child(rw->window, GTK_WIDGET(rw->stack));
 	gtk_stack_add_child(rw->stack, GTK_WIDGET(rose_webview_new()));
 	gtk_window_present(rw->window);
 #endif
-
 
 	g_signal_connect(rw->window, "destroy",
 				     G_CALLBACK(rose_window_destroy_cb), rw);
@@ -110,16 +114,45 @@ RoseWindow *rose_window_new(void)
 	return rw;
 }
 
+#if GTK == 3
+
+static bool rose_window_is_fullscreen(int v)
+{
+	static bool is_fullscreen = false;
+
+	if (v == 1 || v == 0)
+		is_fullscreen = v;
+
+	return is_fullscreen;
+}
+
+static void rose_window_state_event(void *win, GdkEventWindowState *event)
+{
+	(void) win;
+
+	if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
+		rose_window_is_fullscreen(1);
+	else
+		rose_window_is_fullscreen(0);
+}
+
+#endif
+
 void rose_window_fullscreen()
 {
 	RoseWindow *rw = rose_window_get();
+#if GTK == 4
 	if (gtk_window_is_fullscreen(rw->window)) {
+#elif GTK == 3
+	if (rose_window_is_fullscreen(-1)) {
+#endif
 		gtk_window_unfullscreen(rw->window);
 	} else {
 		gtk_window_fullscreen(rw->window);
 	}
 }
 
+#if GTK == 4
 void rose_window_minimize()
 {
 	RoseWindow *rw = rose_window_get();
@@ -129,9 +162,10 @@ void rose_window_minimize()
 		minimalized = true;
 		gtk_window_minimize(rw->window);
 	} else {
-		gtk_window_unmaximize(rw->window);
+		gtk_window_unminimize(rw->window);
 	}
 }
+#endif
 
 void rose_window_maximize()
 {
@@ -150,9 +184,11 @@ void rose_window_lua_api(lua_State *L)
 	lua_pushcfunction(L, (lua_CFunction) rose_window_fullscreen);
 	lua_setfield(L, -2, "fullscreen");
 
+#if GTK == 4
 	rose_lua_table_add_field("rose", "window.toggle");
 	lua_pushcfunction(L, (lua_CFunction) rose_window_minimize);
 	lua_setfield(L, -2, "minimize");
+#endif
 
 	rose_lua_table_add_field("rose", "window.toggle");
 	lua_pushcfunction(L, (lua_CFunction) rose_window_maximize);
