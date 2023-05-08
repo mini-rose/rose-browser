@@ -89,7 +89,7 @@ RoseWindow *rose_window_new(void)
 	                 G_CALLBACK(rose_keypress_event), NULL);
 #elif GTK == 4
 	GtkEventController *event_controller = gtk_event_controller_key_new();
-	g_signal_connect(rw->window, "key-pressed", G_CALLBACK(rose_keypress_event), NULL);
+	g_signal_connect(event_controller, "key-pressed", G_CALLBACK(rose_keypress_event), NULL);
 	gtk_widget_add_controller(GTK_WIDGET(rw->window), event_controller);
 #endif
 
