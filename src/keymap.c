@@ -64,7 +64,7 @@ static int parse_single_mod_key(RoseKeymap *keymap, const char *key)
 		return 1;
 	}
 
-	keymap->keyval = gdk_keyval_from_name((char[]) { *(key + 2), 0 });
+	keymap->keyval = gdk_keyval_from_name(key + 2);
 
 	return 0;
 }
@@ -78,14 +78,11 @@ static RoseKeymap *rose_keymap_new(const char *key)
 		keymap->state = 0;
 		keymap->keyval = gdk_keyval_from_name(key);
 		break;
-	case 3:
+	default:
 		if (parse_single_mod_key(keymap, key)) {
 			free(keymap);
 			return NULL;
 		}
-		break;
-	default:
-		warn("wrong format of keymap: `%s`", key);
 		break;
 	}
 

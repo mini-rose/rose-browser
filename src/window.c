@@ -75,8 +75,8 @@ RoseWindow *rose_window_new(void)
 	rw->stack = GTK_STACK(gtk_stack_new());
 
 	// Set window size
-	int width = rose_lua_value_number("rose.window.width");
-	int height = rose_lua_value_number("rose.window.height");
+	int width = rose_lua_value_number("rose.settings.width");
+	int height = rose_lua_value_number("rose.settings.height");
 
 	width = (width == -1) ? 800 : width;
 	height = (height == -1) ? 600 : height;
@@ -108,6 +108,55 @@ RoseWindow *rose_window_new(void)
 				     G_CALLBACK(rose_window_destroy_cb), rw);
 
 	return rw;
+}
+
+void rose_window_fullscreen()
+{
+	RoseWindow *rw = rose_window_get();
+	if (gtk_window_is_fullscreen(rw->window)) {
+		gtk_window_unfullscreen(rw->window);
+	} else {
+		gtk_window_fullscreen(rw->window);
+	}
+}
+
+void rose_window_minimize()
+{
+	RoseWindow *rw = rose_window_get();
+	static bool minimalized = false;
+
+	if (minimalized) {
+		minimalized = true;
+		gtk_window_minimize(rw->window);
+	} else {
+		gtk_window_unmaximize(rw->window);
+	}
+}
+
+void rose_window_maximize()
+{
+	RoseWindow *rw = rose_window_get();
+
+	if (gtk_window_is_maximized(rw->window)) {
+		gtk_window_unmaximize(rw->window);
+	} else {
+		gtk_window_maximize(rw->window);
+	}
+}
+
+void rose_window_lua_api(lua_State *L)
+{
+	rose_lua_table_add_field("rose", "window.toggle");
+	lua_pushcfunction(L, (lua_CFunction) rose_window_fullscreen);
+	lua_setfield(L, -2, "fullscreen");
+
+	rose_lua_table_add_field("rose", "window.toggle");
+	lua_pushcfunction(L, (lua_CFunction) rose_window_minimize);
+	lua_setfield(L, -2, "minimize");
+
+	rose_lua_table_add_field("rose", "window.toggle");
+	lua_pushcfunction(L, (lua_CFunction) rose_window_maximize);
+	lua_setfield(L, -2, "maximize");
 }
 
 void rose_window_destroy(RoseWindow *rw)

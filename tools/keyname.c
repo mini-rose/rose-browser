@@ -4,6 +4,7 @@
 void key_press_event(GtkWindow *self, GdkEvent *ev)
 {
 	(void) self;
+
 	printf("%s\n", gdk_keyval_name(ev->key.keyval));
 }
 
