@@ -1,13 +1,15 @@
 #include "lua.h"
 #include "debug.h"
+#include "keymap.h"
 #include "path.h"
 #include "webview.h"
+#include "keymap.h"
 
 #include <lualib.h>
 #include <stdlib.h>
 #include <string.h>
 
-static void rose_lua_value(char *fieldpath)
+void rose_lua_value(char *fieldpath)
 {
 	lua_State *L = rose_lua_state_get();
 	lua_pop(L, -1);
@@ -135,6 +137,9 @@ lua_State *rose_lua_state_get()
 		L = luaL_newstate();
 		luaL_openlibs(L);
 		rose_lua_setup();
+		if (luaL_dofile(L, "/usr/local/lib/rose/rose.lua") != LUA_OK) {
+			warn("%s", lua_tostring(L, -1));
+		}
 		char *config_path = buildpath(getenv("HOME"), ".config/rose/init.lua", NULL);
 		if (luaL_dofile(L, config_path) != LUA_OK) {
 			warn("%s", lua_tostring(L, -1));

@@ -3,11 +3,27 @@
 #include "lua.h"
 #include "webview.h"
 #include "debug.h"
+#include "keymap.h"
 
 static void rose_window_destroy_cb(GtkWindow *window, RoseWindow *rw)
 {
 	(void) window;
 	rose_client_destroy_by_window(rw);
+}
+
+static int rose_keypress_event(void *self, GdkEvent *e)
+{
+	(void) self;
+	RoseKeymapList *rkl = rose_keymap_list_get();
+	GdkEventKey key = e->key;
+
+	for (int i = 0; i < rkl->n_keymaps; i++) {
+		if ((int) key.state == rkl->keymaps[i]->state
+		 && (int) key.keyval == rkl->keymaps[i]->keyval)
+			return 1;
+	}
+
+	return 0;
 }
 
 RoseWindow *rose_window_get(void)
@@ -43,6 +59,9 @@ RoseWindow *rose_window_new(void)
 	gtk_stack_add_child(rw->stack, GTK_WIDGET(rose_webview_new()));
 	gtk_window_present(rw->window);
 #endif
+
+	g_signal_connect(rw->window, "key-press-event",
+	                 G_CALLBACK(rose_keypress_event), NULL);
 
 	g_signal_connect(rw->window, "destroy",
 				     G_CALLBACK(rose_window_destroy_cb), rw);
