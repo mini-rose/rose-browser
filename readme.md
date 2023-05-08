@@ -6,6 +6,7 @@ Small browser built on gtk and webkit. <br>
 </p>
 
 ## ⚡️ Requirements
+  - lua (5.0+)
   - webkitgtk (4.0|6.0)
   - gtk (3|4)
   
