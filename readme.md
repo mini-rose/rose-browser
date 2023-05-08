@@ -13,6 +13,7 @@ Small browser built on gtk and webkit. <br>
   - lua (5.0+)
   - webkitgtk (4.0|6.0)
   - gtk (3|4)
+  - libsanitizer-devel
   
   - Video and audio:
   	- gst-plugins-bad
