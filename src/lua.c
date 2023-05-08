@@ -1,31 +1,11 @@
 #include "lua.h"
 #include "debug.h"
 #include "path.h"
+#include "webview.h"
 
 #include <lualib.h>
 #include <stdlib.h>
 #include <string.h>
-
-static void rose_lua_setup(void)
-{
-	rose_lua_add_table("rose");
-	rose_lua_table_add_field("rose", "webkit.settings");
-}
-
-void rose_lua_add_table(char *name)
-{
-	lua_State *L = rose_lua_state_get();
-
-	lua_getglobal(L, name);
-
-	if (!lua_isnil(L, -1)) {
-		warn("overrides `%s` table", name);
-	}
-
-	lua_pop(L, -1);
-	lua_newtable(L);
-	lua_setglobal(L, name);
-}
 
 static void rose_lua_value(char *fieldpath)
 {
@@ -34,6 +14,7 @@ static void rose_lua_value(char *fieldpath)
 
 	char *path = strdup(fieldpath);
 	char *path_chunk = strtok(path, ".");
+
 	lua_getglobal(L, path_chunk);
 
 	if (lua_isnil(L, -1)) {
@@ -58,6 +39,35 @@ static void rose_lua_value(char *fieldpath)
 	}
 
 	free(path);
+}
+
+static void rose_lua_setup(void)
+{
+	lua_State *L = rose_lua_state_get();
+	rose_lua_add_table("rose");
+	rose_lua_table_add_field("rose", "webkit.settings");
+	rose_lua_table_add_field("rose", "webview");
+	rose_lua_value("rose.webview");
+	lua_pushcfunction(L, (void *) rose_webview_reload);
+	lua_setfield(L, -2, "reload");
+	rose_lua_value("rose.webview");
+	lua_pushcfunction(L, (void *) rose_webview_force_reload);
+	lua_setfield(L, -2, "force_reload");
+}
+
+void rose_lua_add_table(char *name)
+{
+	lua_State *L = rose_lua_state_get();
+
+	lua_getglobal(L, name);
+
+	if (!lua_isnil(L, -1)) {
+		warn("overrides `%s` table", name);
+	}
+
+	lua_pop(L, -1);
+	lua_newtable(L);
+	lua_setglobal(L, name);
 }
 
 bool rose_lua_value_boolean(char *fieldpath)
@@ -92,28 +102,28 @@ void rose_lua_table_add_field(char *glob_var, const char *fieldpath)
 	lua_State *L = rose_lua_state_get();
 	lua_getglobal(L, glob_var);
 
-    // Split the fieldpath string into parts
-    char* path_copy = strdup(fieldpath);
-    char* path_part = strtok(path_copy, ".");
+	// Split the fieldpath string into parts
+	char* path_copy = strdup(fieldpath);
+	char* path_part = strtok(path_copy, ".");
 
-    // Traverse the fieldpath and create nested tables as needed
-    while (path_part != NULL) {
-        // Push the next table onto the stack or create it if it doesn't exist
-        lua_pushstring(L, path_part);
-        lua_gettable(L, -2);
-        if (lua_isnil(L, -1)) {
-            lua_pop(L, 1);
-            lua_newtable(L);
-            lua_pushstring(L, path_part);
-            lua_pushvalue(L, -2);
-            lua_settable(L, -4);
-        }
-        // Move to the next part of the fieldpath
-        path_part = strtok(NULL, ".");
-    }
+	// Traverse the fieldpath and create nested tables as needed
+	while (path_part != NULL) {
+		// Push the next table onto the stack or create it if it doesn't exist
+		lua_pushstring(L, path_part);
+		lua_gettable(L, -2);
+		if (lua_isnil(L, -1)) {
+			lua_pop(L, 1);
+			lua_newtable(L);
+			lua_pushstring(L, path_part);
+			lua_pushvalue(L, -2);
+			lua_settable(L, -4);
+		}
+		// Move to the next part of the fieldpath
+		path_part = strtok(NULL, ".");
+	}
 
-    // Clean up
-    free(path_copy);
+	// Clean up
+	free(path_copy);
 }
 
 lua_State *rose_lua_state_get()
@@ -126,8 +136,9 @@ lua_State *rose_lua_state_get()
 		luaL_openlibs(L);
 		rose_lua_setup();
 		char *config_path = buildpath(getenv("HOME"), ".config/rose/init.lua", NULL);
-		warn("%s", config_path);
-		luaL_dofile(L, config_path);
+		if (luaL_dofile(L, config_path) != LUA_OK) {
+			warn("%s", lua_tostring(L, -1));
+		}
 		free(config_path);
 	}
 

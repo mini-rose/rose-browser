@@ -1,5 +1,6 @@
 #include "window.h"
 #include "client.h"
+#include "lua.h"
 #include "webview.h"
 #include "debug.h"
 
@@ -9,13 +10,22 @@ static void rose_window_destroy_cb(GtkWindow *window, RoseWindow *rw)
 	rose_client_destroy_by_window(rw);
 }
 
+RoseWindow *rose_window_get(void)
+{
+	static RoseWindow *rw = NULL;
+
+	if (rw == NULL)
+		rw = rose_window_new();
+
+	return rw;
+}
+
 RoseWindow *rose_window_new(void)
 {
-	debug("Initializing new window");
 	RoseWindow *rw = calloc(1, sizeof(RoseWindow));
 
 #if GTK == 3
-	rw->window = GTK_WINDOW(gtk_window_new(0));
+	rw->window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 #elif GTK == 4
 	rw->window = GTK_WINDOW(gtk_window_new());
 #endif

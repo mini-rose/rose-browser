@@ -1,4 +1,5 @@
 #include "webview.h"
+#include "debug.h"
 #include "lua.h"
 
 static WebKitSettings *rose_webview_get_settings(void)
@@ -8,6 +9,12 @@ static WebKitSettings *rose_webview_get_settings(void)
 		rose_lua_value_boolean("rose.webview.gestures"),
 		"allow-file-access-from-file-urls",
 		rose_lua_value_boolean("rose.webview.allow_file_access_from_urls"),
+		"enable-developer-extras",
+		rose_lua_value_boolean("rose.webview.developer_extras"),
+		"enable-webgl",
+		rose_lua_value_boolean("rose.webview.webgl"),
+		"enable-smooth-scrolling",
+		rose_lua_value_boolean("rose.webview.smooth_scrolling"),
 		NULL
 	);
 }
@@ -27,4 +34,22 @@ WebKitWebView *rose_webview_new(void)
 	webkit_web_view_set_settings(view, rose_webview_get_settings());
 
 	return view;
+}
+
+void rose_webview_reload(void)
+{
+	RoseWindow *rs = rose_window_get();
+	debug("reload");
+	webkit_web_view_reload(
+		WEBKIT_WEB_VIEW(gtk_stack_get_visible_child(rs->stack))
+	);
+}
+
+void rose_webview_force_reload(void)
+{
+	RoseWindow *rs = rose_window_get();
+	debug("force reload");
+	webkit_web_view_reload_bypass_cache(
+		WEBKIT_WEB_VIEW(gtk_stack_get_visible_child(rs->stack))
+	);
 }

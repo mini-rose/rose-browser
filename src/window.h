@@ -9,4 +9,5 @@ typedef struct {
 } RoseWindow;
 
 RoseWindow *rose_window_new(void);
+RoseWindow *rose_window_get(void);
 void rose_window_destroy(RoseWindow *);

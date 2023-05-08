@@ -8,4 +8,9 @@
 # error "Unknown gtk version"
 #endif
 
+#include "window.h"
+
 WebKitWebView *rose_webview_new(void);
+
+void rose_webview_reload();
+void rose_webview_force_reload();
