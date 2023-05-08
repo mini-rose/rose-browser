@@ -1,5 +1,7 @@
 #pragma once
 
+#include <lua.h>
+
 #if GTK == 4
 #include <webkit/webkit.h>
 #elif GTK == 3
@@ -14,3 +16,4 @@ WebKitWebView *rose_webview_new(void);
 
 void rose_webview_reload();
 void rose_webview_force_reload();
+void rose_webview_lua_api(lua_State *L);

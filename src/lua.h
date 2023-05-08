@@ -11,3 +11,4 @@ void rose_lua_table_add_field(char *glob_var, const char* fieldpath);
 bool rose_lua_value_boolean(char *fieldpath);
 char *rose_lua_value_string(char *fieldpath);
 void rose_lua_value(char *fieldpath);
+int rose_lua_value_number(char *fieldpath);

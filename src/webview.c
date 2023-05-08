@@ -19,6 +19,17 @@ static WebKitSettings *rose_webview_get_settings(void)
 	);
 }
 
+void rose_webview_lua_api(lua_State *L)
+{
+	rose_lua_table_add_field("rose", "webview");
+	lua_pushcfunction(L, (lua_CFunction) rose_webview_reload);
+	lua_setfield(L, -2, "reload");
+
+	rose_lua_table_add_field("rose", "webview");
+	lua_pushcfunction(L, (lua_CFunction) rose_webview_force_reload);
+	lua_setfield(L, -2, "force_reload");
+}
+
 WebKitWebView *rose_webview_new(void)
 {
 	WebKitWebView *view = WEBKIT_WEB_VIEW(webkit_web_view_new());
@@ -39,7 +50,6 @@ WebKitWebView *rose_webview_new(void)
 void rose_webview_reload(void)
 {
 	RoseWindow *rs = rose_window_get();
-	debug("reload");
 	webkit_web_view_reload(
 		WEBKIT_WEB_VIEW(gtk_stack_get_visible_child(rs->stack))
 	);
@@ -48,7 +58,6 @@ void rose_webview_reload(void)
 void rose_webview_force_reload(void)
 {
 	RoseWindow *rs = rose_window_get();
-	debug("force reload");
 	webkit_web_view_reload_bypass_cache(
 		WEBKIT_WEB_VIEW(gtk_stack_get_visible_child(rs->stack))
 	);

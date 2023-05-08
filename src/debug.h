@@ -1,6 +1,7 @@
 #pragma once
 #include <stdnoreturn.h>
 
+void info(char *fmt, ...);
 void warn(char *fmt, ...);
 noreturn void error(char *fmt, ...);
 

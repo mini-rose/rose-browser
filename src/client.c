@@ -19,7 +19,7 @@ RoseClient *rose_client_new(void)
 	RoseClients *rcs = rose_client_get_all();
 	RoseClient *rc = calloc(sizeof(*rc), 1);
 
-	rc->window = rose_window_new();
+	rc->window = rose_window_get();
 	rc->id = rand();
 
 	while (rose_client_get_by_id(rc->id)) {

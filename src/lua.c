@@ -12,7 +12,6 @@
 void rose_lua_value(char *fieldpath)
 {
 	lua_State *L = rose_lua_state_get();
-	lua_pop(L, -1);
 
 	char *path = strdup(fieldpath);
 	char *path_chunk = strtok(path, ".");
@@ -20,7 +19,7 @@ void rose_lua_value(char *fieldpath)
 	lua_getglobal(L, path_chunk);
 
 	if (lua_isnil(L, -1)) {
-		warn("cannot access `%s`, the `%s` does not exist", fieldpath, path_chunk);
+		info("cannot access `%s`, the `%s` does not exist", fieldpath, path_chunk);
 		free(path);
 		return;
 	}
@@ -34,7 +33,7 @@ void rose_lua_value(char *fieldpath)
 		lua_getfield(L, -1, path_chunk);
 
 		if (lua_isnil(L, -1)) {
-			warn("cannot access `%s`, the field `%s` does not exist", fieldpath, path_chunk);
+			info("cannot access `%s`, the field `%s` does not exist", fieldpath, path_chunk);
 			free(path);
 			return;
 		}
@@ -48,13 +47,8 @@ static void rose_lua_setup(void)
 	lua_State *L = rose_lua_state_get();
 	rose_lua_add_table("rose");
 	rose_lua_table_add_field("rose", "webkit.settings");
-	rose_lua_table_add_field("rose", "webview");
-	rose_lua_value("rose.webview");
-	lua_pushcfunction(L, (void *) rose_webview_reload);
-	lua_setfield(L, -2, "reload");
-	rose_lua_value("rose.webview");
-	lua_pushcfunction(L, (void *) rose_webview_force_reload);
-	lua_setfield(L, -2, "force_reload");
+	rose_webview_lua_api(L);
+	rose_keymap_lua_api(L);
 }
 
 void rose_lua_add_table(char *name)
@@ -99,6 +93,20 @@ char *rose_lua_value_string(char *fieldpath)
 	return value;
 }
 
+int rose_lua_value_number(char *fieldpath)
+{
+	lua_State *L = rose_lua_state_get();
+
+	rose_lua_value(fieldpath);
+
+	if (lua_isnil(L, -1))
+		return -1;
+
+	int value = lua_tonumber(L, -1);
+	lua_pop(L, -1);
+	return value;
+}
+
 void rose_lua_table_add_field(char *glob_var, const char *fieldpath)
 {
 	lua_State *L = rose_lua_state_get();
@@ -137,9 +145,6 @@ lua_State *rose_lua_state_get()
 		L = luaL_newstate();
 		luaL_openlibs(L);
 		rose_lua_setup();
-		if (luaL_dofile(L, "/usr/local/lib/rose/rose.lua") != LUA_OK) {
-			warn("%s", lua_tostring(L, -1));
-		}
 		char *config_path = buildpath(getenv("HOME"), ".config/rose/init.lua", NULL);
 		if (luaL_dofile(L, config_path) != LUA_OK) {
 			warn("%s", lua_tostring(L, -1));
