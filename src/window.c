@@ -180,17 +180,17 @@ void rose_window_maximize()
 
 void rose_window_lua_api(lua_State *L)
 {
-	rose_lua_table_add_field("rose", "window.toggle");
+	rose_lua_table_add_field("rose.window.toggle");
 	lua_pushcfunction(L, (lua_CFunction) rose_window_fullscreen);
 	lua_setfield(L, -2, "fullscreen");
 
 #if GTK == 4
-	rose_lua_table_add_field("rose", "window.toggle");
+	rose_lua_table_add_field("rose.window.toggle");
 	lua_pushcfunction(L, (lua_CFunction) rose_window_minimize);
 	lua_setfield(L, -2, "minimize");
 #endif
 
-	rose_lua_table_add_field("rose", "window.toggle");
+	rose_lua_table_add_field("rose.window.toggle");
 	lua_pushcfunction(L, (lua_CFunction) rose_window_maximize);
 	lua_setfield(L, -2, "maximize");
 }

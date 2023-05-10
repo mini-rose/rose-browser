@@ -46,7 +46,7 @@ static void rose_lua_setup(void)
 {
 	lua_State *L = rose_lua_state_get();
 	rose_lua_add_table("rose");
-	rose_lua_table_add_field("rose", "webkit.settings");
+	rose_lua_table_add_field("rose.webkit.settings");
 	rose_webview_lua_api(L);
 	rose_keymap_lua_api(L);
 }
@@ -107,14 +107,17 @@ int rose_lua_value_number(char *fieldpath)
 	return value;
 }
 
-void rose_lua_table_add_field(char *glob_var, const char *fieldpath)
+void rose_lua_table_add_field(const char *fieldpath)
 {
 	lua_State *L = rose_lua_state_get();
-	lua_getglobal(L, glob_var);
 
 	// Split the fieldpath string into parts
 	char* path_copy = strdup(fieldpath);
 	char* path_part = strtok(path_copy, ".");
+
+	lua_getglobal(L, path_part);
+
+	path_part = strtok(NULL, ".");
 
 	// Traverse the fieldpath and create nested tables as needed
 	while (path_part != NULL) {

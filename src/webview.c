@@ -21,35 +21,35 @@ static WebKitSettings *rose_webview_get_settings(void)
 
 void rose_webview_lua_api(lua_State *L)
 {
-	rose_lua_table_add_field("rose", "webview");
+	rose_lua_table_add_field("rose.webview");
 	lua_pushcfunction(L, (lua_CFunction) rose_webview_reload);
 	lua_setfield(L, -2, "reload");
 
-	rose_lua_table_add_field("rose", "webview");
+	rose_lua_table_add_field("rose.webview");
 	lua_pushcfunction(L, (lua_CFunction) rose_webview_force_reload);
 	lua_setfield(L, -2, "force_reload");
 
-	rose_lua_table_add_field("rose", "webview");
+	rose_lua_table_add_field("rose.webview");
 	lua_pushcfunction(L, (lua_CFunction) rose_webview_goback);
 	lua_setfield(L, -2, "back");
 
-	rose_lua_table_add_field("rose", "webview");
+	rose_lua_table_add_field("rose.webview");
 	lua_pushcfunction(L, (lua_CFunction) rose_webview_goforward);
 	lua_setfield(L, -2, "forward");
 
-	rose_lua_table_add_field("rose", "webview");
+	rose_lua_table_add_field("rose.webview");
 	lua_pushcfunction(L, (lua_CFunction) rose_webview_open);
 	lua_setfield(L, -2, "open");
 
-	rose_lua_table_add_field("rose", "webview");
+	rose_lua_table_add_field("rose.webview");
 	lua_pushcfunction(L, (lua_CFunction) rose_webview_zoom_reset);
 	lua_setfield(L, -2, "zoom_reset");
 
-	rose_lua_table_add_field("rose", "webview");
+	rose_lua_table_add_field("rose.webview");
 	lua_pushcfunction(L, (lua_CFunction) rose_webview_zoomin);
 	lua_setfield(L, -2, "zoomin");
 
-	rose_lua_table_add_field("rose", "webview");
+	rose_lua_table_add_field("rose.webview");
 	lua_pushcfunction(L, (lua_CFunction) rose_webview_zoomout);
 	lua_setfield(L, -2, "zoomout");
 }

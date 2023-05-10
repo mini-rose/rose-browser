@@ -91,15 +91,23 @@ static RoseKeymap *rose_keymap_new(const char *key)
 
 void rose_keymap_set(lua_State *L)
 {
+	// Retrieve the first argument from Lua as a string
 	const char *key = luaL_checkstring(L, 1);
+
+	// Create a new RoseKeymap using the key
 	RoseKeymap *keymap = rose_keymap_new(key);
 
+	// Check if the second argument is a Lua function
 	if (!lua_isfunction(L, 2))
 		error("expected lua function in rose.keymap.set");
 
+    // Retrieve the Lua function from the stack and assign it to the keymap
 	keymap->func = lua_tocfunction(L, 2);
+
+	// Remove the Lua function from the stack
 	lua_pop(L, 1);
 
+	// Remove the Lua function from the stack
 	rose_keymap_list_append(keymap);
 }
 
@@ -129,7 +137,7 @@ void rose_keymap_del(lua_State *L)
 
 void rose_keymap_lua_api(lua_State *L)
 {
-	rose_lua_table_add_field("rose", "keymap");
+	rose_lua_table_add_field("rose.keymap");
 	lua_pushcfunction(L, (lua_CFunction) rose_keymap_set);
 	lua_setfield(L, -2, "set");
 
