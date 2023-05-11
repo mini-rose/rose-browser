@@ -1,4 +1,5 @@
 #include "client.h"
+#include "split.h"
 #include "window.h"
 #include "debug.h"
 

@@ -74,7 +74,8 @@ WebKitWebView *rose_webview_new(void)
 static WebKitWebView *rose_webview_get(void)
 {
 	RoseWindow *rs = rose_window_get();
-	return WEBKIT_WEB_VIEW(gtk_stack_get_visible_child(rs->stack));
+	GtkPaned *splitter = GTK_PANED(gtk_stack_get_visible_child(rs->stack));
+	return WEBKIT_WEB_VIEW(gtk_container_get_focus_child(GTK_CONTAINER(splitter)));
 }
 
 static void load_uri(const char *uri)

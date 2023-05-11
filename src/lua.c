@@ -4,6 +4,7 @@
 #include "path.h"
 #include "webview.h"
 #include "keymap.h"
+#include "window.h"
 
 #include <lualib.h>
 #include <stdlib.h>
@@ -47,6 +48,7 @@ static void rose_lua_setup(void)
 	lua_State *L = rose_lua_state_get();
 	rose_lua_add_table("rose");
 	rose_lua_table_add_field("rose.webkit.settings");
+	rose_window_lua_api(L);
 	rose_webview_lua_api(L);
 	rose_keymap_lua_api(L);
 }
@@ -91,6 +93,20 @@ char *rose_lua_value_string(char *fieldpath)
 	char *value = strdup(lua_tostring(L, -1));
 	lua_pop(L, -1);
 	return value;
+}
+
+void *rose_lua_value_ptr(char *fieldpath)
+{
+	lua_State *L = rose_lua_state_get();
+
+	rose_lua_value(fieldpath);
+
+	if (lua_isnil(L, -1))
+		return NULL;
+
+	void *ptr = *((void **)lua_touserdata(L, -1));
+	lua_pop(L, -1);
+	return ptr;
 }
 
 int rose_lua_value_number(char *fieldpath)

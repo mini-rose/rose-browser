@@ -4,6 +4,7 @@
 #include "webview.h"
 #include "debug.h"
 #include "keymap.h"
+#include "split.h"
 
 #if GTK == 3
 static void rose_window_state_event(void *win, GdkEventWindowState *event);
@@ -68,6 +69,7 @@ RoseWindow *rose_window_get(void)
 RoseWindow *rose_window_new(void)
 {
 	RoseWindow *rw = calloc(1, sizeof(RoseWindow));
+	GtkPaned *splitter = GTK_PANED(gtk_paned_new(GTK_ORIENTATION_HORIZONTAL));
 
 #if GTK == 3
 	rw->window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
@@ -75,7 +77,6 @@ RoseWindow *rose_window_new(void)
 	rw->window = GTK_WINDOW(gtk_window_new());
 #endif
 
-	rw->paned = GTK_PANED(gtk_paned_new(GTK_ORIENTATION_HORIZONTAL));
 	rw->stack = GTK_STACK(gtk_stack_new());
 
 	// Set window size
@@ -99,12 +100,13 @@ RoseWindow *rose_window_new(void)
 
 #if GTK == 3
 	gtk_container_add(GTK_CONTAINER(rw->window), GTK_WIDGET(rw->stack));
-	gtk_stack_add_named(rw->stack, GTK_WIDGET(rose_webview_new()), "0");
+	gtk_paned_pack1(splitter, GTK_WIDGET(rose_webview_new()), true, false);
+	gtk_stack_add_named(rw->stack, GTK_WIDGET(splitter), "0");
 	gtk_widget_show_all(GTK_WIDGET(rw->window));
 	g_signal_connect(rw->window, "window-state-event", G_CALLBACK(rose_window_state_event), NULL);
 #elif GTK == 4
 	gtk_window_set_child(rw->window, GTK_WIDGET(rw->stack));
-	gtk_stack_add_child(rw->stack, GTK_WIDGET(rose_webview_new()));
+	gtk_stack_add_child(rw->stack, GTK_WIDGET(rose_view_new()));
 	gtk_window_present(rw->window);
 #endif
 
@@ -193,6 +195,18 @@ void rose_window_lua_api(lua_State *L)
 	rose_lua_table_add_field("rose.window.toggle");
 	lua_pushcfunction(L, (lua_CFunction) rose_window_maximize);
 	lua_setfield(L, -2, "maximize");
+
+	/**
+	 * TODO: create one function for splits
+	 * 	 rose.window.split({ orientation = "horizontal|vertical" })
+	 */
+	rose_lua_table_add_field("rose.window");
+	lua_pushcfunction(L, (lua_CFunction) rose_window_vsplit);
+	lua_setfield(L, -2, "vsplit");
+
+	rose_lua_table_add_field("rose.window");
+	lua_pushcfunction(L, (lua_CFunction) rose_window_hsplit);
+	lua_setfield(L, -2, "hsplit");
 }
 
 void rose_window_destroy(RoseWindow *rw)
