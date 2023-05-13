@@ -42,6 +42,6 @@ Here is a list of tasks to be completed for the next releases of the Rose:
 
 - [ ] - Reintroduce functionality from previous versions: There are some features that were available in previous versions of the browser that are currently missing. These features need to be reimplemented, including the ability to customize the browser's user interface, tabs etc.
 
-- [ ] - Implement split view: The browser needs to support split view, which allows users to view multiple web pages side by side in the same window. This can be implemented by using the browser's existing tab system and creating multiple webview widgets to display the content.
+- [x] - Implement split view: The browser needs to support split view, which allows users to view multiple web pages side by side in the same window. This can be implemented by using the browser's existing tab system and creating multiple webview widgets to display the content.
 
 - [ ] - Implement vertical tab view: Another useful feature that should be added is vertical tab view, which displays tabs in a vertical list on the side of the window instead of across the top.
