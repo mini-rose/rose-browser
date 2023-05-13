@@ -1,4 +1,5 @@
 #include "client.h"
+#include "lua.h"
 #include "split.h"
 #include "window.h"
 #include "debug.h"
@@ -102,6 +103,21 @@ void rose_client_destroy_by_id(int id)
             return;
         }
     }
+}
+
+int rose_client_lua_new(lua_State *L)
+{
+	RoseClient *rc = rose_client_new();
+	lua_pushlightuserdata(L, rc);
+	return 1;
+}
+
+void rose_client_lua_api(lua_State *L)
+{
+	rose_lua_table_add_field("rose.client");
+	lua_pushcfunction(L, rose_client_lua_new);
+	lua_setfield(L, -2, "new");
+	lua_pop(L, -2);
 }
 
 void rose_client_destroy_all(void)

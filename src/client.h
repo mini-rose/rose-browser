@@ -16,3 +16,4 @@ RoseClient *rose_client_get_by_id(int);
 void rose_client_destroy_by_window(RoseWindow *window);
 void rose_client_destroy_by_id(int);
 void rose_client_destroy_all(void);
+void rose_client_lua_api(lua_State *L);

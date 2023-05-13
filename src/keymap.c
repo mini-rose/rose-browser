@@ -54,6 +54,9 @@ static int parse_single_mod_key(RoseKeymap *keymap, const char *key)
 	case 's':
 		keymap->state = GDK_SHIFT_MASK;
 		break;
+	case 'a':
+		keymap->state = GDK_MOD1_MASK; // ALT
+		break;
 	default:
 		warn("cannot resolve modifier `%c` for `%s`", *key, key);
 		return 1;
