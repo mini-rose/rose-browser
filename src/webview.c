@@ -4,19 +4,25 @@
 
 static WebKitSettings *rose_webview_get_settings(void)
 {
-	return webkit_settings_new_with_settings(
-		"enable-back-forward-navigation-gestures",
-		rose_lua_value_boolean("rose.webkit.settings.gestures"),
-		"allow-file-access-from-file-urls",
-		rose_lua_value_boolean("rose.webkit.settings.allow_file_access_from_urls"),
-		"enable-developer-extras",
-		rose_lua_value_boolean("rose.webkit.settings.developer_extras"),
-		"enable-webgl",
-		rose_lua_value_boolean("rose.webkit.settings.webgl"),
-		"enable-smooth-scrolling",
-		rose_lua_value_boolean("rose.webkit.settings.smooth_scrolling"),
-		NULL
-	);
+	static WebKitSettings *settings = NULL;
+
+	if (settings == NULL) {
+		settings = webkit_settings_new_with_settings(
+			"enable-back-forward-navigation-gestures",
+			rose_lua_value_boolean("rose.webkit.settings.gestures"),
+			"allow-file-access-from-file-urls",
+			rose_lua_value_boolean("rose.webkit.settings.allow_file_access_from_urls"),
+			"enable-developer-extras",
+			rose_lua_value_boolean("rose.webkit.settings.developer_extras"),
+			"enable-webgl",
+			rose_lua_value_boolean("rose.webkit.settings.webgl"),
+			"enable-smooth-scrolling",
+			rose_lua_value_boolean("rose.webkit.settings.smooth_scrolling"),
+			NULL
+		);
+	}
+
+	return settings;
 }
 
 void rose_webview_lua_api(lua_State *L)

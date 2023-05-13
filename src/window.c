@@ -69,7 +69,7 @@ RoseWindow *rose_window_get(void)
 RoseWindow *rose_window_new(void)
 {
 	RoseWindow *rw = calloc(1, sizeof(RoseWindow));
-	GtkPaned *splitter = GTK_PANED(gtk_paned_new(GTK_ORIENTATION_HORIZONTAL));
+	GtkBox *box = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 
 #if GTK == 3
 	rw->window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
@@ -100,8 +100,8 @@ RoseWindow *rose_window_new(void)
 
 #if GTK == 3
 	gtk_container_add(GTK_CONTAINER(rw->window), GTK_WIDGET(rw->stack));
-	gtk_paned_pack1(splitter, GTK_WIDGET(rose_webview_new()), true, false);
-	gtk_stack_add_named(rw->stack, GTK_WIDGET(splitter), "0");
+	gtk_box_pack_start(box, GTK_WIDGET(rose_webview_new()), true, true, 0);
+	gtk_stack_add_named(rw->stack, GTK_WIDGET(box), "0");
 	gtk_widget_show_all(GTK_WIDGET(rw->window));
 	g_signal_connect(rw->window, "window-state-event", G_CALLBACK(rose_window_state_event), NULL);
 #elif GTK == 4
@@ -207,6 +207,10 @@ void rose_window_lua_api(lua_State *L)
 	rose_lua_table_add_field("rose.window");
 	lua_pushcfunction(L, (lua_CFunction) rose_window_hsplit);
 	lua_setfield(L, -2, "hsplit");
+
+	rose_lua_table_add_field("rose.window");
+	lua_pushcfunction(L, (lua_CFunction) rose_window_split_close);
+	lua_setfield(L, -2, "split_close");
 }
 
 void rose_window_destroy(RoseWindow *rw)
