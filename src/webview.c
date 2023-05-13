@@ -79,12 +79,13 @@ WebKitWebView *rose_webview_new(void)
 
 static WebKitWebView *rose_webview_get(void)
 {
-	RoseWindow *rs = rose_window_get();
-	GtkPaned *splitter = GTK_PANED(gtk_stack_get_visible_child(rs->stack));
-	return WEBKIT_WEB_VIEW(gtk_container_get_focus_child(GTK_CONTAINER(splitter)));
+	RoseWindow *rw = rose_window_get();
+	GtkWidget *focus = gtk_window_get_focus(rw->window);
+
+	return WEBKIT_WEB_VIEW(focus);
 }
 
-static void load_uri(const char *uri)
+void rose_webview_load_uri(const char *uri)
 {
 	if (g_str_has_prefix(uri, "http://") || g_str_has_prefix(uri, "https://") ||
 	    g_str_has_prefix(uri, "file://") || g_str_has_prefix(uri, "about:")) {
@@ -97,10 +98,10 @@ static void load_uri(const char *uri)
 		}
 
 		int lenght = strlen(uri) + strlen(search_uri) + 1;
-		char tmp[lenght];
-		tmp[lenght] = 0;
+		char *tmp = calloc(1, lenght);
 		snprintf(tmp, lenght - 1, search_uri, uri);
 		webkit_web_view_load_uri(rose_webview_get(), tmp);
+		free(tmp);
 		free(search_uri);
 	}
 }
@@ -123,7 +124,7 @@ void rose_webview_goforward(void)
 void rose_webview_open(lua_State *L)
 {
 	const char *uri = luaL_checkstring(L, 1);
-	load_uri(uri);
+	rose_webview_load_uri(uri);
 }
 
 void rose_webview_zoomin(void)

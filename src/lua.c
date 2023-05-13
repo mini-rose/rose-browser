@@ -7,6 +7,7 @@
 #include "window.h"
 #include "client.h"
 #include "tab.h"
+#include "search.h"
 
 #include <lualib.h>
 #include <stdlib.h>
@@ -55,6 +56,7 @@ static void rose_lua_setup(void)
 	rose_keymap_lua_api(L);
 	rose_client_lua_api(L);
 	rose_tab_lua_api(L);
+	rose_search_lua_api(L);
 }
 
 void rose_lua_add_table(char *name)
