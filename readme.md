@@ -40,7 +40,7 @@ Here is a list of tasks to be completed for the next releases of the Rose:
 
 - [x] - Implement keyboard shortcuts support in Lua: The browser needs to be able to handle user-defined keyboard shortcuts for various functions such as opening a new tab, closing a tab, or switching between tabs. This can be achieved by using the Lua C API to register keyboard shortcut handlers.
 
-- [ ] - Reintroduce functionality from previous versions: There are some features that were available in previous versions of the browser that are currently missing. These features need to be reimplemented, including the ability to customize the browser's user interface, tabs etc.
+- [x] - Reintroduce functionality from previous versions: There are some features that were available in previous versions of the browser that are currently missing. These features need to be reimplemented, including the ability to customize the browser's user interface, tabs etc.
 
 - [x] - Implement split view: The browser needs to support split view, which allows users to view multiple web pages side by side in the same window. This can be implemented by using the browser's existing tab system and creating multiple webview widgets to display the content.
 
