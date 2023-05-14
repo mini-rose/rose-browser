@@ -20,10 +20,17 @@ static void rose_split(GtkOrientation orientation)
 	gtk_orientable_set_orientation(GTK_ORIENTABLE(outside), orientation);
 
 	GtkBox *inside = GTK_BOX(gtk_box_new(orientation, 0));
+#if GTK == 3
 	gtk_box_pack_start(inside, GTK_WIDGET(rose_webview_new()), true, true, 0);
 	gtk_box_pack_start(outside, GTK_WIDGET(inside), true, true, 0);
+#elif GTK == 4
+	gtk_box_append(inside, GTK_WIDGET(rose_webview_new()));
+	gtk_box_append(outside, GTK_WIDGET(inside));
+#endif
 
+#if GTK == 3
 	gtk_widget_show_all(GTK_WIDGET(rw->window));
+#endif
 }
 
 void rose_window_vsplit(lua_State *L)
@@ -62,6 +69,7 @@ void rose_window_split_close(lua_State *L)
 		buf = gtk_widget_get_parent(buf);
 	}
 
+#if GTK == 3
 	GList *main_box_children = gtk_container_get_children(GTK_CONTAINER(main_box));
 	int main_box_n_child = g_list_length(main_box_children);
 
@@ -76,4 +84,7 @@ void rose_window_split_close(lua_State *L)
 	}
 
 	g_list_free(main_box_children);
+#elif GTK == 4
+	error("not implemented yet.");
+#endif
 }

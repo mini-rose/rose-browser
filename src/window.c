@@ -106,8 +106,9 @@ RoseWindow *rose_window_new(void)
 	g_signal_connect(rw->window, "window-state-event", G_CALLBACK(rose_window_state_event), NULL);
 #elif GTK == 4
 	gtk_window_set_child(rw->window, GTK_WIDGET(rw->stack));
-	gtk_stack_add_child(rw->stack, GTK_WIDGET(rose_view_new()));
-	gtk_window_present(rw->window);
+	gtk_box_prepend(box, GTK_WIDGET(rose_webview_new()));
+	gtk_stack_add_child(rw->stack, GTK_WIDGET(box));
+	gtk_widget_set_visible(GTK_WIDGET(rw->window), true);
 #endif
 
 	g_signal_connect(rw->window, "destroy",
