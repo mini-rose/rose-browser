@@ -8,6 +8,7 @@ PKGCONFIG := pkg-config
 PREFIX := /usr/local
 LIBPREFIX := $(PREFIX)/lib
 LIBDIR := $(LIBPREFIX)/rose
+BINDIR := $(PREFIX)/bin
 
 # Gtk version (3|4)
 # Default is 3

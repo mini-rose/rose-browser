@@ -24,12 +24,11 @@ build/makedeps.mk: build $(SOURCE)
 	$(CC) -MM $(CFLAGS) $(SOURCE) | \
 		sed 's/\b\([a-zA-Z0-9_]*\.o\)\b/build\/\1/g' > build/makedeps.mk
 
-run:
-	make
+run: rose
 	$(OUTPUT)
 
-install:
-	cp -f $(OUTPUT) $(BINDIR)/mcc
+install: rose
+	cp -f $(OUTPUT) $(BINDIR)/rose
 
 uninstall:
 	$(RM) $(BINDIR)/mcc
