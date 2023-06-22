@@ -28,12 +28,12 @@ Small browser built on gtk and webkit. <br>
   
 ## 📦 Installation
 ```sh
-$ git clone https://github.com/mini-rose/rose && cd rose
+$ git clone https://github.com/mini-rose/rose-browser && cd rose
 $ (doas|sudo) GTK=(3|4) BUILDTYPE=RELEASE make install
 ```
 
 ## 🚀 Usage
-See how to configure rose [here](https://github.com/mini-rose/rose/wiki#configuring-rose).
+See how to configure rose [here](https://github.com/mini-rose/rose-browser/wiki/Configuration).
 
 ## 📝 TODO
-See planned changes [here](https://github.com/mini-rose/rose/blob/main/todo.md).
+See planned changes [here](https://github.com/mini-rose/rose-browser/blob/main/todo.md).
