@@ -33,7 +33,7 @@ $ (doas|sudo) GTK=(3|4) BUILDTYPE=RELEASE make install
 ```
 
 ## 🚀 Usage
-See how to configure rose [here](https://github.com/mini-rose/rose/wiki#configuring-rose).
+See how to configure rose [here](https://github.com/mini-rose/rose-browser/wiki/Configuration).
 
 ## 📝 TODO
-See planned changes [here](https://github.com/mini-rose/rose/blob/main/todo.md).
+See planned changes [here](https://github.com/mini-rose/rose-browser/blob/main/todo.md).
