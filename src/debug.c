@@ -9,7 +9,7 @@ void _debug(char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	fputs("rose: \033[35mDEBUG\033[0m: ", stderr);
+	fputs("\033[1;35mdebug\033[0m: ", stderr);
 	vfprintf(stderr, fmt, args);
 	fputc('\n', stderr);
 	va_end(args);
@@ -20,7 +20,7 @@ void warn(char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	fputs("rose: \033[33mWARNING\033[0m: ", stderr);
+	fputs("\033[1;33mwarning\033[0m: ", stderr);
 	vfprintf(stderr, fmt, args);
 	fputc('\n', stderr);
 	va_end(args);
@@ -30,7 +30,7 @@ void error(char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	fputs("rose: \033[31ERROR\033[0m: ", stderr);
+	fputs("rose: \033[1;31error\033[0m: ", stderr);
 	vfprintf(stderr, fmt, args);
 	fputc('\n', stderr);
 	va_end(args);
@@ -41,7 +41,7 @@ void info(char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	fputs("rose: \033[34mINFO\033[0m: ", stderr);
+	fputs("\033[1;34mnote\033[0m: ", stderr);
 	vfprintf(stderr, fmt, args);
 	fputc('\n', stderr);
 	va_end(args);

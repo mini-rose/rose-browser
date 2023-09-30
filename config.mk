@@ -2,6 +2,7 @@ VERSION := 3.0
 
 # Programs
 CC ?= cc
+LD := $(if $(shell which mold),mold,ld)
 PKGCONFIG := pkg-config
 
 # Paths
@@ -12,7 +13,7 @@ BINDIR := $(PREFIX)/bin
 
 # Gtk version (3|4)
 # Default is 3
-GTK ?= 3
+GTK ?= 4
 
 # Includes and libraries
 ifeq ($(GTK), 4)
@@ -27,8 +28,8 @@ LUA_INCS := `$(PKGCONFIG) --cflags lua`
 LUA_LIBS := `$(PKGCONFIG) --libs lua`
 
 CFLAGS  := -Wall -Wextra -Iinclude \
-		   -march=native -flto -pipe \
+		   -march=native -pipe \
 		   -DVERSION=\"$(VERSION)\" -DGTK=$(GTK) \
 		   $(WEBKIT_INCS) $(LUA_INCS)
 
-LDFLAGS := $(WEBKIT_LIBS) $(LUA_LIBS)
+LDFLAGS := $(WEBKIT_LIBS) $(LUA_LIBS) -fuse-ld=$(LD)

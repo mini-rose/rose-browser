@@ -1,7 +1,7 @@
 -include build/makedeps.mk
 include config.mk
 
-MAKEFLAGS += -j$(nproc)
+MAKEFLAGS += -j$(nproc) -r -R
 SOURCE := $(shell find src -type f -name '*.c')
 OBJECT := $(patsubst src/%.c,build/%.o,$(SOURCE))
 SRCDIR := $(shell find src -type d -wholename 'src/*' | sed 's/^src/build/g')
@@ -10,7 +10,7 @@ OUTPUT := build/rose
 BUILDTYPE ?= DEBUG
 
 ifeq ($(BUILDTYPE), DEBUG)
-	CFLAGS += -O0 -ggdb -DDEBUG=1 -fsanitize=address
+	CFLAGS += -O0 -ggdb -DDEBUG=1
 else ifeq ($(BUILDTYPE), RELEASE)
 	CFLAGS += -Ofast
 endif
@@ -18,7 +18,7 @@ endif
 rose: build build/makedeps.mk $(OUTPUT)
 
 build:
-	mkdir -p build $(SRCDIR)
+	@mkdir -p build $(SRCDIR)
 
 build/makedeps.mk: build $(SOURCE)
 	$(CC) -MM $(CFLAGS) $(SOURCE) | \
@@ -31,19 +31,21 @@ install: rose
 	cp -f $(OUTPUT) $(BINDIR)/rose
 
 uninstall:
-	$(RM) $(BINDIR)/mcc
+	rm -f $(BINDIR)/mcc
 
 clean:
-	$(RM) -r build
+	rm -rf build
 
 compile_flags.txt: makefile
 	echo $(CFLAGS) | tr ' ' '\n' > compile_flags.txt
 
 $(OUTPUT): $(OBJECT)
-	$(CC) -o $@ $(USE_LD) $(CFLAGS) $(LDFLAGS) $^
+	@printf " \033[32m LD \033[m $(shell basename $@)\n"
+	@$(CC) -o $@ $(USE_LD) $(CFLAGS) $(LDFLAGS) $^
 
 build/%.o: src/%.c
-	$(CC) -c -o $@ $(CFLAGS) $<
+	@printf " \033[33m CC \033[m $(shell basename $@)\n"
+	@$(CC) -c -o $@ $(CFLAGS) $<
 
 .PHONY: install uninstall clean
 .SILENT: build/makedeps.mk

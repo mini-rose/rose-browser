@@ -171,7 +171,7 @@ lua_State *rose_lua_state_get()
 		luaL_openlibs(L);
 		rose_lua_setup();
 		char *config_path = buildpath(getenv("HOME"), ".config/rose/init.lua", NULL);
-		if (luaL_dofile(L, config_path) != LUA_OK) {
+		if (luaL_dofile(L, config_path) != 0) {
 			warn("%s", lua_tostring(L, -1));
 		}
 		free(config_path);

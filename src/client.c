@@ -4,6 +4,8 @@
 #include "window.h"
 #include "debug.h"
 
+#include <stdlib.h>
+
 typedef struct
 {
 	RoseClient **clients;
