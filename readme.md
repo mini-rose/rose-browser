@@ -16,19 +16,19 @@ Small browser built on gtk and webkit. <br>
   - libsanitizer-devel
   
   - Video and audio:
-  	- gst-plugins-bad
-	- gst-plugins-base
-	- gst-plugins-good
-	- gst-libav
-	- gstreamer-vaapi (gpu acceleration)
-	
+    - gst-plugins-bad
+  - gst-plugins-base
+  - gst-plugins-good
+  - gst-libav
+  - gstreamer-vaapi (gpu acceleration)
+  
 ## ✨ Features
   - supports the lastes webkit and gtk features
   - configuration via lua modules
   
 ## 📦 Installation
 ```sh
-$ git clone https://github.com/mini-rose/rose-browser && cd rose
+$ git clone https://github.com/mini-rose/rose-browser && cd rose-browser
 $ (doas|sudo) GTK=(3|4) BUILDTYPE=RELEASE make install
 ```
 
