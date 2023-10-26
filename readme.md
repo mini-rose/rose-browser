@@ -17,10 +17,10 @@ Small browser built on gtk and webkit. <br>
   
   - Video and audio:
     - gst-plugins-bad
-  - gst-plugins-base
-  - gst-plugins-good
-  - gst-libav
-  - gstreamer-vaapi (gpu acceleration)
+    - gst-plugins-base
+    - gst-plugins-good
+    - gst-libav
+    - gstreamer-vaapi (gpu acceleration)
   
 ## ✨ Features
   - supports the lastes webkit and gtk features
