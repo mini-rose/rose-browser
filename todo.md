@@ -1,5 +1,3 @@
-
-
 ## 📝 TODO
 
 ### 🚀 Next stable release
@@ -8,6 +6,7 @@
   - [ ] - Implement find function in webview lua api
   - [ ] - Enable sandboxing by default
   - [ ] - Implement missing webkit and gtk settings to lua api
+  - [ ] - Rewrite makefile (current is too slow)
 
 ### 🌠 Future features
 

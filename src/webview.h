@@ -10,20 +10,6 @@
 # error "Unknown gtk version"
 #endif
 
-#include "window.h"
-
 WebKitWebView *rose_webview_new(void);
-
-// Actions
-void rose_webview_open(lua_State *L);
-void rose_webview_reload();
-void rose_webview_force_reload();
-void rose_webview_goback(void);
-void rose_webview_goforward(void);
-void rose_webview_zoomout(void);
-void rose_webview_zoomin(void);
-void rose_webview_load_uri(const char *uri);
-void rose_webview_zoom_reset(void);
-
-// Api
+void rose_webview_load_uri(const char *);
 void rose_webview_lua_api(lua_State *);

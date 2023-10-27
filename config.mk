@@ -30,6 +30,6 @@ LUA_LIBS := `$(PKGCONFIG) --libs lua`
 CFLAGS  := -Wall -Wextra -Iinclude \
 		   -march=native -pipe \
 		   -DVERSION=\"$(VERSION)\" -DGTK=$(GTK) \
-		   $(WEBKIT_INCS) $(LUA_INCS)
+		   $(WEBKIT_INCS) $(LUA_INCS) -flto
 
 LDFLAGS := $(WEBKIT_LIBS) $(LUA_LIBS) -fuse-ld=$(LD)
